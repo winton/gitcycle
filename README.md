@@ -1,4 +1,4 @@
-GitCycle
+Gitcycle
 ========
 
 Tame your development cycle.
