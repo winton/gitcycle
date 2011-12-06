@@ -12,5 +12,5 @@ elsif gitcycle.respond_to?(command)
 elsif ARGV.empty?
   gitcycle.pull_request(command)
 else
-  puts "\nCommand \"#{command}\" not found\n".red
+  puts "\nCommand \"#{command}\" not found.\n".red
 end

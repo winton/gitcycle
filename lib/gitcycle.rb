@@ -2,6 +2,9 @@ require 'open-uri'
 require 'uri'
 require 'yaml'
 
+gem 'launchy', '= 2.0.5'
+require 'launchy'
+
 gem 'yajl-ruby', '= 1.1.0'
 require 'yajl'
 
@@ -24,127 +27,88 @@ class Gitcycle
     load_git
   end
 
-  def pull_request(url_or_title)
+  def discuss
     require_git && require_config
 
-    params = {
-      :login => @git_login,
-      :repo => @git_repo,
-      :token => @token
-    }
+    puts "\nRetrieving branch information from gitcycle.\n".green
+    branch = get('branch',
+      'branch[name]' => branches(:current => true),
+      'create' => 0
+    )
 
-    if url_or_title.strip[0..3] == 'http'
-      if url_or_title.include?('lighthouseapp.com/')
-        params[:lighthouse_url] = url_or_title
-      elsif url_or_title.include?('github.com/')
-        params[:issue_url] = url_or_title
-      end
-    else
-      params[:title] = url_or_title
-    end
-
-    puts "\nRetrieving branch information from gitcycle.\n\n"
-    branch = get('branch', params)
-
-    if branch['new']
-      branch['source'] = branches(:current => true)
-
-      unless yes?("\nWould you like to name your branch #{branch['name'].yellow}?")
-        branch['name'] = q("\nWhat would you like to name your branch?")
-        branch['name'] = branch.gsub(/[\s\W]/, '-')
-      end
-
-      puts "\nCreating #{branch['name'].yellow} from #{branch['source'].yellow}.\n\n"
-      run("git branch #{branch['name']}")
-    end
-
-    puts "Checking out #{branch['name'].yellow}."
-    if branches(:match => branch['name'])
-      run("git checkout #{branch['name']}")
-    else
-      run("git fetch && git checkout -b #{branch['name']} origin/#{branch['name']}")
-    end
-
-    if branch['new']
-      run("git push origin #{branch['name']}")
-
-      puts "\nCreating GitHub pull request.\n\n"
+    if branch
+      puts "Creating GitHub pull request.\n".green
       branch = get('branch',
-        :login => @git_login,
-        :token => @token,
-        :name => branch['name'],
-        :repo => @git_repo,
-        :source => branch['source']
+        'branch[create_pull_request]' => true,
+        'branch[name]' => branch['name'],
+        'create' => 0
       )
     end
 
-    # ticket = nil
-    
-    # if url_or_desc.strip[0..3] == 'http'
-    #   puts "\nRetrieving ticket information.\n\n"
-    #   ticket = get('ticket',
-    #     :login => @git_login,
-    #     :token => @token,
-    #     :url => url_or_desc
-    #   )
-    #   if ticket
-    #     number = ticket['number']
-    #     title = ticket['title']
-    #   else
-    #     puts "Please add issue tracker information at http://gitcycle.com.\n".red
-    #     exit
-    #   end
-    # else
-    #   puts "\n"
-    #   title = url_or_desc
-    # end
+    if branch == false
+      puts "Branch not found.\n".red
+    elsif branch['issue_url']
+      Launchy.open(branch['issue_url'])
+    else
+      puts "You must push code before opening a pull request.\n".red
+    end
+  end
 
-    # branch = "#{number} #{title}".strip.downcase.gsub(/[\s\W]/, '-')[0..30]
-    # branch = branch.gsub(/-[^-]*$/, '')
+  def pull_request(url_or_title)
+    require_git && require_config
 
-    # if ticket && ticket['branch']
-    #   branch = ticket['branch']
-    #   existing = true
-    # else
-    #   if branches(:all => true, :match => branch)
-    #     branch = branch
-    #     existing = true
-    #   end
-    # end
+    params = {}
 
-    # unless existing
-    #   unless yes?("\nWould you like to name your branch #{branch.yellow}?")
-    #     branch = q("\nWhat would you like to name your branch?")
-    #     branch = branch.gsub(/[\s\W]/, '-')
-    #   end
+    if url_or_title.strip[0..3] == 'http'
+      if url_or_title.include?('lighthouseapp.com/')
+        params = { 'branch[lighthouse_url]' => url_or_title }
+      elsif url_or_title.include?('github.com/')
+        params = { 'branch[issue_url]' => url_or_title }
+      end
+    else
+      params = {
+        'branch[name]' => url_or_title,
+        'branch[title]' => url_or_title
+      }
+    end
 
-    #   current_branch = branches(:current => true)
+    puts "\nRetrieving branch information from gitcycle.\n".green
+    branch = get('branch', params)
 
-    #   puts "\nCreating #{branch.yellow} from #{current_branch.yellow}.\n\n"
-    #   run("git branch #{branch}")
-    # end
+    name = branch['name']
 
-    # puts "Checking out #{branch.yellow}."
-    # if branches(:match => branch)
-    #   run("git checkout #{branch}")
-    # else
-    #   run("git fetch && git checkout -b #{branch} origin/#{branch}")
-    # end
+    unless branch['exists']
+      branch['source'] = branches(:current => true)
 
-    # puts "\n"
+      unless yes?("Would you like to name your branch #{name}?")
+        name = q("\nWhat would you like to name your branch?")
+        name = name.gsub(/[\s\W]/, '-')
+      end
 
-    # if !ticket || !ticket['branch']
-    #   puts "Sending branch name to gitcycle.\n\n"
-    #   params = {
-    #     :login => @git_login,
-    #     :token => @token,
-    #     :branch => branch
-    #   }
-    #   if ticket
-    #     params[:lighthouse] = number
-    #   end
-    #   get('branch', params)
-    # end
+      puts "\nCreating '#{name}' from '#{branch['source']}'.\n".green
+      run("git branch #{name}")
+    end
+
+    puts "Checking out '#{name}'.".green
+    if branches(:match => name)
+      run("git checkout #{name}")
+    else
+      run("git fetch && git checkout -b #{name} origin/#{name}")
+    end
+
+    unless branch['exists']
+      puts "\nPushing '#{name}'.".green
+      run("git push origin #{name}")
+
+      puts "\nSending branch information to gitcycle.".green
+      get('branch',
+        'branch[name]' => branch['name'],
+        'branch[rename]' => name != branch['name'] ? name : nil,
+        'branch[source]' => branch['source']
+      )
+    end
+
+    puts "\n"
   end
 
   def setup(login, repo, token)
@@ -167,10 +131,18 @@ class Gitcycle
   end
 
   def get(path, hash)
+    hash.merge!(
+      :login => @git_login,
+      :token => @token,
+      :repo => @git_repo,
+    )
+
     params = ''
     hash[:session] = 0
     hash.each do |k, v|
-      params << "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}&"
+      if v
+        params << "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}&"
+      end
     end
     params.chop! # trailing &
 
@@ -198,16 +170,16 @@ class Gitcycle
 
   def require_config
     unless @token
-      puts "\ngitcycle configuration not found.".red
-      puts "Are you in the right repository?"
-      puts "Have you set up this repository at http://gitcycle.com?\n\n"
+      puts "\nGitcycle configuration not found.".red
+      puts "Are you in the right repository?".yellow
+      puts "Have you set up this repository at http://gitcycle.com?\n".yellow
     end
   end
 
   def require_git
     unless @git_url && @git_repo && @git_login
-      puts "\n.git/config origin entry not found!".red
-      puts "Are you sure you are in a git repository?\n\n"
+      puts "\norigin entry within '.git/config' not found!".red
+      puts "Are you sure you are in a git repository?\n".yellow
     end
   end
 
@@ -217,8 +189,8 @@ class Gitcycle
     end
   end
 
-  def q(question)
-    puts question
+  def q(question, extra='')
+    puts "#{question.yellow}#{extra}"
     gets.strip
   end
 
@@ -231,6 +203,6 @@ class Gitcycle
   end
 
   def yes?(question)
-    q(question + " (#{"y".green}/#{"n".red})").downcase[0..0] == 'y'
+    q(question, " (#{"y".green}/#{"n".red})").downcase[0..0] == 'y'
   end
 end
