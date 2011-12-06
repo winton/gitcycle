@@ -27,34 +27,7 @@ class Gitcycle
     load_git
   end
 
-  def discuss
-    require_git && require_config
-
-    puts "\nRetrieving branch information from gitcycle.\n".green
-    branch = get('branch',
-      'branch[name]' => branches(:current => true),
-      'create' => 0
-    )
-
-    if branch
-      puts "Creating GitHub pull request.\n".green
-      branch = get('branch',
-        'branch[create_pull_request]' => true,
-        'branch[name]' => branch['name'],
-        'create' => 0
-      )
-    end
-
-    if branch == false
-      puts "Branch not found.\n".red
-    elsif branch['issue_url']
-      Launchy.open(branch['issue_url'])
-    else
-      puts "You must push code before opening a pull request.\n".red
-    end
-  end
-
-  def pull_request(url_or_title)
+  def create_branch(url_or_title)
     require_git && require_config
 
     params = {}
@@ -85,8 +58,10 @@ class Gitcycle
         name = name.gsub(/[\s\W]/, '-')
       end
 
-      puts "\nCreating '#{name}' from '#{branch['source']}'.\n".green
-      run("git branch #{name}")
+      unless branches(:match => name)
+        puts "\nCreating '#{name}' from '#{branch['source']}'.\n".green
+        run("git branch #{name}")
+      end
     end
 
     puts "Checking out '#{name}'.".green
@@ -109,6 +84,76 @@ class Gitcycle
     end
 
     puts "\n"
+  end
+
+  def discuss
+    require_git && require_config
+
+    puts "\nRetrieving branch information from gitcycle.\n".green
+    branch = get('branch',
+      'branch[name]' => branches(:current => true),
+      'create' => 0
+    )
+
+    if branch && !branch['issue_url']
+      puts "Creating GitHub pull request.\n".green
+      branch = get('branch',
+        'branch[create_pull_request]' => true,
+        'branch[name]' => branch['name'],
+        'create' => 0
+      )
+    end
+
+    if branch == false
+      puts "Branch not found.\n".red
+    elsif branch['issue_url']
+      puts "Opening issue in your default browser.\n".green
+      Launchy.open(branch['issue_url'])
+    else
+      puts "You must push code before opening a pull request.\n".red
+    end
+  end
+
+  def pull
+    require_git && require_config
+
+    puts "\nRetrieving branch information from gitcycle.\n".green
+    branch = get('branch',
+      'branch[name]' => branches(:current => true),
+      'include[]' => 'repo',
+      'create' => 0
+    )
+
+    name = branch['repo']['name']
+    owner = branch['repo']['owner']
+
+    puts "Adding remote repo '#{owner}/#{name}'.\n".green
+    run("git remote rm #{owner}")
+    run("git remote add #{owner} git@github.com:#{owner}/#{name}.git")
+    run("git fetch #{owner}")
+
+    puts "\nMerging remote branch '#{branch['source']}' from '#{owner}/#{name}'.\n".green
+    run("git merge #{owner}/#{branch['source']}")
+  end
+
+  def ready
+    require_git && require_config
+
+    puts "\nLabeling issue as 'Pending Review'.\n".green
+    get('label',
+      'branch[name]' => branches(:current => true),
+      'labels[]' => 'Pending Review'
+    )
+  end
+
+  def reviewed
+    require_git && require_config
+
+    puts "\nLabeling issue as 'Pending QA'.\n".green
+    get('label',
+      'branch[name]' => branches(:current => true),
+      'labels[]' => 'Pending QA'
+    )
   end
 
   def setup(login, repo, token)
@@ -161,7 +206,7 @@ class Gitcycle
   def load_git
     path = "#{Dir.pwd}/.git/config"
     if File.exists?(path)
-      @git_url = File.read(path).match(/\[remote "origin"\].*url = ([^\n]+)/m)[1]
+      @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
       @git_repo = @git_url.match(/\/(.+)\./)[1]
       @git_login = @git_url.match(/:(.+)\//)[1]
       @token = @config[@git_login][@git_repo]

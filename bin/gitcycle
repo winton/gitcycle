@@ -10,7 +10,7 @@ if command.nil?
 elsif gitcycle.respond_to?(command)
   gitcycle.send(command, *ARGV)
 elsif ARGV.empty?
-  gitcycle.pull_request(command)
+  gitcycle.create_branch(command)
 else
   puts "\nCommand \"#{command}\" not found.\n".red
 end
