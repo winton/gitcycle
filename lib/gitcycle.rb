@@ -86,31 +86,79 @@ class Gitcycle
     puts "\n"
   end
 
-  def discuss
+  def discuss(*issues)
     require_git && require_config
 
-    puts "\nRetrieving branch information from gitcycle.\n".green
-    branch = get('branch',
-      'branch[name]' => branches(:current => true),
-      'create' => 0
-    )
-
-    if branch && !branch['issue_url']
-      puts "Creating GitHub pull request.\n".green
+    if issues.empty?
+      puts "\nRetrieving branch information from gitcycle.\n".green
       branch = get('branch',
-        'branch[create_pull_request]' => true,
-        'branch[name]' => branch['name'],
+        'branch[name]' => branches(:current => true),
         'create' => 0
       )
-    end
 
-    if branch == false
-      puts "Branch not found.\n".red
-    elsif branch['issue_url']
-      puts "Opening issue in your default browser.\n".green
-      Launchy.open(branch['issue_url'])
+      if branch && !branch['issue_url']
+        puts "Creating GitHub pull request.\n".green
+        branch = get('branch',
+          'branch[create_pull_request]' => true,
+          'branch[name]' => branch['name'],
+          'create' => 0
+        )
+      end
+
+      if branch == false
+        puts "Branch not found.\n".red
+      elsif branch['issue_url']
+        puts "Opening issue in your default browser.\n".green
+        Launchy.open(branch['issue_url'])
+      else
+        puts "You must push code before opening a pull request.\n".red
+      end
     else
-      puts "You must push code before opening a pull request.\n".red
+      puts "\nRetrieving branch information from gitcycle.\n".green
+      get('branch', 'issues' => issues, 'scope' => 'repo').each do |branch|
+        if branch['issue_url']
+          puts "Opening issue in your default browser.\n".green
+          Launchy.open(branch['issue_url'])
+        end
+      end
+    end
+  end
+
+  def fail(*issues)
+    require_git && require_config
+
+    if issues.empty?
+      puts "\nLabeling issue as 'Fail'.\n".green
+      get('label',
+        'branch[name]' => branches(:current => true),
+        'labels' => [ 'Fail' ]
+      )
+    else
+      puts "\nLabeling issues as 'Fail'.\n".green
+      get('label',
+        'issues' => issues,
+        'labels' => [ 'Fail' ],
+        'scope' => 'repo'
+      )
+    end
+  end
+
+  def pass(*issues)
+    require_git && require_config
+
+    if issues.empty?
+      puts "\nLabeling issue as 'Pass'.\n".green
+      get('label',
+        'branch[name]' => branches(:current => true),
+        'labels' => [ 'Pass' ]
+      )
+    else
+      puts "\nLabeling issues as 'Pass'.\n".green
+      get('label',
+        'issues' => issues,
+        'labels' => [ 'Pass' ],
+        'scope' => 'repo'
+      )
     end
   end
 
@@ -120,7 +168,7 @@ class Gitcycle
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch',
       'branch[name]' => branches(:current => true),
-      'include[]' => 'repo',
+      'include' => [ 'repo' ],
       'create' => 0
     )
 
@@ -136,24 +184,52 @@ class Gitcycle
     run("git merge #{owner}/#{branch['source']}")
   end
 
-  def ready
+  def qa(*issues)
     require_git && require_config
 
-    puts "\nLabeling issue as 'Pending Review'.\n".green
-    get('label',
-      'branch[name]' => branches(:current => true),
-      'labels[]' => 'Pending Review'
-    )
+    unless issues.empty?
+      puts "\nRetrieving branch information from gitcycle.\n".green
+      qa_branch = get('qa_branch', 'issues' => issues)
+      puts qa_branch.inspect
+    end
   end
 
-  def reviewed
+  def ready(*issues)
     require_git && require_config
 
-    puts "\nLabeling issue as 'Pending QA'.\n".green
-    get('label',
-      'branch[name]' => branches(:current => true),
-      'labels[]' => 'Pending QA'
-    )
+    if issues.empty?
+      puts "\nLabeling issue as 'Pending Review'.\n".green
+      get('label',
+        'branch[name]' => branches(:current => true),
+        'labels' => [ 'Pending Review' ]
+      )
+    else
+      puts "\nLabeling issues as 'Pending Review'.\n".green
+      get('label',
+        'issues' => issues,
+        'labels' => [ 'Pending Review' ],
+        'scope' => 'repo'
+      )
+    end
+  end
+
+  def reviewed(*issues)
+    require_git && require_config
+
+    if issues.empty?
+      puts "\nLabeling issue as 'Pending QA'.\n".green
+      get('label',
+        'branch[name]' => branches(:current => true),
+        'labels' => 'Pending QA'
+      )
+    else
+      puts "\nLabeling issues as 'Pending QA'.\n".green
+      get('label',
+        'issues' => issues,
+        'labels' => [ 'Pending QA' ],
+        'scope' => 'repo'
+      )
+    end
   end
 
   def setup(login, repo, token)
