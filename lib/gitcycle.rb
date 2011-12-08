@@ -64,18 +64,19 @@ class Gitcycle
       end
     end
 
-    puts "Checking out '#{name}'.".green
     if branches(:match => name)
+      puts "Checking out branch '#{name}'.\n".green
       run("git checkout #{name}")
     else
+      puts "Tracking branch '#{name}'.\n".green
       run("git fetch && git checkout -b #{name} origin/#{name}")
     end
 
     unless branch['exists']
-      puts "\nPushing '#{name}'.".green
+      puts "Pushing '#{name}'.".green
       run("git push origin #{name}")
 
-      puts "\nSending branch information to gitcycle.".green
+      puts "Sending branch information to gitcycle.".green
       get('branch',
         'branch[name]' => branch['name'],
         'branch[rename]' => name != branch['name'] ? name : nil,
@@ -176,7 +177,7 @@ class Gitcycle
     owner = branch['repo']['owner']
 
     puts "Adding remote repo '#{owner}/#{name}'.\n".green
-    run("git remote rm #{owner}")
+    run("git remote rm #{owner}") if remotes(:match => owner)
     run("git remote add #{owner} git@github.com:#{owner}/#{name}.git")
     run("git fetch #{owner}")
 
@@ -187,10 +188,50 @@ class Gitcycle
   def qa(*issues)
     require_git && require_config
 
-    unless issues.empty?
-      puts "\nRetrieving branch information from gitcycle.\n".green
-      qa_branch = get('qa_branch', 'issues' => issues)
-      puts qa_branch.inspect
+    if issues.empty?
+      puts "\n"
+      get('qa_branch').each do |branches|
+        puts "qa_#{branches['source']}".green
+        branches['branches'].each do |branch|
+          puts "  #{"issue ##{branch['issue']}".yellow}\t#{branch['user']}/#{branch['branch']}"
+        end
+        puts "\n"
+      end
+
+    elsif issues.first == 'resolved'
+      branch = branches(:current => true)
+
+      if branch =~ /^qa_/
+        puts "\nRetrieving branch information from gitcycle.\n".green
+        qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
+
+        if qa_branch
+          branches = qa_branch['branches']
+          conflict = branches.detect { |branch| branch['conflict'] }
+
+          if conflict
+            puts "Committing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
+            run("git add . && git add . -u && git commit -a -m 'Merge conflict resolution of #{conflict['branch']} (issue ##{conflict['issue']})'")
+
+            puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
+            run("git push origin qa_#{qa_branch['source']}")
+
+            create_qa_branch(
+              :preserve => true,
+              :range => (branches.index(conflict)+1..-1),
+              :qa_branch => qa_branch
+            )
+          else
+            puts "Couldn't find record of a conflicted merge.\n".red
+          end
+        else
+          puts "Couldn't find record of a conflicted merge.\n".red
+        end
+      else
+        puts "\nYou aren't on a QA branch.\n".red
+      end
+    else
+      create_qa_branch(:issues => issues)
     end
   end
 
@@ -251,7 +292,94 @@ class Gitcycle
     end
   end
 
-  def get(path, hash)
+  def create_qa_branch(options)
+    issues = options[:issues]
+    range = options[:range] || (0..-1)
+
+    if (issues && !issues.empty?) || options[:qa_branch]
+      if options[:qa_branch]
+        qa_branch = options[:qa_branch]
+      else
+        puts "\nRetrieving branch information from gitcycle.\n".green
+        qa_branch = get('qa_branch', 'issues' => issues)
+      end
+
+      source = qa_branch['source']
+      name = "qa_#{source}"
+
+      unless qa_branch['branches'].empty?
+        unless options[:preserve]
+          if branches(:current => source)
+            # Do nothing
+          elsif branches(:match => source)
+            puts "Checking out source branch '#{source}'.\n".green
+            run("git checkout #{source}")
+          else
+            puts "Tracking source branch '#{source}'.\n".green
+            run("git fetch && git checkout -b #{source} origin/#{source}")
+          end
+
+          if branches(:match => name)
+            puts "Deleting old QA branch '#{name}'.\n".green
+            run("git branch -D #{name}")
+            run("git push origin :#{name}")
+          end
+          
+          puts "Creating QA branch '#{name}'.\n".green
+          run("git branch #{name} && git checkout #{name}")
+
+          puts "\n"
+        end
+
+        added = []
+        puts range.inspect
+        qa_branch['branches'][range].each do |branch|
+          issue = branch['issue']
+          owner, repo = branch['repo'].split(':')
+          user = branch['user']
+          branch = branch['branch']
+
+          unless added.include?(user)
+            puts "Adding remote repo '#{user}/#{repo}' (issue ##{issue}).\n".green
+            run("git remote rm #{user}") if remotes(:match => user)
+            run("git remote add #{user} git@github.com:#{user}/#{repo}.git")
+            run("git fetch #{user}")
+            added << user
+            puts "\n"
+          end
+
+          puts "Merging remote branch '#{branch}' (issue ##{issue}).\n".green
+          output = run("git merge #{user}/#{branch}")
+
+          if output.include?('CONFLICT')
+            puts "Conflict occurred when merging '#{branch}' (issue ##{issue}).\n".red
+            answer = q("Would you like to (s)kip or (r)esolve?")
+
+            issues = qa_branch['branches'].collect { |b| b['issue'] }
+
+            if answer.downcase[0..0] == 's'
+              run("git reset --hard HEAD")
+              issues.delete(issue)
+
+              puts "\nSending QA branch information to gitcycle.\n".green
+              get('qa_branch', 'issues' => issues, 'conflict' => issue)
+            else
+              puts "\nSending conflict information to gitcycle.\n".green
+              get('qa_branch', 'issues' => issues, 'conflict' => issue)
+
+              puts "Type 'gitc qa resolved' when finished resolving.\n".yellow
+              break
+            end
+          else
+            puts "Pushing QA branch '#{name}'.\n".green
+            run("git push origin #{name}")
+          end
+        end
+      end
+    end
+  end
+
+  def get(path, hash={})
     hash.merge!(
       :login => @git_login,
       :token => @token,
@@ -289,6 +417,15 @@ class Gitcycle
     end
   end
 
+  def remotes(options={})
+    b = `git remote`
+    if options[:match]
+      b.match(/^(#{options[:match]})$/)[1] rescue nil
+    else
+      b
+    end
+  end
+
   def require_config
     unless @token
       puts "\nGitcycle configuration not found.".red
@@ -312,7 +449,7 @@ class Gitcycle
 
   def q(question, extra='')
     puts "#{question.yellow}#{extra}"
-    gets.strip
+    $stdin.gets.strip
   end
 
   def run(cmd)
