@@ -125,44 +125,6 @@ class Gitcycle
     end
   end
 
-  def fail(*issues)
-    require_git && require_config
-
-    if issues.empty?
-      puts "\nLabeling issue as 'Fail'.\n".green
-      get('label',
-        'branch[name]' => branches(:current => true),
-        'labels' => [ 'Fail' ]
-      )
-    else
-      puts "\nLabeling issues as 'Fail'.\n".green
-      get('label',
-        'issues' => issues,
-        'labels' => [ 'Fail' ],
-        'scope' => 'repo'
-      )
-    end
-  end
-
-  def pass(*issues)
-    require_git && require_config
-
-    if issues.empty?
-      puts "\nLabeling issue as 'Pass'.\n".green
-      get('label',
-        'branch[name]' => branches(:current => true),
-        'labels' => [ 'Pass' ]
-      )
-    else
-      puts "\nLabeling issues as 'Pass'.\n".green
-      get('label',
-        'issues' => issues,
-        'labels' => [ 'Pass' ],
-        'scope' => 'repo'
-      )
-    end
-  end
-
   def pull
     require_git && require_config
 
@@ -197,7 +159,32 @@ class Gitcycle
         end
         puts "\n"
       end
+    elsif issues.first == 'fail' || issues.first == 'pass'
+      branch = branches(:current => true)
+      label = issues.first.capitalize
+      if branch =~ /^qa_/
+        puts "\nRetrieving branch information from gitcycle.\n".green
+        qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
 
+        puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
+        run("git checkout #{qa_branch['source']}")
+        run("git merge #{branch}")
+        run("git push origin #{qa_branch['source']}")
+        
+        puts "\nLabeling all issues as '#{label}'.\n".green
+        get('label',
+          'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+          'labels' => [ label ]
+        )
+
+        puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
+        branches = qa_branch['branches'].collect do |b|
+          { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
+        end
+        get('ticket_resolve', 'branches' => Yajl::Encoder.encode(branches))        
+      else
+        puts "\nYou are not in a QA branch.\n".red
+      end
     elsif issues.first == 'resolved'
       branch = branches(:current => true)
 
@@ -332,7 +319,6 @@ class Gitcycle
         end
 
         added = []
-        puts range.inspect
         qa_branch['branches'][range].each do |branch|
           issue = branch['issue']
           owner, repo = branch['repo'].split(':')
@@ -368,13 +354,16 @@ class Gitcycle
               get('qa_branch', 'issues' => issues, 'conflict' => issue)
 
               puts "Type 'gitc qa resolved' when finished resolving.\n".yellow
-              break
+              exit
             end
           else
             puts "Pushing QA branch '#{name}'.\n".green
             run("git push origin #{name}")
           end
         end
+
+        puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
+        puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
       end
     end
   end
@@ -413,7 +402,7 @@ class Gitcycle
       @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
       @git_repo = @git_url.match(/\/(.+)\./)[1]
       @git_login = @git_url.match(/:(.+)\//)[1]
-      @token = @config[@git_login][@git_repo]
+      @token = @config[@git_login][@git_repo] rescue nil
     end
   end
 
