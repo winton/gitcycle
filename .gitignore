@@ -1,6 +1,8 @@
 .DS_Store
 *.gem
 .bundle
+features/config.yml
+features/fixtures
 Gemfile.lock
 pkg
 tmp

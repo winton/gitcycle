@@ -22,7 +22,11 @@ class Gitcycle
     end
   
   def initialize
-    @config_path = File.expand_path("~/.gitcycle.yml")
+    if ENV['CONFIG']
+      @config_path = File.expand_path(ENV['CONFIG'])
+    else
+      @config_path = File.expand_path("~/.gitcycle.yml")
+    end
     load_config
     load_git
   end
@@ -53,7 +57,7 @@ class Gitcycle
     unless branch['exists']
       branch['source'] = branches(:current => true)
 
-      unless yes?("Would you like to name your branch #{name}?")
+      unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
       end
@@ -264,6 +268,7 @@ class Gitcycle
     @config[login] ||= {}
     @config[login][repo] = token
     save_config
+    puts "\nConfiguration saved.\n".green
   end
 
   private
@@ -420,6 +425,7 @@ class Gitcycle
       puts "\nGitcycle configuration not found.".red
       puts "Are you in the right repository?".yellow
       puts "Have you set up this repository at http://gitcycle.com?\n".yellow
+      exit
     end
   end
 
@@ -427,6 +433,7 @@ class Gitcycle
     unless @git_url && @git_repo && @git_login
       puts "\norigin entry within '.git/config' not found!".red
       puts "Are you sure you are in a git repository?\n".yellow
+      exit
     end
   end
 

@@ -19,7 +19,10 @@ Gem::Specification.new do |s|
   s.require_paths = %w(lib)
   s.test_files = `cd #{root} && git ls-files -- {features,test,spec}/*`.split("\n")
 
-  s.add_development_dependency "rspec", "~> 1.0"
+  s.add_development_dependency "aruba"
+  s.add_development_dependency "cucumber"
+  s.add_development_dependency "lighthouse"
+  s.add_development_dependency "rspec"
 
   s.add_dependency "launchy", "= 2.0.5"
   s.add_dependency "yajl-ruby", "= 1.1.0"
