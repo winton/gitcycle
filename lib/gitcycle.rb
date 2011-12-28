@@ -94,8 +94,9 @@ class Gitcycle
   def discuss(*issues)
     require_git && require_config
 
+    puts "\nRetrieving branch information from gitcycle.\n".green
+
     if issues.empty?
-      puts "\nRetrieving branch information from gitcycle.\n".green
       branch = get('branch',
         'branch[name]' => branches(:current => true),
         'create' => 0
@@ -113,16 +114,15 @@ class Gitcycle
       if branch == false
         puts "Branch not found.\n".red
       elsif branch['issue_url']
-        puts "Opening issue in your default browser.\n".green
+        puts "Opening issue: #{branch['issue_url']}\n".green
         Launchy.open(branch['issue_url'])
       else
         puts "You must push code before opening a pull request.\n".red
       end
     else
-      puts "\nRetrieving branch information from gitcycle.\n".green
       get('branch', 'issues' => issues, 'scope' => 'repo').each do |branch|
         if branch['issue_url']
-          puts "Opening issue in your default browser.\n".green
+          puts "Opening issue: #{branch['issue_url']}\n".green
           Launchy.open(branch['issue_url'])
         end
       end
@@ -139,16 +139,11 @@ class Gitcycle
       'create' => 0
     )
 
-    name = branch['repo']['name']
-    owner = branch['repo']['owner']
-
-    puts "Adding remote repo '#{owner}/#{name}'.\n".green
-    run("git remote rm #{owner}") if remotes(:match => owner)
-    run("git remote add #{owner} git@github.com:#{owner}/#{name}.git")
-    run("git fetch #{owner}")
-
-    puts "\nMerging remote branch '#{branch['source']}' from '#{owner}/#{name}'.\n".green
-    run("git merge #{owner}/#{branch['source']}")
+    merge_remote_branch(
+      :owner => branch['repo']['owner'],
+      :repo => branch['repo']['name'],
+      :branch => branch['source']
+    )
   end
 
   def qa(*issues)
@@ -166,26 +161,54 @@ class Gitcycle
     elsif issues.first == 'fail' || issues.first == 'pass'
       branch = branches(:current => true)
       label = issues.first.capitalize
+
       if branch =~ /^qa_/
         puts "\nRetrieving branch information from gitcycle.\n".green
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
 
-        puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
+        puts "Checking out #{qa_branch['source']}.".green
         run("git checkout #{qa_branch['source']}")
-        run("git merge #{branch}")
-        run("git push origin #{qa_branch['source']}")
-        
-        puts "\nLabeling all issues as '#{label}'.\n".green
-        get('label',
-          'qa_branch[source]' => branch.gsub(/^qa_/, ''),
-          'labels' => [ label ]
-        )
+
+        if issues[1..-1].empty?
+          puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
+          run("git merge #{branch}")
+          run("git push origin #{qa_branch['source']}")
+          
+          puts "\nLabeling all issues as '#{label}'.\n".green
+          get('label',
+            'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+            'labels' => [ label ]
+          )
+
+          branches = qa_branch['branches']
+        else
+          issues = [1..-1]
+
+          branches = qa_branch['branches'].select do |b|
+            issues.include?(b['issue'])
+          end
+
+          branches.each do |branch|
+            merge_remote_branch(
+              :user => branch['user'],
+              :repo => branch['repo'].split(':'),
+              :branch => branch['branch']
+            )
+
+            puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
+            get('label',
+              'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+              'issue' => branch['issue'],
+              'labels' => [ label ]
+            )
+          end
+        end
 
         puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
-        branches = qa_branch['branches'].collect do |b|
+        branches = branches.collect do |b|
           { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
         end
-        get('ticket_resolve', 'branches' => Yajl::Encoder.encode(branches))        
+        get('ticket_resolve', 'branches' => Yajl::Encoder.encode(branches))
       else
         puts "\nYou are not in a QA branch.\n".red
       end
@@ -323,24 +346,17 @@ class Gitcycle
           puts "\n"
         end
 
-        added = []
         qa_branch['branches'][range].each do |branch|
           issue = branch['issue']
           owner, repo = branch['repo'].split(':')
           user = branch['user']
           branch = branch['branch']
 
-          unless added.include?(user)
-            puts "Adding remote repo '#{user}/#{repo}' (issue ##{issue}).\n".green
-            run("git remote rm #{user}") if remotes(:match => user)
-            run("git remote add #{user} git@github.com:#{user}/#{repo}.git")
-            run("git fetch #{user}")
-            added << user
-            puts "\n"
-          end
-
-          puts "Merging remote branch '#{branch}' (issue ##{issue}).\n".green
-          output = run("git merge #{user}/#{branch}")
+          output = merge_remote_branch(
+            :owner => user,
+            :repo => repo,
+            :branch => branch
+          )
 
           if output.include?('CONFLICT')
             puts "Conflict occurred when merging '#{branch}' (issue ##{issue}).\n".red
@@ -409,6 +425,27 @@ class Gitcycle
       @git_login = @git_url.match(/:(.+)\//)[1]
       @token = @config[@git_login][@git_repo] rescue nil
     end
+  end
+
+  def merge_remote_branch(options={})
+    owner = options[:owner]
+    repo = options[:repo]
+    branch = options[:branch]
+
+    $remotes ||= {}
+
+    unless $remotes[owner]
+      $remotes[owner] = true
+      puts "Adding remote repo '#{owner}/#{repo}'.\n".green
+      run("git remote rm #{owner}") if remotes(:match => owner)
+      run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
+    end
+    
+    puts "\nFetching remote branch '#{branch}'.\n".green
+    run("git fetch #{owner}")
+
+    puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
+    run("git merge #{owner}/#{branch}")
   end
 
   def remotes(options={})

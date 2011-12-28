@@ -22,7 +22,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "aruba"
   s.add_development_dependency "cucumber"
   s.add_development_dependency "lighthouse"
+  s.add_development_dependency "redis"
   s.add_development_dependency "rspec"
+  s.add_development_dependency "yajl-ruby"
 
   s.add_dependency "launchy", "= 2.0.5"
   s.add_dependency "yajl-ruby", "= 1.1.0"
