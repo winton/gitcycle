@@ -114,7 +114,13 @@ When /^I execute gitcycle setup$/ do
     "setup",
     config['user'],
     config['repo'],
-    config['gitcycle']
+    config['token_dev']
+  ].join(' ')
+  run_gitcycle [
+    "setup",
+    config['owner'],
+    config['repo'],
+    config['token_qa']
   ].join(' ')
 end
 
@@ -151,7 +157,8 @@ end
 
 Then /^gitcycle\.yml should be valid$/ do
   gitcycle = YAML.load(File.read(GITCYCLE))
-  gitcycle[config['user']][config['repo']].should == config['gitcycle']
+  gitcycle[config['user']][config['repo']].should == config['token_dev']
+  gitcycle[config['owner']][config['repo']].should == config['token_qa']
 end
 
 Then /^output includes \"([^\"]*)"$/ do |expected|
