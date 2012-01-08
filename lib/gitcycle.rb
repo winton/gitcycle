@@ -18,7 +18,7 @@ class Gitcycle
     if ENV['ENV'] == 'development'
       "http://127.0.0.1:8080/api"
     else
-      "http://gitcycle.com/api"
+      "http://gitcycle.bleacherreport.com/api"
     end
   
   def initialize
@@ -275,7 +275,7 @@ class Gitcycle
       puts "\nLabeling issue as 'Pending QA'.\n".green
       get('label',
         'branch[name]' => branches(:current => true),
-        'labels' => 'Pending QA'
+        'labels' => [ 'Pending QA' ]
       )
     else
       puts "\nLabeling issues as 'Pending QA'.\n".green
@@ -288,8 +288,8 @@ class Gitcycle
   end
 
   def setup(login, repo, token)
-    @config[login] ||= {}
-    @config[login][repo] = token
+    repo = "#{login}/#{repo}" unless repo.include?('/')
+    @config[repo] = [ login, token ]
     save_config
     puts "\nConfiguration saved.\n".green
   end
@@ -391,9 +391,8 @@ class Gitcycle
 
   def get(path, hash={})
     hash.merge!(
-      :login => @git_login,
-      :token => @token,
-      :repo => @git_repo,
+      :login => @login,
+      :token => @token
     )
 
     params = ''
@@ -423,7 +422,7 @@ class Gitcycle
       @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
       @git_repo = @git_url.match(/\/(.+)\./)[1]
       @git_login = @git_url.match(/:(.+)\//)[1]
-      @token = @config[@git_login][@git_repo] rescue nil
+      @login, @token = @config["#{@git_login}/#{@git_repo}"] rescue [ nil, nil ]
     end
   end
 
@@ -458,7 +457,7 @@ class Gitcycle
   end
 
   def require_config
-    unless @token
+    unless @login && @token
       puts "\nGitcycle configuration not found.".red
       puts "Are you in the right repository?".yellow
       puts "Have you set up this repository at http://gitcycle.com?\n".yellow

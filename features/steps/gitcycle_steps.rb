@@ -49,6 +49,7 @@ def gsub_variables(str)
   end
   str = str.gsub('config.owner', config['owner'])
   str = str.gsub('config.repo', config['repo'])
+  str = str.gsub('config.user', config['user'])
   str
 end
 
@@ -118,8 +119,8 @@ When /^I execute gitcycle setup$/ do
   ].join(' ')
   run_gitcycle [
     "setup",
-    config['owner'],
-    config['repo'],
+    config['user'],
+    "#{config['owner']}/#{config['repo']}",
     config['token_qa']
   ].join(' ')
 end
@@ -157,8 +158,12 @@ end
 
 Then /^gitcycle\.yml should be valid$/ do
   gitcycle = YAML.load(File.read(GITCYCLE))
-  gitcycle[config['user']][config['repo']].should == config['token_dev']
-  gitcycle[config['owner']][config['repo']].should == config['token_qa']
+
+  repo = "#{config['user']}/#{config['repo']}"
+  gitcycle[repo].should == [ config['user'], config['token_dev'] ]
+  
+  repo = "#{config['owner']}/#{config['repo']}"
+  gitcycle[repo].should == [ config['user'], config['token_qa'] ]
 end
 
 Then /^output includes \"([^\"]*)"$/ do |expected|

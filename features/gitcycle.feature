@@ -137,3 +137,19 @@ Scenario: Reviewed issue w/ parameters
   When I cd to the user repo
     And I execute gitcycle with "reviewed issue.id"
   Then output includes "Labeling issues as 'Pending QA'."
+
+Scenario: QA issue
+  When I cd to the owner repo
+    And I checkout master
+    And I execute gitcycle with "qa issue.id"
+  Then output includes "Retrieving branch information from gitcycle."
+    And output does not include "Checking out source branch 'master'."
+    And output does not include "Tracking source branch 'master'."
+    And output does not include "Deleting old QA branch 'qa_master'."
+    And output includes "Creating QA branch 'qa_master'."
+    And output includes "Adding remote repo 'config.user/config.repo'."
+    And output includes "Fetching remote branch 'ticket.id'."
+    And output includes "Merging remote branch 'ticket.id' from 'config.user/config.repo'."
+    And output includes "Pushing QA branch 'qa_master'."
+    And output includes "Type 'gitc qa pass' to approve all issues in this branch."
+    And output includes "Type 'gitc qa fail' to reject all issues in this branch."
