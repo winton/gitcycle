@@ -195,6 +195,11 @@ Then /^output includes \"([^\"]*)" with URL$/ do |expected|
   $url = @output.match(/#{expected}.*(https?:\/\/[^\s]+)/)[1]
 end
 
+Then /^output includes$/ do |expected|
+  expected = gsub_variables(expected)
+  @output.include?(expected).should == true
+end
+
 Then /^output does not include \"([^\"]*)"$/ do |expected|
   expected = gsub_variables(expected)
   @output.include?(expected).should == false

@@ -159,13 +159,15 @@ Scenario: QA issue
     And I checkout master
     And I execute gitcycle with "qa issue.id"
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output does not include "Checking out source branch 'master'."
-    And output does not include "Tracking source branch 'master'."
-    And output includes "Creating QA branch 'qa_master'."
-    And output includes "Adding remote repo 'env.home/config.repo'."
-    And output includes "Fetching remote branch 'ticket.id'."
-    And output includes "Merging remote branch 'ticket.id' from 'env.home/config.repo'."
-    And output includes "Pushing QA branch 'qa_master'."
-    And output includes "Type 'gitc qa pass' to approve all issues in this branch."
-    And output includes "Type 'gitc qa fail' to reject all issues in this branch."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Deleting old QA branch 'qa_master'.
+      Creating QA branch 'qa_master'.
+      Adding remote repo 'br/gitcycle_test'.
+      Fetching remote branch '200-test-ticket'.
+      Merging remote branch '200-test-ticket' from 'br/gitcycle_test'.
+      Pushing QA branch 'qa_master'.
+      Type 'gitc qa pass' to approve all issues in this branch.
+      Type 'gitc qa fail' to reject all issues in this branch.
+      """
