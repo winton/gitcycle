@@ -81,6 +81,7 @@ Scenario: Pull changes from upstream
     And I checkout master
     And I commit something
     And I cd to the user repo
+    And I checkout ticket.id
     And I execute gitcycle with "pull"
   Then gitcycle runs
     And output includes "Retrieving branch information from gitcycle."
@@ -162,9 +163,9 @@ Scenario: QA issue
     And output does not include "Checking out source branch 'master'."
     And output does not include "Tracking source branch 'master'."
     And output includes "Creating QA branch 'qa_master'."
-    And output includes "Adding remote repo 'config.user/config.repo'."
+    And output includes "Adding remote repo 'env.home/config.repo'."
     And output includes "Fetching remote branch 'ticket.id'."
-    And output includes "Merging remote branch 'ticket.id' from 'config.user/config.repo'."
+    And output includes "Merging remote branch 'ticket.id' from 'env.home/config.repo'."
     And output includes "Pushing QA branch 'qa_master'."
     And output includes "Type 'gitc qa pass' to approve all issues in this branch."
     And output includes "Type 'gitc qa fail' to reject all issues in this branch."

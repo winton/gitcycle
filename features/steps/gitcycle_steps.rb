@@ -20,6 +20,7 @@ Before do |scenario|
   @scenario_title = scenario.title
   $execute = []
   $input = []
+  $remotes = nil
 end
 
 def branches(options={})
@@ -49,6 +50,7 @@ def gsub_variables(str)
     issue_id = $url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
     str = str.gsub('issue.id', issue_id)
   end
+  str = str.gsub('env.home', ENV['REPO'] == 'owner' ? config['owner'] : config['user'])
   str = str.gsub('config.owner', config['owner'])
   str = str.gsub('config.repo', config['repo'])
   str = str.gsub('config.user', config['user'])
@@ -83,7 +85,11 @@ end
 def run_gitcycle(cmd)
   @output = ''
   @gitcycle = Gitcycle.new
-  @gitcycle.stub(:puts) { |str| @output << str.gsub(/\e\[\d{1,2}m/, '') }
+  @gitcycle.stub(:puts) do |str|
+    str = str.gsub(/\e\[\d{1,2}m/, '')
+    @output << str
+    puts str
+  end
   if cmd
     @gitcycle.start(Shellwords.split(cmd))
   else
@@ -138,7 +144,10 @@ When /^I execute gitcycle with the Lighthouse ticket URL$/ do
 end
 
 When /^I cd to the (.*) repo$/ do |user|
-  Dir.chdir($repos[user.to_sym])
+  if ENV['REPO']
+    puts "(overiding repo as #{ENV['REPO']})"
+  end
+  Dir.chdir($repos[(ENV['REPO'] || user).to_sym])
 end
 
 When /^I enter "([^\"]*)"$/ do |input|
@@ -207,6 +216,7 @@ Then /^redis entries valid$/ do
   should = {
     'lighthouse_url' => $ticket.url,
     'body' => "<div><p>test</p></div>\n\n#{$ticket.url}",
+    'home' => 'br',
     'name' => $ticket.attributes['id'] + add,
     'id' => $ticket.attributes['id'] + add,
     'title' => $ticket.title,

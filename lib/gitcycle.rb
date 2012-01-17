@@ -58,6 +58,7 @@ class Gitcycle
     name = branch['name']
 
     unless branch['exists']
+      branch['home'] = @git_login
       branch['source'] = branches(:current => true)
 
       unless yes?("Would you like to name your branch '#{name}'?")
@@ -85,6 +86,7 @@ class Gitcycle
 
       puts "Sending branch information to gitcycle.".green
       get('branch',
+        'branch[home]' => branch['home'],
         'branch[name]' => branch['name'],
         'branch[rename]' => name != branch['name'] ? name : nil,
         'branch[source]' => branch['source']
@@ -142,11 +144,15 @@ class Gitcycle
       'create' => 0
     )
 
-    merge_remote_branch(
-      :owner => branch['repo']['owner'],
-      :repo => branch['repo']['name'],
-      :branch => branch['source']
-    )
+    if branch
+      merge_remote_branch(
+        :owner => branch['repo']['owner'],
+        :repo => branch['repo']['name'],
+        :branch => branch['source']
+      )
+    else
+      puts "Branch not found.\n".red
+    end
   end
 
   def qa(*issues)
@@ -172,40 +178,17 @@ class Gitcycle
         puts "Checking out #{qa_branch['source']}.".green
         run("git checkout #{qa_branch['source']}")
 
-        if issues[1..-1].empty?
-          puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
-          run("git merge #{branch}")
-          run("git push origin #{qa_branch['source']}")
-          
-          puts "\nLabeling all issues as '#{label}'.\n".green
-          get('label',
-            'qa_branch[source]' => branch.gsub(/^qa_/, ''),
-            'labels' => [ label ]
-          )
+        puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
+        run("git merge #{branch}")
+        run("git push origin #{qa_branch['source']}")
+        
+        puts "\nLabeling all issues as '#{label}'.\n".green
+        get('label',
+          'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+          'labels' => [ label ]
+        )
 
-          branches = qa_branch['branches']
-        else
-          issues = [1..-1]
-
-          branches = qa_branch['branches'].select do |b|
-            issues.include?(b['issue'])
-          end
-
-          branches.each do |branch|
-            merge_remote_branch(
-              :user => branch['user'],
-              :repo => branch['repo'].split(':'),
-              :branch => branch['branch']
-            )
-
-            puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
-            get('label',
-              'qa_branch[source]' => branch.gsub(/^qa_/, ''),
-              'issue' => branch['issue'],
-              'labels' => [ label ]
-            )
-          end
-        end
+        branches = qa_branch['branches']
 
         puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
         branches = branches.collect do |b|
@@ -338,6 +321,8 @@ class Gitcycle
       source = qa_branch['source']
       name = "qa_#{source}"
 
+      puts qa_branch.inspect
+
       unless qa_branch['branches'].empty?
         unless options[:preserve]
           if branches(:current => source)
@@ -365,11 +350,11 @@ class Gitcycle
         qa_branch['branches'][range].each do |branch|
           issue = branch['issue']
           owner, repo = branch['repo'].split(':')
-          user = branch['user']
+          home = branch['home']
           branch = branch['branch']
 
           output = merge_remote_branch(
-            :owner => user,
+            :owner => home,
             :repo => repo,
             :branch => branch
           )
