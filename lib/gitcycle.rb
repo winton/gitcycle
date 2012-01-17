@@ -321,8 +321,6 @@ class Gitcycle
       source = qa_branch['source']
       name = "qa_#{source}"
 
-      puts qa_branch.inspect
-
       unless qa_branch['branches'].empty?
         unless options[:preserve]
           if branches(:current => source)
@@ -399,7 +397,9 @@ class Gitcycle
     params = ''
     hash[:session] = 0
     hash.each do |k, v|
-      if v
+      if v && v.is_a?(::Array)
+        params << "#{URI.escape(k.to_s)}=#{URI.escape(v.inspect)}&"
+      elsif v
         params << "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}&"
       end
     end

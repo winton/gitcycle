@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = %w(lib)
   s.test_files = `cd #{root} && git ls-files -- {features,test,spec}/*`.split("\n")
 
-  s.add_development_dependency "aruba"
   s.add_development_dependency "cucumber"
   s.add_development_dependency "lighthouse"
   s.add_development_dependency "redis"
