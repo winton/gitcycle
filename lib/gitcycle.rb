@@ -21,14 +21,17 @@ class Gitcycle
       "http://gitcycle.bleacherreport.com/api"
     end
   
-  def initialize
+  def initialize(args=nil)
     if ENV['CONFIG']
       @config_path = File.expand_path(ENV['CONFIG'])
     else
       @config_path = File.expand_path("~/.gitcycle.yml")
     end
+
     load_config
     load_git
+
+    start(args) if args
   end
 
   def create_branch(url_or_title)
@@ -294,6 +297,19 @@ class Gitcycle
     puts "\nConfiguration saved.\n".green
   end
 
+  def start(args=[])
+    command = args.shift
+    if command.nil?
+      puts "\nNo command specified\n".red
+    elsif self.respond_to?(command)
+      send(command, *args)
+    elsif args.empty?
+      create_branch(command)
+    else
+      puts "\nCommand '#{command}' not found.\n".red
+    end
+  end
+
   private
 
   def branches(options={})
@@ -334,7 +350,7 @@ class Gitcycle
             run("git fetch && git checkout -b #{source} origin/#{source}")
           end
 
-          if branches(:match => name)
+          if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
             run("git branch -D #{name}")
             run("git push origin :#{name}")
@@ -481,7 +497,7 @@ class Gitcycle
 
   def q(question, extra='')
     puts "#{question.yellow}#{extra}"
-    $stdin.gets.strip
+    $input ? $input.shift : $stdin.gets.strip
   end
 
   def run(cmd)

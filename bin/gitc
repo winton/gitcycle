@@ -2,15 +2,4 @@
 
 require File.expand_path("../../lib/gitcycle", __FILE__)
 
-gitcycle = Gitcycle.new
-command = ARGV.shift
-
-if command.nil?
-  puts "\nNo command specified\n".red
-elsif gitcycle.respond_to?(command)
-  gitcycle.send(command, *ARGV)
-elsif ARGV.empty?
-  gitcycle.create_branch(command)
-else
-  puts "\nCommand '#{command}' not found.\n".red
-end
+Gitcycle.new(ARGV)

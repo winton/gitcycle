@@ -1,4 +1,4 @@
-require 'aruba/cucumber'
+require 'cucumber/rspec/doubles'
 require 'lighthouse'
 require 'redis'
 require 'rspec/expectations'
@@ -11,23 +11,25 @@ BIN = "#{BASE}/bin/gitc"
 ENV['CONFIG'] = GITCYCLE = "#{BASE}/features/fixtures/gitcycle.yml"
 ENV['ENV'] = 'development'
 
+$:.unshift File.expand_path(__FILE__, "../../../lib")
+require "gitcycle"
+
 $redis = Redis.new
 
 Before do |scenario|
-  @aruba_timeout_seconds = 10
   @scenario_title = scenario.title
+  $execute = []
+  $input = []
 end
 
 def branches(options={})
-  in_current_dir do
-    b = `git branch#{" -a" if options[:all]}`
-    if options[:current]
-      b.match(/\*\s+(.+)/)[1]
-    elsif options[:match]
-      b.match(/([\s]+|origin\/)(#{options[:match]})/)[2] rescue nil
-    else
-      b
-    end
+  b = `git branch#{" -a" if options[:all]}`
+  if options[:current]
+    b.match(/\*\s+(.+)/)[1]
+  elsif options[:match]
+    b.match(/([\s]+|origin\/)(#{options[:match]})/)[2] rescue nil
+  else
+    b
   end
 end
 
@@ -54,11 +56,8 @@ def gsub_variables(str)
 end
 
 def log(match)
-  in_current_dir do
-    log = `git log --pretty=format:%s`
-    match = !(match =~ /^#{match}$/).nil?
-  end
-  match
+  log = `git log --pretty=format:%s`
+  !(match =~ /^#{match}$/).nil?
 end
 
 def repos(reload=false)
@@ -81,13 +80,19 @@ def repos(reload=false)
   end
 end
 
-def run_gitcycle(cmd, interactive=false)
-  cmd = [ BIN, cmd ].join(' ')
-  if interactive
-    run_interactive(unescape(cmd))
+def run_gitcycle(cmd)
+  @output = ''
+  @gitcycle = Gitcycle.new
+  @gitcycle.stub(:puts) { |str| @output << str.gsub(/\e\[\d{1,2}m/, '') }
+  if cmd
+    @gitcycle.start(Shellwords.split(cmd))
   else
-    run_simple(unescape(cmd), false)
+    @gitcycle.start
   end
+end
+
+def type(text)
+  $input << text
 end
 
 Given /^a fresh set of repositories$/ do
@@ -104,20 +109,23 @@ Given /^a new Lighthouse ticket$/ do
   $ticket.save
 end
 
+When /^I execute gitcycle with nothing$/ do
+  $execute << nil
+end
+
 When /^I execute gitcycle with "([^\"]*)"$/ do |cmd|
-  cmd = gsub_variables(cmd)
-  run_gitcycle(cmd)
+  $execute << gsub_variables(cmd)
 end
 
 When /^I execute gitcycle setup$/ do
   FileUtils.rm(GITCYCLE) if File.exists?(GITCYCLE)
-  run_gitcycle [
+  $execute << [
     "setup",
     config['user'],
     config['repo'],
     config['token_dev']
   ].join(' ')
-  run_gitcycle [
+  $execute << [
     "setup",
     config['user'],
     "#{config['owner']}/#{config['repo']}",
@@ -126,12 +134,11 @@ When /^I execute gitcycle setup$/ do
 end
 
 When /^I execute gitcycle with the Lighthouse ticket URL$/ do
-  run_gitcycle $ticket.url, true
+  $execute << $ticket.url
 end
 
 When /^I cd to the (.*) repo$/ do |user|
-  dirs.pop
-  cd($repos[user.to_sym])
+  Dir.chdir($repos[user.to_sym])
 end
 
 When /^I enter "([^\"]*)"$/ do |input|
@@ -141,18 +148,20 @@ end
 
 When /^I commit something$/ do
   branch = branches(:current => true)
-  in_current_dir do
-    $commit_msg = "#{@scenario_title} - #{rand}"
-    File.open('README', 'w') {|f| f.write($commit_msg) }
-    `git add . && git add . -u && git commit -a -m '#{$commit_msg}'`
-    `git push origin #{branch}`
-  end
+  $commit_msg = "#{@scenario_title} - #{rand}"
+  File.open('README', 'w') {|f| f.write($commit_msg) }
+  `git add . && git add . -u && git commit -a -m '#{$commit_msg}'`
+  `git push origin #{branch}`
 end
 
 When /^I checkout (.+)$/ do |branch|
   branch = gsub_variables(branch)
-  in_current_dir do
-    `git checkout #{branch}`
+  `git checkout #{branch}`
+end
+
+Then /^gitcycle runs$/ do
+  $execute.each do |cmd|
+    run_gitcycle(cmd)
   end
 end
 
@@ -168,19 +177,18 @@ end
 
 Then /^output includes \"([^\"]*)"$/ do |expected|
   expected = gsub_variables(expected)
-  assert_partial_output(expected, all_output)
+  @output.include?(expected).should == true
 end
 
 Then /^output includes \"([^\"]*)" with URL$/ do |expected|
-  puts all_output.inspect
   expected = gsub_variables(expected)
-  assert_partial_output(expected, all_output)
-  $url = all_output.match(/^#{expected}.*(https?:\/\/[^\s]+)/)[1]
+  @output.include?(expected).should == true
+  $url = @output.match(/#{expected}.*(https?:\/\/[^\s]+)/)[1]
 end
 
 Then /^output does not include \"([^\"]*)"$/ do |expected|
   expected = gsub_variables(expected)
-  assert_no_partial_output(expected, all_output)
+  @output.include?(expected).should == false
 end
 
 Then /^redis entries valid$/ do

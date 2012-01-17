@@ -1,16 +1,19 @@
 Feature: gitcycle
 
 Scenario: No command given
-  When I execute gitcycle with ""
-  Then output includes "No command specified"
+  When I execute gitcycle with nothing
+  Then gitcycle runs
+    And output includes "No command specified"
 
 Scenario: Non-existent command
   When I execute gitcycle with "blah blah"
-  Then output includes "Command 'blah' not found"
+  Then gitcycle runs
+    And output includes "Command 'blah' not found"
 
 Scenario: Setup
   When I execute gitcycle setup
-  Then output includes "Configuration saved."
+  Then gitcycle runs
+    And output includes "Configuration saved."
     And gitcycle.yml should be valid
 
 Scenario: Feature branch w/ custom branch name
@@ -20,7 +23,8 @@ Scenario: Feature branch w/ custom branch name
     And I execute gitcycle with the Lighthouse ticket URL
     And I enter "n"
     And I enter "ticket.id-rename"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output includes "Would you like to name your branch 'ticket.id'?"
     And output includes "What would you like to name your branch?"
     And output includes "Creating 'ticket.id-rename' from 'master'."
@@ -35,7 +39,8 @@ Scenario: Feature branch
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
     And I enter "y"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output includes "Would you like to name your branch 'ticket.id'?"
     And output does not include "What would you like to name your branch?"
     And output includes "Creating 'ticket.id' from 'master'."
@@ -47,7 +52,8 @@ Scenario: Feature branch
 Scenario: Checkout via ticket w/ existing branch
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output does not include "Would you like to name your branch 'ticket.id'?"
     And output does not include "What would you like to name your branch?"
     And output does not include "Creating 'ticket.id' from 'master'."
@@ -60,7 +66,8 @@ Scenario: Checkout via ticket w/ fresh repo
   Given a fresh set of repositories
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output does not include "Would you like to name your branch 'ticket.id'?"
     And output does not include "What would you like to name your branch?"
     And output does not include "Creating 'ticket.id' from 'master'."
@@ -75,7 +82,8 @@ Scenario: Pull changes from upstream
     And I commit something
     And I cd to the user repo
     And I execute gitcycle with "pull"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output includes "Adding remote repo 'config.owner/config.repo'."
     And output includes "Fetching remote branch 'master'."
     And output includes "Merging remote branch 'master' from 'config.owner/config.repo'."
@@ -85,7 +93,8 @@ Scenario: Discuss commits w/ no parameters and nothing committed
   When I cd to the user repo
     And I checkout ticket.id
     And I execute gitcycle with "discuss"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output includes "Creating GitHub pull request."
     And output does not include "Branch not found."
     And output does not include "Opening issue"
@@ -97,7 +106,8 @@ Scenario: Discuss commits w/ no parameters and something committed
     And I checkout ticket.id
     And I commit something
     And I execute gitcycle with "discuss"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output includes "Creating GitHub pull request."
     And output does not include "Branch not found."
     And output includes "Opening issue" with URL
@@ -109,7 +119,8 @@ Scenario: Discuss commits w/ parameters
   When I cd to the user repo
     And I checkout ticket.id
     And I execute gitcycle with "discuss issue.id"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output does not include "Creating GitHub pull request."
     And output does not include "Branch not found."
     And output does not include "You must push code before opening a pull request."
@@ -120,32 +131,36 @@ Scenario: Ready issue w/ no parameters
   When I cd to the user repo
     And I checkout ticket.id
     And I execute gitcycle with "ready"
-  Then output includes "Labeling issue as 'Pending Review'."
+  Then gitcycle runs
+    And output includes "Labeling issue as 'Pending Review'."
 
 Scenario: Ready issue w/ parameters
   When I cd to the user repo
     And I execute gitcycle with "ready issue.id"
-  Then output includes "Labeling issues as 'Pending Review'."
+  Then gitcycle runs
+    And output includes "Labeling issues as 'Pending Review'."
 
 Scenario: Reviewed issue w/ no parameters
   When I cd to the user repo
     And I checkout ticket.id
     And I execute gitcycle with "reviewed"
-  Then output includes "Labeling issue as 'Pending QA'."
+  Then gitcycle runs
+    And output includes "Labeling issue as 'Pending QA'."
 
 Scenario: Reviewed issue w/ parameters
   When I cd to the user repo
     And I execute gitcycle with "reviewed issue.id"
-  Then output includes "Labeling issues as 'Pending QA'."
+  Then gitcycle runs
+    And output includes "Labeling issues as 'Pending QA'."
 
 Scenario: QA issue
   When I cd to the owner repo
     And I checkout master
     And I execute gitcycle with "qa issue.id"
-  Then output includes "Retrieving branch information from gitcycle."
+  Then gitcycle runs
+    And output includes "Retrieving branch information from gitcycle."
     And output does not include "Checking out source branch 'master'."
     And output does not include "Tracking source branch 'master'."
-    And output does not include "Deleting old QA branch 'qa_master'."
     And output includes "Creating QA branch 'qa_master'."
     And output includes "Adding remote repo 'config.user/config.repo'."
     And output includes "Fetching remote branch 'ticket.id'."
