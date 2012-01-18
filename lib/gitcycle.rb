@@ -99,22 +99,8 @@ class Gitcycle
   def discuss(*issues)
     require_git && require_config
 
-    puts "\nRetrieving branch information from gitcycle.\n".green
-
     if issues.empty?
-      branch = get('branch',
-        'branch[name]' => branches(:current => true),
-        'create' => 0
-      )
-
-      if branch && !branch['issue_url']
-        puts "Creating GitHub pull request.\n".green
-        branch = get('branch',
-          'branch[create_pull_request]' => true,
-          'branch[name]' => branch['name'],
-          'create' => 0
-        )
-      end
+      branch = create_pull_request
 
       if branch == false
         puts "Branch not found.\n".red
@@ -125,6 +111,8 @@ class Gitcycle
         puts "You must push code before opening a pull request.\n".red
       end
     else
+      puts "\nRetrieving branch information from gitcycle.\n".green
+
       get('branch', 'issues' => issues, 'scope' => 'repo').each do |branch|
         if branch['issue_url']
           puts "Opening issue: #{branch['issue_url']}\n".green
@@ -268,11 +256,20 @@ class Gitcycle
     require_git && require_config
 
     if issues.empty?
-      puts "\nLabeling issue as 'Pending Review'.\n".green
-      get('label',
-        'branch[name]' => branches(:current => true),
-        'labels' => [ 'Pending Review' ]
-      )
+      branch = create_pull_request
+
+      if branch == false
+        puts "Branch not found.\n".red
+      elsif branch['issue_url']
+        puts "\nLabeling issue as 'Pending Review'.\n".green
+        get('label',
+          'branch[name]' => branches(:current => true),
+          'labels' => [ 'Pending Review' ]
+        )
+
+        puts "Opening issue: #{branch['issue_url']}\n".green
+        Launchy.open(branch['issue_url'])
+      end
     else
       puts "\nLabeling issues as 'Pending Review'.\n".green
       get('label',
@@ -333,6 +330,26 @@ class Gitcycle
     else
       b
     end
+  end
+
+  def create_pull_request
+    puts "\nRetrieving branch information from gitcycle.\n".green
+      
+    branch = get('branch',
+      'branch[name]' => branches(:current => true),
+      'create' => 0
+    )
+
+    if branch && !branch['issue_url']
+      puts "Creating GitHub pull request.\n".green
+      branch = get('branch',
+        'branch[create_pull_request]' => true,
+        'branch[name]' => branch['name'],
+        'create' => 0
+      )
+    end
+
+    branch
   end
 
   def create_qa_branch(options)

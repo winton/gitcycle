@@ -95,3 +95,11 @@ To pass all issues:
 	gitc qa pass
 
 This will add a "pass" label to the issue and will complete the pull request by merging the feature branch into the target branch.
+
+Todo
+----
+
+* Label issues with ticket milestone?
+* Add confirmation when creating new dev branch for branch that it is based off of
+	* If confirmation is a no, allow user to specify branch to base off of
+* bug with branch rename on Jimmy's machine

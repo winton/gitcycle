@@ -202,7 +202,7 @@ end
 
 Then /^output does not include \"([^\"]*)"$/ do |expected|
   expected = gsub_variables(expected)
-  @output.include?(expected).should == false
+  @output.gsub(/\n+/, "\n").include?(expected).should == false
 end
 
 Then /^redis entries valid$/ do
@@ -221,7 +221,7 @@ Then /^redis entries valid$/ do
   should = {
     'lighthouse_url' => $ticket.url,
     'body' => "<div><p>test</p></div>\n\n#{$ticket.url}",
-    'home' => 'br',
+    'home' => ENV['REPO'] == 'owner' ? config['owner'] : config['user'],
     'name' => $ticket.attributes['id'] + add,
     'id' => $ticket.attributes['id'] + add,
     'title' => $ticket.title,
