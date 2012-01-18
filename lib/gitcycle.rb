@@ -178,23 +178,52 @@ class Gitcycle
         puts "Checking out #{qa_branch['source']}.".green
         run("git checkout #{qa_branch['source']}")
 
-        puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
-        run("git merge #{branch}")
-        run("git push origin #{qa_branch['source']}")
-        
-        puts "\nLabeling all issues as '#{label}'.\n".green
-        get('label',
-          'qa_branch[source]' => branch.gsub(/^qa_/, ''),
-          'labels' => [ label ]
-        )
+        if issues[1..-1].empty?
+          if issues.first = 'pass'
+            puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
+            run("git merge #{branch}")
+            run("git push origin #{qa_branch['source']}")
+          end
+          
+          puts "\nLabeling all issues as '#{label}'.\n".green
+          get('label',
+            'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+            'labels' => [ label ]
+          )
 
-        branches = qa_branch['branches']
+          branches = qa_branch['branches']
+        else
+          issues = [1..-1]
 
-        puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
-        branches = branches.collect do |b|
-          { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
+          branches = qa_branch['branches'].select do |b|
+            issues.include?(b['issue'])
+          end
+
+          branches.each do |branch|
+            if issues.first = 'pass'
+              merge_remote_branch(
+                :user => branch['user'],
+                :repo => branch['repo'].split(':'),
+                :branch => branch['branch']
+              )
+            end
+
+            puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
+            get('label',
+              'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+              'issue' => branch['issue'],
+              'labels' => [ label ]
+            )
+          end
         end
-        get('ticket_resolve', 'branches' => Yajl::Encoder.encode(branches))
+
+        if issues.first = 'pass'
+          puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
+          branches = branches.collect do |b|
+            { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
+          end
+          get('ticket_resolve', 'branches' => Yajl::Encoder.encode(branches))
+        end
       else
         puts "\nYou are not in a QA branch.\n".red
       end
