@@ -550,6 +550,7 @@ class Gitcycle
   end
 
   def save_config
+    FileUtils.mkdir_p(File.dirname(@config_path))
     File.open(@config_path, 'w') do |f|
       f.write(YAML.dump(@config))
     end
