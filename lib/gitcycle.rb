@@ -61,6 +61,14 @@ class Gitcycle
       branch['home'] = @git_login
       branch['source'] = branches(:current => true)
 
+      unless yes?("Would you like to eventually merge this feature into #{branch['source']}?")
+        branch['source'] = q("What branch would you like to eventually merge this feature into?")
+      end
+
+      unless branches(:match => branch['source'])
+        
+      end
+
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
@@ -330,6 +338,27 @@ class Gitcycle
     else
       b
     end
+  end
+
+  def checkout_remote_branch(options={})
+    owner = options[:owner]
+    repo = options[:repo]
+    branch = options[:branch]
+
+    $remotes ||= {}
+
+    unless $remotes[owner]
+      $remotes[owner] = true
+      puts "Adding remote repo '#{owner}/#{repo}'.\n".green
+      run("git remote rm #{owner}") if remotes(:match => owner)
+      run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
+    end
+    
+    puts "\nFetching remote branch '#{branch}'.\n".green
+    run("git fetch #{owner}")
+
+    puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
+    run("git merge #{owner}/#{branch}")
   end
 
   def create_pull_request
