@@ -61,13 +61,13 @@ class Gitcycle
       branch['home'] = @git_login
       branch['source'] = branches(:current => true)
 
-      unless yes?("Would you like to eventually merge this feature into #{branch['source']}?")
-        branch['source'] = q("What branch would you like to eventually merge this feature into?")
-      end
+      # unless yes?("Would you like to eventually merge this feature into #{branch['source']}?")
+      #   branch['source'] = q("What branch would you like to eventually merge this feature into?")
+      # end
 
-      unless branches(:match => branch['source'])
+      # unless branches(:match => branch['source'])
         
-      end
+      # end
 
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
@@ -334,7 +334,7 @@ class Gitcycle
     if options[:current]
       b.match(/\*\s+(.+)/)[1]
     elsif options[:match]
-      b.match(/([\s]+|origin\/)(#{options[:match]})/)[2] rescue nil
+      b.match(/([\s]+|origin\/)(#{options[:match]})$/)[2] rescue nil
     else
       b
     end
