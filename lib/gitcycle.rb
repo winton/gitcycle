@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'open-uri'
 require 'uri'
 require 'yaml'
