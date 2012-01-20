@@ -175,7 +175,7 @@ class Gitcycle
         run("git checkout #{qa_branch['source']}")
 
         if issues[1..-1].empty?
-          if issues.first = 'pass'
+          if issues.first == 'pass'
             puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
             run("git merge #{branch}")
             run("git push origin #{qa_branch['source']}")
@@ -196,7 +196,7 @@ class Gitcycle
           end
 
           branches.each do |branch|
-            if issues.first = 'pass'
+            if issues.first == 'pass'
               merge_remote_branch(
                 :user => branch['user'],
                 :repo => branch['repo'].split(':'),
@@ -213,7 +213,7 @@ class Gitcycle
           end
         end
 
-        if issues.first = 'pass'
+        if issues.first == 'pass'
           puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
           branches = branches.collect do |b|
             { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
