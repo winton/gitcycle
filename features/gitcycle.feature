@@ -21,10 +21,12 @@ Scenario: Feature branch w/ custom branch name
     And a new Lighthouse ticket
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
+    And I enter "y"
     And I enter "n"
     And I enter "ticket.id-rename"
   Then gitcycle runs
     And output includes "Retrieving branch information from gitcycle."
+    And output includes "Your work will eventually merge into 'master'. Is this correct?"
     And output includes "Would you like to name your branch 'ticket.id'?"
     And output includes "What would you like to name your branch?"
     And output includes "Creating 'ticket.id-rename' from 'master'."
@@ -39,8 +41,10 @@ Scenario: Feature branch
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
     And I enter "y"
+    And I enter "y"
   Then gitcycle runs
     And output includes "Retrieving branch information from gitcycle."
+    And output includes "Your work will eventually merge into 'master'. Is this correct?"
     And output includes "Would you like to name your branch 'ticket.id'?"
     And output does not include "What would you like to name your branch?"
     And output includes "Creating 'ticket.id' from 'master'."
@@ -86,7 +90,7 @@ Scenario: Pull changes from upstream
   Then gitcycle runs
     And output includes "Retrieving branch information from gitcycle."
     And output includes "Adding remote repo 'config.owner/config.repo'."
-    And output includes "Fetching remote branch 'master'."
+    And output includes "Fetching remote repo 'config.owner'."
     And output includes "Merging remote branch 'master' from 'config.owner/config.repo'."
     And git log should contain the last commit
 

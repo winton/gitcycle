@@ -99,7 +99,10 @@ This will add a "pass" label to the issue and will complete the pull request by 
 Todo
 ----
 
+* Make ticket active when starting branch
 * Label issues with ticket milestone?
-* Add confirmation when creating new dev branch for branch that it is based off of
-	* If confirmation is a no, allow user to specify branch to base off of
-* bug with branch rename on Jimmy's machine
+* Bug with branch rename on Jimmy's machine
+* Need to pull before merging qa pass branch
+* Check for conflict wherever merge happens
+* Instead of detecting CONFLICT, use error status $? != 0
+* Add comment on lighthouse with issue URL

@@ -56,18 +56,21 @@ class Gitcycle
     branch = get('branch', params)
 
     name = branch['name']
+    owner, repo = branch['repo'].split(':')
 
     unless branch['exists']
       branch['home'] = @git_login
       branch['source'] = branches(:current => true)
 
-      # unless yes?("Would you like to eventually merge this feature into #{branch['source']}?")
-      #   branch['source'] = q("What branch would you like to eventually merge this feature into?")
-      # end
+      unless yes?("Your work will eventually merge into '#{branch['source']}'. Is this correct?")
+        branch['source'] = q("What branch would you like to eventually merge into?")
+      end
 
-      # unless branches(:match => branch['source'])
-        
-      # end
+      checkout_remote_branch(
+        :owner => owner,
+        :repo => repo,
+        :branch => branch['source']
+      )
 
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
@@ -329,6 +332,23 @@ class Gitcycle
 
   private
 
+  def add_remote_and_fetch(options={})
+    owner = options[:owner]
+    repo = options[:repo]
+
+    $remotes ||= {}
+
+    unless $remotes[owner]
+      $remotes[owner] = true
+      puts "Adding remote repo '#{owner}/#{repo}'.\n".green
+      run("git remote rm #{owner}") if remotes(:match => owner)
+      run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
+    end
+    
+    puts "\nFetching remote repo '#{owner}'.\n".green
+    run("git fetch #{owner}")
+  end
+
   def branches(options={})
     b = `git branch#{" -a" if options[:all]}`
     if options[:current]
@@ -345,20 +365,22 @@ class Gitcycle
     repo = options[:repo]
     branch = options[:branch]
 
-    $remotes ||= {}
-
-    unless $remotes[owner]
-      $remotes[owner] = true
-      puts "Adding remote repo '#{owner}/#{repo}'.\n".green
-      run("git remote rm #{owner}") if remotes(:match => owner)
-      run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
-    end
+    add_remote_and_fetch(options)
     
-    puts "\nFetching remote branch '#{branch}'.\n".green
-    run("git fetch #{owner}")
+    puts "\nChecking out remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
 
-    puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
-    run("git merge #{owner}/#{branch}")
+    if branches(:match => branch)
+      run("git checkout #{branch}")
+    else
+      run("git checkout -b #{branch} #{owner}/#{branch}")
+    end
+
+    if branches(:current => true) == branch
+      run("git pull #{owner} #{branch}")
+    else
+      puts "Oops. Something bad happened.\n".red
+      exit
+    end
   end
 
   def create_pull_request
@@ -407,6 +429,8 @@ class Gitcycle
             puts "Tracking source branch '#{source}'.\n".green
             run("git fetch && git checkout -b #{source} origin/#{source}")
           end
+
+          run("git pull origin #{source}")
 
           if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
@@ -507,17 +531,7 @@ class Gitcycle
     repo = options[:repo]
     branch = options[:branch]
 
-    $remotes ||= {}
-
-    unless $remotes[owner]
-      $remotes[owner] = true
-      puts "Adding remote repo '#{owner}/#{repo}'.\n".green
-      run("git remote rm #{owner}") if remotes(:match => owner)
-      run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
-    end
-    
-    puts "\nFetching remote branch '#{branch}'.\n".green
-    run("git fetch #{owner}")
+    add_remote_and_fetch(options)
 
     puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
     run("git merge #{owner}/#{branch}")
