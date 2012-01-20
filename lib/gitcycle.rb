@@ -182,6 +182,7 @@ class Gitcycle
           if issues.first == 'pass'
             puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
             run("git merge #{branch}")
+            run("git pull origin #{qa_branch['source']}")
             run("git push origin #{qa_branch['source']}")
           end
           
