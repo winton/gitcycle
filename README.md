@@ -104,3 +104,5 @@ Todo
 * Check for conflict whenever merge happens
 * Instead of detecting CONFLICT, use error status $? != 0
 * Add comment on lighthouse with issue URL
+* Need to make sure when a branch is created, it is always from the pristine remote version, not local
+* Add conflict check when calling "qa pass [ticket]"

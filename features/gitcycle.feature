@@ -25,14 +25,20 @@ Scenario: Feature branch w/ custom branch name
     And I enter "n"
     And I enter "ticket.id-rename"
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output includes "Your work will eventually merge into 'master'. Is this correct?"
-    And output includes "Would you like to name your branch 'ticket.id'?"
-    And output includes "What would you like to name your branch?"
-    And output includes "Creating 'ticket.id-rename' from 'master'."
-    And output includes "Checking out branch 'ticket.id-rename'."
-    And output includes "Pushing 'ticket.id-rename'."
-    And output includes "Sending branch information to gitcycle."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Your work will eventually merge into 'master'. Is this correct? (y/n)
+      Adding remote repo 'br/gitcycle_test'.
+      Fetching remote repo 'br'.
+      Checking out remote branch 'master' from 'br/gitcycle_test'.
+      Would you like to name your branch 'ticket.id'? (y/n)
+      What would you like to name your branch?
+      Creating 'ticket.id-rename' from 'master'.
+      Checking out branch 'ticket.id-rename'.
+      Pushing 'ticket.id-rename'.
+      Sending branch information to gitcycle.
+      """
     And redis entries valid
 
 Scenario: Feature branch

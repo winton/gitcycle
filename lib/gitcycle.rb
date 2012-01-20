@@ -92,7 +92,7 @@ class Gitcycle
     end
 
     unless branch['exists']
-      puts "Pushing '#{name}'.".green
+      puts "Pushing '#{name}'.\n".green
       run("git push origin #{name}")
 
       puts "Sending branch information to gitcycle.".green

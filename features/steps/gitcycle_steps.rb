@@ -87,7 +87,7 @@ def run_gitcycle(cmd)
   @gitcycle = Gitcycle.new
   @gitcycle.stub(:puts) do |str|
     str = str.gsub(/\e\[\d{1,2}m/, '')
-    @output << str
+    @output << "#{str}\n"
     puts str
   end
   if cmd
