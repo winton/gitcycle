@@ -49,27 +49,30 @@ Scenario: Feature branch
     And I enter "y"
     And I enter "y"
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output includes "Your work will eventually merge into 'master'. Is this correct?"
-    And output includes "Would you like to name your branch 'ticket.id'?"
-    And output does not include "What would you like to name your branch?"
-    And output includes "Creating 'ticket.id' from 'master'."
-    And output includes "Checking out branch 'ticket.id'."
-    And output includes "Pushing 'ticket.id'."
-    And output includes "Sending branch information to gitcycle."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Your work will eventually merge into 'master'. Is this correct? (y/n)
+      Adding remote repo 'br/gitcycle_test'.
+      Fetching remote repo 'br'.
+      Checking out remote branch 'master' from 'br/gitcycle_test'.
+      Would you like to name your branch 'ticket.id'? (y/n)
+      Creating 'ticket.id' from 'master'.
+      Checking out branch 'ticket.id'.
+      Pushing 'ticket.id'.
+      Sending branch information to gitcycle.
+      """
     And redis entries valid
 
 Scenario: Checkout via ticket w/ existing branch
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output does not include "Would you like to name your branch 'ticket.id'?"
-    And output does not include "What would you like to name your branch?"
-    And output does not include "Creating 'ticket.id' from 'master'."
-    And output includes "Checking out branch 'ticket.id'."
-    And output does not include "Pushing 'ticket.id'."
-    And output does not include "Sending branch information to gitcycle."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Checking out branch 'ticket.id'.
+      """
     And current branch is "ticket.id"
 
 Scenario: Checkout via ticket w/ fresh repo
@@ -77,13 +80,11 @@ Scenario: Checkout via ticket w/ fresh repo
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output does not include "Would you like to name your branch 'ticket.id'?"
-    And output does not include "What would you like to name your branch?"
-    And output does not include "Creating 'ticket.id' from 'master'."
-    And output includes "Tracking branch 'ticket.id'."
-    And output does not include "Pushing 'ticket.id'."
-    And output does not include "Sending branch information to gitcycle."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Tracking branch 'ticket.id'.
+      """
     And current branch is "ticket.id"
 
 Scenario: Pull changes from upstream
@@ -94,10 +95,13 @@ Scenario: Pull changes from upstream
     And I checkout ticket.id
     And I execute gitcycle with "pull"
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output includes "Adding remote repo 'config.owner/config.repo'."
-    And output includes "Fetching remote repo 'config.owner'."
-    And output includes "Merging remote branch 'master' from 'config.owner/config.repo'."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Adding remote repo 'config.owner/config.repo'.
+      Fetching remote repo 'config.owner'.
+      Merging remote branch 'master' from 'config.owner/config.repo'.
+      """
     And git log should contain the last commit
 
 Scenario: Discuss commits w/ no parameters and nothing committed
@@ -105,11 +109,12 @@ Scenario: Discuss commits w/ no parameters and nothing committed
     And I checkout ticket.id
     And I execute gitcycle with "discuss"
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output includes "Creating GitHub pull request."
-    And output does not include "Branch not found."
-    And output does not include "Opening issue"
-    And output includes "You must push code before opening a pull request."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Creating GitHub pull request.
+      You must push code before opening a pull request.
+      """
     And redis entries valid
 
 Scenario: Discuss commits w/ no parameters and something committed
@@ -118,11 +123,12 @@ Scenario: Discuss commits w/ no parameters and something committed
     And I commit something
     And I execute gitcycle with "discuss"
   Then gitcycle runs
-    And output includes "Retrieving branch information from gitcycle."
-    And output includes "Creating GitHub pull request."
-    And output does not include "Branch not found."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Creating GitHub pull request.
+      """
     And output includes "Opening issue" with URL
-    And output does not include "You must push code before opening a pull request."
     And URL is a valid issue
     And redis entries valid
 
