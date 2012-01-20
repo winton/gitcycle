@@ -106,3 +106,4 @@ Todo
 * Add comment on lighthouse with issue URL
 * Need to make sure when a branch is created, it is always from the pristine remote version, not local
 * Add conflict check when calling "qa pass [ticket]"
+* Need to change Github.parseLabels so we can have a "Fail" label along side a "Pending" tag, but for all other cases there should only be one of these tags present: "Pending QA", "Pending Review", "Pass"
