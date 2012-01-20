@@ -101,8 +101,6 @@ Todo
 
 * Make ticket active when starting branch
 * Label issues with ticket milestone?
-* Bug with branch rename on Jimmy's machine
-* Need to pull before merging qa pass branch
-* Check for conflict wherever merge happens
+* Check for conflict whenever merge happens
 * Instead of detecting CONFLICT, use error status $? != 0
 * Add comment on lighthouse with issue URL

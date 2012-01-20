@@ -197,12 +197,12 @@ end
 
 Then /^output includes$/ do |expected|
   expected = gsub_variables(expected)
-  @output.include?(expected).should == true
+  @output.gsub(/\n+/, "\n").include?(expected).should == true
 end
 
 Then /^output does not include \"([^\"]*)"$/ do |expected|
   expected = gsub_variables(expected)
-  @output.gsub(/\n+/, "\n").include?(expected).should == false
+  @output.include?(expected).should == false
 end
 
 Then /^redis entries valid$/ do

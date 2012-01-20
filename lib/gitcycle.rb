@@ -176,6 +176,7 @@ class Gitcycle
 
         puts "Checking out #{qa_branch['source']}.".green
         run("git checkout #{qa_branch['source']}")
+        run("git pull origin #{qa_branch['source']}")
 
         if issues[1..-1].empty?
           if issues.first == 'pass'
