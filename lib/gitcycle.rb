@@ -297,17 +297,25 @@ class Gitcycle
   def reviewed(*issues)
     require_git && require_config
 
+    if issues.include?("fail")
+      issues = issues.reject{|x| x=='fail'}
+      label = 'Fail'
+    else
+      issues = issues.reject{|x| x=='pass'}
+      label = 'Pending QA'
+    end
+
     if issues.empty?
-      puts "\nLabeling issue as 'Pending QA'.\n".green
+      puts "\nLabeling issue as '#{label}'.\n".green
       get('label',
         'branch[name]' => branches(:current => true),
-        'labels' => [ 'Pending QA' ]
+        'labels' => [ label ]
       )
     else
-      puts "\nLabeling issues as 'Pending QA'.\n".green
+      puts "\nLabeling issues as '#{label}'.\n".green
       get('label',
         'issues' => issues,
-        'labels' => [ 'Pending QA' ],
+        'labels' => [ label ],
         'scope' => 'repo'
       )
     end
