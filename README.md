@@ -101,7 +101,6 @@ Todo
 
 * Check for conflict whenever merge happens
 * Add conflict check when calling "qa pass [ticket]"
-* Need to change Github.parseLabels so we can have a "Fail" label along side a "Pending" tag, but for all other cases there should only be one of these tags present: "Pending QA", "Pending Review", "Pass"
 * Instead of detecting CONFLICT, use error status $? != 0
 * Add comment on lighthouse with issue URL
 * Label issues with ticket milestone?
