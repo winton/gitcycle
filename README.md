@@ -99,11 +99,9 @@ This will add a "pass" label to the issue and will complete the pull request by 
 Todo
 ----
 
-* Make ticket active when starting branch
-* Label issues with ticket milestone?
 * Check for conflict whenever merge happens
-* Instead of detecting CONFLICT, use error status $? != 0
-* Add comment on lighthouse with issue URL
-* Need to make sure when a branch is created, it is always from the pristine remote version, not local
 * Add conflict check when calling "qa pass [ticket]"
 * Need to change Github.parseLabels so we can have a "Fail" label along side a "Pending" tag, but for all other cases there should only be one of these tags present: "Pending QA", "Pending Review", "Pass"
+* Instead of detecting CONFLICT, use error status $? != 0
+* Add comment on lighthouse with issue URL
+* Label issues with ticket milestone?

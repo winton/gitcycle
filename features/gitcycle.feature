@@ -29,13 +29,11 @@ Scenario: Feature branch w/ custom branch name
       """
       Retrieving branch information from gitcycle.
       Your work will eventually merge into 'master'. Is this correct? (y/n)
-      Adding remote repo 'br/gitcycle_test'.
-      Fetching remote repo 'br'.
-      Checking out remote branch 'master' from 'br/gitcycle_test'.
       Would you like to name your branch 'ticket.id'? (y/n)
       What would you like to name your branch?
-      Creating 'ticket.id-rename' from 'master'.
-      Checking out branch 'ticket.id-rename'.
+      Adding remote repo 'config.owner/config.repo'.
+      Fetching remote repo 'config.owner/config.repo'.
+      Checking out remote branch 'ticket.id-rename' from 'config.owner/config.repo/master'.
       Pushing 'ticket.id-rename'.
       Sending branch information to gitcycle.
       """
@@ -53,12 +51,10 @@ Scenario: Feature branch
       """
       Retrieving branch information from gitcycle.
       Your work will eventually merge into 'master'. Is this correct? (y/n)
-      Adding remote repo 'br/gitcycle_test'.
-      Fetching remote repo 'br'.
-      Checking out remote branch 'master' from 'br/gitcycle_test'.
       Would you like to name your branch 'ticket.id'? (y/n)
-      Creating 'ticket.id' from 'master'.
-      Checking out branch 'ticket.id'.
+      Adding remote repo 'config.owner/config.repo'.
+      Fetching remote repo 'config.owner/config.repo'.
+      Checking out remote branch 'ticket.id' from 'config.owner/config.repo/master'.
       Pushing 'ticket.id'.
       Sending branch information to gitcycle.
       """
@@ -99,7 +95,7 @@ Scenario: Pull changes from upstream
       """
       Retrieving branch information from gitcycle.
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner'.
+      Fetching remote repo 'config.owner/config.repo'.
       Merging remote branch 'master' from 'config.owner/config.repo'.
       """
     And git log should contain the last commit
@@ -179,10 +175,13 @@ Scenario: QA issue
       """
       Retrieving branch information from gitcycle.
       Deleting old QA branch 'qa_master'.
-      Creating QA branch 'qa_master'.
-      Adding remote repo 'config.user/gitcycle_test'.
-      Fetching remote repo 'config.user'.
-      Merging remote branch 'ticket.id' from 'config.user/gitcycle_test'.
+      Adding remote repo 'config.owner/config.repo'.
+      Fetching remote repo 'config.owner/config.repo'.
+      Checking out remote branch 'qa_master' from 'config.owner/config.repo/master'.
+      Pushing 'qa_master'.
+      Adding remote repo 'config.user/config.repo'.
+      Fetching remote repo 'config.user/config.repo'.
+      Merging remote branch 'ticket.id' from 'config.user/config.repo'.
       Pushing QA branch 'qa_master'.
       Type 'gitc qa pass' to approve all issues in this branch.
       Type 'gitc qa fail' to reject all issues in this branch.

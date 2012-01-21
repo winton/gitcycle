@@ -63,39 +63,32 @@ class Gitcycle
       branch['home'] = @git_login
       branch['source'] = branches(:current => true)
 
-      unless yes?("Your work will eventually merge into '#{branch['source']}'. Is this correct?")
+      unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
         branch['source'] = q("What branch would you like to eventually merge into?")
       end
-
-      checkout_remote_branch(
-        :owner => owner,
-        :repo => repo,
-        :branch => branch['source']
-      )
 
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
       end
 
-      unless branches(:match => name)
-        puts "\nCreating '#{name}' from '#{branch['source']}'.\n".green
-        run("git branch #{name}")
+      checkout_remote_branch(
+        :owner => owner,
+        :repo => repo,
+        :branch => branch['source'],
+        :target => name
+      )
+    end
+
+    if branch['exists']
+      if branches(:match => name)
+        puts "Checking out branch '#{name}'.\n".green
+        run("git checkout #{name}")
+      else
+        puts "Tracking branch '#{name}'.\n".green
+        run("git fetch && git checkout -b #{name} origin/#{name}")
       end
-    end
-
-    if branches(:match => name)
-      puts "Checking out branch '#{name}'.\n".green
-      run("git checkout #{name}")
     else
-      puts "Tracking branch '#{name}'.\n".green
-      run("git fetch && git checkout -b #{name} origin/#{name}")
-    end
-
-    unless branch['exists']
-      puts "Pushing '#{name}'.\n".green
-      run("git push origin #{name}")
-
       puts "Sending branch information to gitcycle.".green
       get('branch',
         'branch[home]' => branch['home'],
@@ -178,6 +171,7 @@ class Gitcycle
         puts "Checking out #{qa_branch['source']}.".green
         run("git checkout #{qa_branch['source']}")
         run("git pull origin #{qa_branch['source']}")
+        # TODO: track if source branch doesn't exist
 
         if issues[1..-1].empty?
           if issues.first == 'pass'
@@ -356,7 +350,7 @@ class Gitcycle
       run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
     end
     
-    puts "\nFetching remote repo '#{owner}'.\n".green
+    puts "Fetching remote repo '#{owner}/#{repo}'.\n".green
     run("git fetch #{owner}")
   end
 
@@ -375,23 +369,23 @@ class Gitcycle
     owner = options[:owner]
     repo = options[:repo]
     branch = options[:branch]
+    target = options[:target] || branch
+
+    if branches(:match => target)
+      unless yes?("You already have a branch called '#{target}'. Overwrite?")
+        run("git checkout #{target}")
+        run("git pull #{owner} #{target}")
+        return
+      end
+    end
 
     add_remote_and_fetch(options)
     
-    puts "\nChecking out remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
+    puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
+    run("git checkout -b #{target} #{owner}/#{branch}")
 
-    if branches(:match => branch)
-      run("git checkout #{branch}")
-    else
-      run("git checkout -b #{branch} #{owner}/#{branch}")
-    end
-
-    if branches(:current => true) == branch
-      run("git pull #{owner} #{branch}")
-    else
-      puts "Oops. Something bad happened.\n".red
-      exit
-    end
+    puts "Pushing '#{target}'.\n".green
+    run("git push origin #{target}")
   end
 
   def create_pull_request
@@ -431,27 +425,19 @@ class Gitcycle
 
       unless qa_branch['branches'].empty?
         unless options[:preserve]
-          if branches(:current => source)
-            # Do nothing
-          elsif branches(:match => source)
-            puts "Checking out source branch '#{source}'.\n".green
-            run("git checkout #{source}")
-          else
-            puts "Tracking source branch '#{source}'.\n".green
-            run("git fetch && git checkout -b #{source} origin/#{source}")
-          end
-
-          run("git pull origin #{source}")
-
           if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
-            run("git branch -D #{name}")
+            run("git branch -D #{name}") if branches(:match => name)
             run("git push origin :#{name}")
           end
-          
-          puts "Creating QA branch '#{name}'.\n".green
-          run("git branch #{name} && git checkout #{name}")
 
+          checkout_remote_branch(
+            :owner => @git_login,
+            :repo => @git_repo,
+            :branch => source,
+            :target => name
+          )
+          
           puts "\n"
         end
 
