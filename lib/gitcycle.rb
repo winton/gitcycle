@@ -168,53 +168,56 @@ class Gitcycle
         puts "\nRetrieving branch information from gitcycle.\n".green
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
 
-        puts "Checking out #{qa_branch['source']}.".green
-        run("git checkout #{qa_branch['source']}")
-        run("git pull origin #{qa_branch['source']}")
-        # TODO: track if source branch doesn't exist
+        pass_fail = issues.first
+        issues = issues[1..-1]
 
-        if issues[1..-1].empty?
-          if issues.first == 'pass'
-            puts "Merging '#{branch}' into '#{qa_branch['source']}'.\n".green
-            run("git merge #{branch}")
-            run("git pull origin #{qa_branch['source']}")
-            run("git push origin #{qa_branch['source']}")
-          end
-          
-          puts "\nLabeling all issues as '#{label}'.\n".green
-          get('label',
-            'qa_branch[source]' => branch.gsub(/^qa_/, ''),
-            'labels' => [ label ]
-          )
+        if pass_fail == 'pass'
+          puts "Checking out #{qa_branch['source']}.".green
+          run("git checkout #{qa_branch['source']}")
+          run("git pull origin #{qa_branch['source']}")
+          # TODO: track if source branch doesn't exist
+        end
 
+        if issues.empty? 
           branches = qa_branch['branches']
         else
-          issues = [1..-1]
-
           branches = qa_branch['branches'].select do |b|
             issues.include?(b['issue'])
           end
+        end
 
-          branches.each do |branch|
-            if issues.first == 'pass'
-              merge_remote_branch(
-                :user => branch['user'],
-                :repo => branch['repo'].split(':'),
-                :branch => branch['branch']
-              )
-            end
+        branches.each do |branch|
+          if pass_fail == 'pass'
+            merge_remote_branch(
+              :owner => branch['home'],
+              :repo => branch['repo'].split(':')[1],
+              :branch => branch['branch'],
+              :issue => branch['issue'],
+              :issues => qa_branch['branches'].collect { |b| b['issue'] },
+              :type => :from_qa
+            )
+          end
 
+          if !issues.empty? || pass_fail == 'pass'
             puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
             get('label',
-              'qa_branch[source]' => branch.gsub(/^qa_/, ''),
+              'qa_branch[source]' => qa_branch['source'],
               'issue' => branch['issue'],
               'labels' => [ label ]
             )
           end
         end
 
-        if issues.first == 'pass'
-          puts "\nMarking Lighthouse tickets as 'pending-approval'.\n".green
+        if issues.empty? && pass_fail == 'fail'
+          puts "\nLabeling all issues as '#{label}'.\n".green
+          get('label',
+            'qa_branch[source]' => qa_branch['source'],
+            'labels' => [ label ]
+          )
+        end
+
+        if pass_fail == 'pass'
+          puts "Marking Lighthouse tickets as 'pending-approval'.\n".green
           branches = branches.collect do |b|
             { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
           end
@@ -229,26 +232,27 @@ class Gitcycle
       if branch =~ /^qa_/
         puts "\nRetrieving branch information from gitcycle.\n".green
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
+        
+        branches = qa_branch['branches']
+        conflict = branches.detect { |branch| branch['conflict'] }
 
-        if qa_branch
-          branches = qa_branch['branches']
-          conflict = branches.detect { |branch| branch['conflict'] }
+        if qa_branch && conflict
+          puts "Committing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
+          run("git add . && git add . -u && git commit -a -F .git/MERGE_MSG")
 
-          if conflict
-            puts "Committing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-            run("git add . && git add . -u && git commit -a -m 'Merge conflict resolution of #{conflict['branch']} (issue ##{conflict['issue']})'")
+          puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
+          run("git push origin qa_#{qa_branch['source']}")
 
-            puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-            run("git push origin qa_#{qa_branch['source']}")
+          puts "\nDe-conflicting on gitcycle.\n".green
+          get('qa_branch',
+            'issues' => branches.collect { |branch| branch['issue'] }
+          )
 
-            create_qa_branch(
-              :preserve => true,
-              :range => (branches.index(conflict)+1..-1),
-              :qa_branch => qa_branch
-            )
-          else
-            puts "Couldn't find record of a conflicted merge.\n".red
-          end
+          create_qa_branch(
+            :preserve => true,
+            :range => (branches.index(conflict)+1..-1),
+            :qa_branch => qa_branch
+          )
         else
           puts "Couldn't find record of a conflicted merge.\n".red
         end
@@ -450,37 +454,43 @@ class Gitcycle
           output = merge_remote_branch(
             :owner => home,
             :repo => repo,
-            :branch => branch
+            :branch => branch,
+            :issue => issue,
+            :issues => qa_branch['branches'].collect { |b| b['issue'] },
+            :type => :to_qa
           )
-
-          if output.include?('CONFLICT')
-            puts "Conflict occurred when merging '#{branch}' (issue ##{issue}).\n".red
-            answer = q("Would you like to (s)kip or (r)esolve?")
-
-            issues = qa_branch['branches'].collect { |b| b['issue'] }
-
-            if answer.downcase[0..0] == 's'
-              run("git reset --hard HEAD")
-              issues.delete(issue)
-
-              puts "\nSending QA branch information to gitcycle.\n".green
-              get('qa_branch', 'issues' => issues, 'conflict' => issue)
-            else
-              puts "\nSending conflict information to gitcycle.\n".green
-              get('qa_branch', 'issues' => issues, 'conflict' => issue)
-
-              puts "Type 'gitc qa resolved' when finished resolving.\n".yellow
-              exit
-            end
-          else
-            puts "Pushing QA branch '#{name}'.\n".green
-            run("git push origin #{name}")
-          end
         end
 
         puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
         puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
       end
+    end
+  end
+
+  def fix_conflict(options)
+    owner = options[:owner]
+    repo = options[:repo]
+    branch = options[:branch]
+    issue = options[:issue]
+    issues = options[:issues]
+    type = options[:type]
+
+    if $? != 0
+      puts "Conflict occurred when merging '#{branch}'#{" (issue ##{issue})" if issue}.\n".red
+      
+      if type # from_qa or to_qa
+        puts "Please resolve this conflict with '#{owner}'.\n".yellow
+      
+        puts "\nSending conflict information to gitcycle.\n".green
+        get('qa_branch', 'issues' => issues, "conflict_#{type}" => issue)
+
+        puts "Type 'gitc qa resolved' when finished resolving.\n".yellow
+        exit
+      end
+    elsif type # from_qa or to_qa
+      branch = branches(:current => true)
+      puts "Pushing branch '#{branch}'.\n".green
+      run("git push origin #{branch}")
     end
   end
 
@@ -532,6 +542,8 @@ class Gitcycle
 
     puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
     run("git merge #{owner}/#{branch}")
+
+    fix_conflict(options)
   end
 
   def remotes(options={})

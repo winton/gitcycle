@@ -182,7 +182,18 @@ Scenario: QA issue
       Adding remote repo 'config.user/config.repo'.
       Fetching remote repo 'config.user/config.repo'.
       Merging remote branch 'ticket.id' from 'config.user/config.repo'.
-      Pushing QA branch 'qa_master'.
+      Pushing branch 'qa_master'.
       Type 'gitc qa pass' to approve all issues in this branch.
       Type 'gitc qa fail' to reject all issues in this branch.
+      """
+
+Scenario: QA issue list
+  When I cd to the owner repo
+    And I checkout master
+    And I execute gitcycle with "qa"
+  Then gitcycle runs
+    And output includes
+      """
+      qa_master
+        issue #issue.id config.user/ticket.id
       """
