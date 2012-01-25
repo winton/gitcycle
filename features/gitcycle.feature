@@ -81,7 +81,7 @@ Scenario: Checkout via ticket w/ fresh repo
     And output includes
       """
       Retrieving branch information from gitcycle.
-      Tracking branch 'ticket.id'.
+      Tracking branch 'origin/ticket.id'.
       """
     And current branch is "ticket.id"
 

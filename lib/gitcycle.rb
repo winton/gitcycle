@@ -81,13 +81,7 @@ class Gitcycle
     end
 
     if branch['exists']
-      if branches(:match => name)
-        puts "Checking out branch '#{name}'.\n".green
-        run("git checkout #{name}")
-      else
-        puts "Tracking branch '#{name}'.\n".green
-        run("git fetch && git checkout --track -b #{name} origin/#{name}")
-      end
+      checkout_or_track(:name => name, :remote => 'origin')
     else
       puts "Sending branch information to gitcycle.".green
       get('branch',
@@ -172,10 +166,7 @@ class Gitcycle
         issues = issues[1..-1]
 
         if pass_fail == 'pass'
-          puts "Checking out #{qa_branch['source']}.".green
-          run("git checkout #{qa_branch['source']}")
-          run("git pull origin #{qa_branch['source']}")
-          # TODO: track if source branch doesn't exist
+          checkout_or_track(:name => qa_branch['source'], :remote => 'origin')
         end
 
         if issues.empty? 
@@ -355,7 +346,7 @@ class Gitcycle
     end
     
     puts "Fetching remote repo '#{owner}/#{repo}'.\n".green
-    run("git fetch #{owner}")
+    run("git fetch -q #{owner}")
   end
 
   def branches(options={})
@@ -369,6 +360,22 @@ class Gitcycle
     end
   end
 
+  def checkout_or_track(options={})
+    name = options[:name]
+    remote = options[:remote]
+
+    if branches(:match => name)
+      puts "Checking out branch '#{name}'.\n".green
+      run("git checkout #{name}")
+    else
+      puts "Tracking branch '#{remote}/#{name}'.\n".green
+      run("git fetch -q #{remote}")
+      run("git checkout --track -b #{name} #{remote}/#{name}")
+    end
+
+    run("git pull #{remote} #{name}")
+  end
+
   def checkout_remote_branch(options={})
     owner = options[:owner]
     repo = options[:repo]
@@ -376,7 +383,10 @@ class Gitcycle
     target = options[:target] || branch
 
     if branches(:match => target)
-      unless yes?("You already have a branch called '#{target}'. Overwrite?")
+      if yes?("You already have a branch called '#{target}'. Overwrite?")
+        run("git push origin :#{target}")
+        run("branch -D #{target}")
+      else
         run("git checkout #{target}")
         run("git pull origin #{target}")
         return
