@@ -86,7 +86,7 @@ class Gitcycle
         run("git checkout #{name}")
       else
         puts "Tracking branch '#{name}'.\n".green
-        run("git fetch && git checkout --track -b #{name} origin/#{name}")
+        run("git fetch -q && git checkout --track -b #{name} origin/#{name}")
       end
     else
       puts "Sending branch information to gitcycle.".green
@@ -355,7 +355,7 @@ class Gitcycle
     end
     
     puts "Fetching remote repo '#{owner}/#{repo}'.\n".green
-    run("git fetch #{owner}")
+    run("git fetch -q #{owner}")
   end
 
   def branches(options={})
