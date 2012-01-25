@@ -106,3 +106,4 @@ Todo
 * Label issues with ticket milestone?
 * Silent verbose branch output when recreating
 * gitc qa pass 1 2 3, should check if the branch exists locally
+* gitc qa pass, should not set ticket to pending-approval if its already resolved
