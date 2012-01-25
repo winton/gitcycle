@@ -105,3 +105,4 @@ Todo
 * Add comment on lighthouse with issue URL
 * Label issues with ticket milestone?
 * Silent verbose branch output when recreating
+* gitc qa pass 1 2 3, should check if the branch exists locally
