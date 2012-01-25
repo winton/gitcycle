@@ -376,9 +376,12 @@ class Gitcycle
     target = options[:target] || branch
 
     if branches(:match => target)
-      unless yes?("You already have a branch called '#{target}'. Overwrite?")
+      if yes?("You already have a branch called '#{target}'. Overwrite?")
+        run("git push origin :#{target}")
+        run("branch -D #{target}")
+      else
         run("git checkout #{target}")
-        run("git pull #{owner} #{target}")
+        run("git pull origin #{target}")
         return
       end
     end
