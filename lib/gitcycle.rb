@@ -81,13 +81,7 @@ class Gitcycle
     end
 
     if branch['exists']
-      if branches(:match => name)
-        puts "Checking out branch '#{name}'.\n".green
-        run("git checkout #{name}")
-      else
-        puts "Tracking branch '#{name}'.\n".green
-        run("git fetch -q && git checkout --track -b #{name} origin/#{name}")
-      end
+      checkout_or_track(:name => name, :remote => 'origin')
     else
       puts "Sending branch information to gitcycle.".green
       get('branch',
@@ -172,10 +166,7 @@ class Gitcycle
         issues = issues[1..-1]
 
         if pass_fail == 'pass'
-          puts "Checking out #{qa_branch['source']}.".green
-          run("git checkout #{qa_branch['source']}")
-          run("git pull origin #{qa_branch['source']}")
-          # TODO: track if source branch doesn't exist
+          checkout_or_track(:name => qa_branch['source'], :remote => 'origin')
         end
 
         if issues.empty? 
@@ -367,6 +358,22 @@ class Gitcycle
     else
       b
     end
+  end
+
+  def checkout_or_track(options={})
+    name = options[:name]
+    remote = options[:remote]
+
+    if branches(:match => name)
+      puts "Checking out branch '#{name}'.\n".green
+      run("git checkout #{name}")
+    else
+      puts "Tracking branch '#{remote}/#{name}'.\n".green
+      run("git fetch -q #{remote}")
+      run("git checkout --track -b #{name} #{remote}/#{name}")
+    end
+
+    run("git pull #{remote} #{name}")
   end
 
   def checkout_remote_branch(options={})
