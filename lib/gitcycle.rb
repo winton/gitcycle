@@ -378,7 +378,7 @@ class Gitcycle
     if branches(:match => target)
       unless yes?("You already have a branch called '#{target}'. Overwrite?")
         run("git checkout #{target}")
-        run("git pull #{owner} #{target}")
+        run("git pull origin #{target}")
         return
       end
     end
@@ -388,7 +388,10 @@ class Gitcycle
     puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
     run("git checkout -b #{target} #{owner}/#{branch}")
 
-    puts "Pushing '#{target}'.\n".green
+    puts "Pulling 'origin/#{target}'.\n".green
+    run("git pull origin #{target}")
+
+    puts "Pushing 'origin/#{target}'.\n".green
     run("git push origin #{target}")
   end
 

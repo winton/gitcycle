@@ -34,7 +34,8 @@ Scenario: Feature branch w/ custom branch name
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote repo 'config.owner/config.repo'.
       Checking out remote branch 'ticket.id-rename' from 'config.owner/config.repo/master'.
-      Pushing 'ticket.id-rename'.
+      Pulling 'origin/ticket.id-rename'.
+      Pushing 'origin/ticket.id-rename'.
       Sending branch information to gitcycle.
       """
     And redis entries valid
@@ -55,7 +56,8 @@ Scenario: Feature branch
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote repo 'config.owner/config.repo'.
       Checking out remote branch 'ticket.id' from 'config.owner/config.repo/master'.
-      Pushing 'ticket.id'.
+      Pulling 'origin/ticket.id'.
+      Pushing 'origin/ticket.id'.
       Sending branch information to gitcycle.
       """
     And redis entries valid
@@ -178,7 +180,8 @@ Scenario: QA issue
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote repo 'config.owner/config.repo'.
       Checking out remote branch 'qa_master' from 'config.owner/config.repo/master'.
-      Pushing 'qa_master'.
+      Pulling 'origin/qa_master'.
+      Pushing 'origin/qa_master'.
       Adding remote repo 'config.user/config.repo'.
       Fetching remote repo 'config.user/config.repo'.
       Merging remote branch 'ticket.id' from 'config.user/config.repo'.
