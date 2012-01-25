@@ -99,15 +99,8 @@ This will add a "pass" label to the issue and will complete the pull request by 
 Todo
 ----
 
-* Check for conflict whenever merge happens
-* Add conflict check when calling "qa pass [ticket]"
 * Instead of detecting CONFLICT, use error status $? != 0
 * Add comment on lighthouse with issue URL
 * Label issues with ticket milestone?
-
-Details
--------
-
-### gitc + ticket URL
-
-* 
+* Silent verbose branch output when recreating
+* gitc qa pass 1 2 3, should check if the branch exists locally
