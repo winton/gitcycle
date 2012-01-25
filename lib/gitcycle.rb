@@ -86,7 +86,7 @@ class Gitcycle
         run("git checkout #{name}")
       else
         puts "Tracking branch '#{name}'.\n".green
-        run("git fetch && git checkout -b #{name} origin/#{name}")
+        run("git fetch && git checkout --track -b #{name} origin/#{name}")
       end
     else
       puts "Sending branch information to gitcycle.".green
@@ -386,7 +386,7 @@ class Gitcycle
     add_remote_and_fetch(options)
     
     puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
-    run("git checkout -b #{target} #{owner}/#{branch}")
+    run("git checkout --track -b #{target} #{owner}/#{branch}")
 
     puts "Pulling 'origin/#{target}'.\n".green
     run("git pull origin #{target}")

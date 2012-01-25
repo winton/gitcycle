@@ -104,3 +104,4 @@ Todo
 * Instead of detecting CONFLICT, use error status $? != 0
 * Add comment on lighthouse with issue URL
 * Label issues with ticket milestone?
+* Silent verbose branch output when recreating
