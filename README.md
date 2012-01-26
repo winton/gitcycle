@@ -22,7 +22,7 @@ Type `gitc` + your ticket URL to create a new branch:
 Reset Branch
 ------------
 
-If you associate the wrong branch with a ticket, use `git reset` to fix it.
+If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
 
 Checkout the branch that you will eventually merge your feature into:
 
