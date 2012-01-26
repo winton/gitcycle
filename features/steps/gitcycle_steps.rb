@@ -143,6 +143,10 @@ When /^I execute gitcycle with the Lighthouse ticket URL$/ do
   $execute << $ticket.url
 end
 
+When /^I execute gitcycle reset with the Lighthouse ticket URL$/ do
+  $execute << "reset #{$ticket.url}"
+end
+
 When /^I cd to the (.*) repo$/ do |user|
   if ENV['REPO']
     puts "(overiding repo as #{ENV['REPO']})"

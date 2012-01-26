@@ -62,6 +62,27 @@ Scenario: Feature branch
       """
     And redis entries valid
 
+Scenario: Reset feature branch
+  Given a fresh set of repositories
+  When I cd to the user repo
+    And I execute gitcycle reset with the Lighthouse ticket URL
+    And I enter "y"
+    And I enter "y"
+  Then gitcycle runs
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Your work will eventually merge into 'master'. Is this correct? (y/n)
+      Would you like to name your branch 'ticket.id'? (y/n)
+      Adding remote repo 'config.owner/config.repo'.
+      Fetching remote repo 'config.owner/config.repo'.
+      Checking out remote branch 'ticket.id' from 'config.owner/config.repo/master'.
+      Pulling 'origin/ticket.id'.
+      Pushing 'origin/ticket.id'.
+      Sending branch information to gitcycle.
+      """
+    And redis entries valid
+
 Scenario: Checkout via ticket w/ existing branch
   When I cd to the user repo
     And I execute gitcycle with the Lighthouse ticket URL

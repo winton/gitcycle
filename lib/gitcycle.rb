@@ -35,7 +35,7 @@ class Gitcycle
     start(args) if args
   end
 
-  def create_branch(url_or_title)
+  def create_branch(url_or_title, reset=false)
     require_git && require_config
 
     params = {}
@@ -52,6 +52,8 @@ class Gitcycle
         'branch[title]' => url_or_title
       }
     end
+
+    params['reset'] = '1' if reset
 
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
@@ -281,6 +283,10 @@ class Gitcycle
         'scope' => 'repo'
       )
     end
+  end
+
+  def reset(ticket_or_url)
+    create_branch(ticket_or_url, true)
   end
 
   def reviewed(*issues)

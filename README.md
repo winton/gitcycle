@@ -19,6 +19,19 @@ Type `gitc` + your ticket URL to create a new branch:
 
 	gitc https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
+Reset Branch
+------------
+
+If you associate the wrong branch with a ticket, use `git reset` to fix it.
+
+Checkout the branch that you will eventually merge your feature into:
+
+	git checkout master
+
+Type `gitc reset` + your ticket URL to reset the branch:
+
+	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+
 Pull Changes from Upstream
 --------------------------
 
