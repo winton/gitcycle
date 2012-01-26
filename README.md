@@ -116,3 +116,7 @@ Todo
 * Add comment on lighthouse with issue URL
 * Label issues with ticket milestone?
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
+* gitc pull before gitc ready
+* Note you can use gitc with a string
+* Tag issue with Lighthouse tags (if == backend or frontend)
+* On pass or fail, send email to Github email
