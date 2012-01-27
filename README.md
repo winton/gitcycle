@@ -122,3 +122,4 @@ Todo
 * On pass or fail, send email to Github email
 * If gitc reset happens on branch with Github issue, close the existing issue
 * Change QA branch name to qa_login_branch
+* LH states aren't being updated to pending-* states, the active state update works, reported by Jimmy
