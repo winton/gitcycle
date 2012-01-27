@@ -120,3 +120,5 @@ Todo
 * Note you can use gitc with a string
 * Tag issue with Lighthouse tags (if == backend or frontend)
 * On pass or fail, send email to Github email
+* If gitc reset happens on branch with Github issue, close the existing issue
+* Change QA branch name to qa_login_branch
