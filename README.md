@@ -94,7 +94,7 @@ This will add a "pass" label to the issue and will complete the pull request by 
 More
 ----
 
-=== Reset Branch
+### Reset Branch
 
 If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
 
@@ -106,7 +106,7 @@ Type `gitc reset` + your ticket URL to reset the branch:
 
 	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-=== Track Upstream Branch
+### Track Upstream Branch
 
 If you are working in a fork, it is easy to track upstream branches:
 
