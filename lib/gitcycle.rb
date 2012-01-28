@@ -274,6 +274,8 @@ class Gitcycle
 
         puts "Opening issue: #{branch['issue_url']}\n".green
         Launchy.open(branch['issue_url'])
+      else
+        puts "You have not pushed any commits to '#{branch['name']}'.\n".red
       end
     else
       puts "\nLabeling issues as 'Pending Review'.\n".green
@@ -336,6 +338,18 @@ class Gitcycle
     end
   end
 
+  def track(*branches)
+    puts "\nRetrieving repo information from gitcycle.\n".green
+    repo = get('repo')
+
+    branches.each do |branch|
+      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
+
+      puts "Creating branch '#{branch}' from '#{repo['owner']}/#{branch}'.\n".green
+      run("git branch --no-track #{branch} #{repo['owner']}/#{branch}")
+    end
+  end
+
   private
 
   def add_remote_and_fetch(options={})
@@ -376,7 +390,7 @@ class Gitcycle
     else
       puts "Tracking branch '#{remote}/#{name}'.\n".green
       run("git fetch -q #{remote}")
-      run("git checkout --track -b #{name} #{remote}/#{name}")
+      run("git checkout -b #{name} #{remote}/#{name}")
     end
 
     run("git pull #{remote} #{name}")
@@ -402,7 +416,7 @@ class Gitcycle
     add_remote_and_fetch(options)
     
     puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
-    run("git checkout --track -b #{target} #{owner}/#{branch}")
+    run("git checkout -b #{target} #{owner}/#{branch}")
 
     puts "Pulling 'origin/#{target}'.\n".green
     run("git pull origin #{target}")

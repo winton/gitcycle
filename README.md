@@ -19,18 +19,6 @@ Type `gitc` + your ticket URL to create a new branch:
 
 	gitc https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-Reset Branch
-------------
-
-If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
-
-Checkout the branch that you will eventually merge your feature into:
-
-	git checkout master
-
-Type `gitc reset` + your ticket URL to reset the branch:
-
-	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
 Pull Changes from Upstream
 --------------------------
@@ -62,9 +50,7 @@ Managers will periodically check for "Pending Review" issues on GitHub.
 
 Once reviewed, they will mark the issue as reviewed:
 
-	gitc reviewed 0000
-
-Where 0000 is the Github issue number.
+	gitc reviewed [GITHUB ISSUE #] [...]
 
 Quality Assurance
 -----------------
@@ -73,7 +59,7 @@ QA engineers will periodically check for "Pending QA" issues on Github.
 
 To create a new QA branch:
 
-	gitc qa 0000 0001
+	gitc qa [GITHUB ISSUE #] [...]
 
 This will create a new QA branch containing the commits from the related Github issue numbers.
 
@@ -84,9 +70,7 @@ QA Fail
 
 If a feature does not pass QA:
 
-	gitc qa fail 0000
-
-Where 0000 is the Github issue number.
+	gitc qa fail [GITHUB ISSUE #] [...]
 
 To fail all issues:
 
@@ -99,15 +83,34 @@ QA Pass
 
 If a feature passes QA:
 
-	gitc qa pass 0000
-
-Where 0000 is the Github issue number.
+	gitc qa pass [GITHUB ISSUE #] [...]
 
 To pass all issues:
 
 	gitc qa pass
 
 This will add a "pass" label to the issue and will complete the pull request by merging the feature branch into the target branch.
+
+More
+----
+
+=== Reset Branch
+
+If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
+
+Checkout the branch that you will eventually merge your feature into:
+
+	git checkout master
+
+Type `gitc reset` + your ticket URL to reset the branch:
+
+	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+
+=== Track Upstream Branch
+
+If you are working in a fork, it is easy to track upstream branches:
+
+	gitc track [BRANCH] [...]
 
 Todo
 ----
