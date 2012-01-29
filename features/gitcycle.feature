@@ -32,9 +32,9 @@ Scenario: Feature branch w/ custom branch name
       Would you like to name your branch 'ticket.id'? (y/n)
       What would you like to name your branch?
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner/config.repo'.
+      Fetching remote 'config.owner'.
       Checking out remote branch 'ticket.id-rename' from 'config.owner/config.repo/master'.
-      Pulling 'origin/ticket.id-rename'.
+      Fetching remote 'origin'.
       Pushing 'origin/ticket.id-rename'.
       Sending branch information to gitcycle.
       """
@@ -54,9 +54,9 @@ Scenario: Feature branch
       Your work will eventually merge into 'master'. Is this correct? (y/n)
       Would you like to name your branch 'ticket.id'? (y/n)
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner/config.repo'.
+      Fetching remote 'config.owner'.
       Checking out remote branch 'ticket.id' from 'config.owner/config.repo/master'.
-      Pulling 'origin/ticket.id'.
+      Fetching remote 'origin'.
       Pushing 'origin/ticket.id'.
       Sending branch information to gitcycle.
       """
@@ -75,8 +75,9 @@ Scenario: Reset feature branch
       Your work will eventually merge into 'master'. Is this correct? (y/n)
       Would you like to name your branch 'ticket.id'? (y/n)
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner/config.repo'.
+      Fetching remote 'config.owner'.
       Checking out remote branch 'ticket.id' from 'config.owner/config.repo/master'.
+      Fetching remote 'origin'.
       Pulling 'origin/ticket.id'.
       Pushing 'origin/ticket.id'.
       Sending branch information to gitcycle.
@@ -118,7 +119,7 @@ Scenario: Pull changes from upstream
       """
       Retrieving branch information from gitcycle.
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner/config.repo'.
+      Fetching remote 'config.owner'.
       Merging remote branch 'master' from 'config.owner/config.repo'.
       """
     And git log should contain the last commit
@@ -172,7 +173,7 @@ Scenario: Ready issue w/ no parameters
       """
       Retrieving branch information from gitcycle.
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner/config.repo'.
+      Fetching remote 'config.owner'.
       Merging remote branch 'master' from 'config.owner/config.repo'.
       Retrieving branch information from gitcycle.
       Labeling issue as 'Pending Review'.
@@ -207,12 +208,12 @@ Scenario: QA issue
       Retrieving branch information from gitcycle.
       Deleting old QA branch 'qa_master'.
       Adding remote repo 'config.owner/config.repo'.
-      Fetching remote repo 'config.owner/config.repo'.
+      Fetching remote 'config.owner'.
       Checking out remote branch 'qa_master' from 'config.owner/config.repo/master'.
-      Pulling 'origin/qa_master'.
+      Fetching remote 'origin'.
       Pushing 'origin/qa_master'.
       Adding remote repo 'config.user/config.repo'.
-      Fetching remote repo 'config.user/config.repo'.
+      Fetching remote 'config.user'.
       Merging remote branch 'ticket.id' from 'config.user/config.repo'.
       Pushing branch 'qa_master'.
       Type 'gitc qa pass' to approve all issues in this branch.

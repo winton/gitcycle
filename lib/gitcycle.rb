@@ -366,12 +366,12 @@ class Gitcycle
       run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
     end
     
-    puts "Fetching remote repo '#{owner}/#{repo}'.\n".green
+    puts "Fetching remote '#{owner}'.\n".green
     run("git fetch -q #{owner}")
   end
 
   def branches(options={})
-    b = `git branch#{" -a" if options[:all]}`
+    b = `git branch#{" -a" if options[:all]}#{" -r" if options[:remote]}`
     if options[:current]
       b.match(/\*\s+(.+)/)[1]
     elsif options[:match]
@@ -391,7 +391,7 @@ class Gitcycle
     else
       puts "Tracking branch '#{remote}/#{name}'.\n".green
       run("git fetch -q #{remote}")
-      run("git checkout -b #{name} #{remote}/#{name}")
+      run("git checkout --track -b #{name} #{remote}/#{name}")
     end
 
     run("git pull #{remote} #{name}")
@@ -417,10 +417,15 @@ class Gitcycle
     add_remote_and_fetch(options)
     
     puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
-    run("git checkout -b #{target} #{owner}/#{branch}")
+    run("git checkout --track -b #{target} #{owner}/#{branch}")
 
-    puts "Pulling 'origin/#{target}'.\n".green
-    run("git pull origin #{target}")
+    puts "Fetching remote 'origin'.\n".green
+    run("git fetch -q origin")
+
+    if branches(:remote => true, :match => "origin/#{target}")
+      puts "Pulling 'origin/#{target}'.\n".green
+      run("git pull origin #{target}")
+    end
 
     puts "Pushing 'origin/#{target}'.\n".green
     run("git push origin #{target}")

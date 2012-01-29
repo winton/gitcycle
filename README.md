@@ -115,7 +115,6 @@ If you are working in a fork, it is easy to track upstream branches:
 Todo
 ----
 
-* gitc pull before gitc ready
 * Fix git fatal error (related to pull?)
 * On pass or fail, send email to Github email
 * Change QA branch name to qa_login_branch
