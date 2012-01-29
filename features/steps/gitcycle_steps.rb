@@ -200,7 +200,7 @@ Then /^output includes \"([^\"]*)" with URL$/ do |expected|
 end
 
 Then /^output includes$/ do |expected|
-  expected = gsub_variables(expected)
+  expected = gsub_variables(expected).gsub('\t', "\t")
   @output.gsub(/\n+/, "\n").include?(expected).should == true
 end
 

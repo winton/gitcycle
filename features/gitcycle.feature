@@ -168,7 +168,15 @@ Scenario: Ready issue w/ no parameters
     And I checkout ticket.id
     And I execute gitcycle with "ready"
   Then gitcycle runs
-    And output includes "Labeling issue as 'Pending Review'."
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Adding remote repo 'config.owner/config.repo'.
+      Fetching remote repo 'config.owner/config.repo'.
+      Merging remote branch 'master' from 'config.owner/config.repo'.
+      Retrieving branch information from gitcycle.
+      Labeling issue as 'Pending Review'.
+      """
 
 Scenario: Ready issue w/ parameters
   When I cd to the user repo
@@ -219,5 +227,5 @@ Scenario: QA issue list
     And output includes
       """
       qa_master
-        issue #issue.id config.user/ticket.id
+        issue #issue.id\tconfig.user/ticket.id
       """

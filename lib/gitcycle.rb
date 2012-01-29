@@ -261,6 +261,7 @@ class Gitcycle
     require_git && require_config
 
     if issues.empty?
+      pull
       branch = create_pull_request
 
       if branch == false

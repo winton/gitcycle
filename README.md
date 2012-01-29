@@ -115,14 +115,14 @@ If you are working in a fork, it is easy to track upstream branches:
 Todo
 ----
 
-* Instead of detecting CONFLICT, use error status $? != 0
-* Add comment on lighthouse with issue URL
-* Label issues with ticket milestone?
-* gitc qa pass, should not set ticket to pending-approval if its already resolved
 * gitc pull before gitc ready
+* Fix git fatal error (related to pull?)
+* On pass or fail, send email to Github email
+* Change QA branch name to qa_login_branch
 * Note you can use gitc with a string
 * Tag issue with Lighthouse tags (if == backend or frontend)
-* On pass or fail, send email to Github email
+* gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
-* Change QA branch name to qa_login_branch
-* LH states aren't being updated to pending-* states, the active state update works, reported by Jimmy
+* Add comment on lighthouse with issue URL
+* Instead of detecting CONFLICT, use error status $? != 0
+* Label issues with ticket milestone?
