@@ -125,3 +125,4 @@ Todo
 * Add comment on lighthouse with issue URL
 * Instead of detecting CONFLICT, use error status $? != 0
 * Label issues with ticket milestone?
+* gitc LH-ticket should not created a redis record right away, what happens if someone control-c
