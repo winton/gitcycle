@@ -191,7 +191,7 @@ class Gitcycle
             )
           end
 
-          if !issues.empty? || pass_fail == 'pass'
+          unless issues.empty?
             puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
             get('label',
               'qa_branch[source]' => qa_branch['source'],
@@ -201,20 +201,12 @@ class Gitcycle
           end
         end
 
-        if issues.empty? && pass_fail == 'fail'
+        if issues.empty?
           puts "\nLabeling all issues as '#{label}'.\n".green
           get('label',
             'qa_branch[source]' => qa_branch['source'],
             'labels' => [ label ]
           )
-        end
-
-        if pass_fail == 'pass'
-          puts "Marking Lighthouse tickets as 'pending-approval'.\n".green
-          branches = branches.collect do |b|
-            { :name => b['branch'], :repo => b['repo'], :user => b['user'] }
-          end
-          get('ticket_resolve', 'branches' => Yajl::Encoder.encode(branches))
         end
       else
         puts "\nYou are not in a QA branch.\n".red
