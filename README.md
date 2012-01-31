@@ -115,11 +115,9 @@ If you are working in a fork, it is easy to track upstream branches:
 Todo
 ----
 
-* Fix git fatal error (related to pull?)
 * On pass or fail, send email to Github email
 * Change QA branch name to qa_login_branch
 * Note you can use gitc with a string
-* Tag issue with Lighthouse tags (if == backend or frontend)
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
 * Add comment on lighthouse with issue URL
