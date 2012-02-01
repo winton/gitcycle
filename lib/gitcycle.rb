@@ -410,6 +410,7 @@ class Gitcycle
     if branches(:match => target)
       if yes?("You already have a branch called '#{target}'. Overwrite?")
         run("git push origin :#{target}")
+        run("git checkout master")
         run("branch -D #{target}")
       else
         run("git checkout #{target}")
@@ -481,7 +482,10 @@ class Gitcycle
         unless options[:preserve]
           if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
-            run("git branch -D #{name}") if branches(:match => name)
+            if branches(:match => name)
+              run("git checkout master")
+              run("git branch -D #{name}")
+            end
             run("git push origin :#{name}")
           end
 
