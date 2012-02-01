@@ -8,7 +8,7 @@ Scenario: No command given
 Scenario: Non-existent command
   When I execute gitcycle with "blah blah"
   Then gitcycle runs
-    And output includes "Command 'blah' not found"
+    And output includes "Command not recognized."
 
 Scenario: Setup
   When I execute gitcycle setup

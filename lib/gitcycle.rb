@@ -1,3 +1,5 @@
+require 'rubygems'
+
 require 'fileutils'
 require 'open-uri'
 require 'uri'
@@ -330,12 +332,14 @@ class Gitcycle
     command = args.shift
     if command.nil?
       puts "\nNo command specified\n".red
+    elsif command[0..0] == '-'
+      command_not_recognized
     elsif self.respond_to?(command)
       send(command, *args)
     elsif args.empty?
       create_branch(command)
     else
-      puts "\nCommand '#{command}' not found.\n".red
+      command_not_recognized
     end
   end
 
@@ -429,6 +433,13 @@ class Gitcycle
 
     puts "Pushing 'origin/#{target}'.\n".green
     run("git push origin #{target}")
+  end
+
+  def command_not_recognized
+    readme = "https://github.com/winton/gitcycle/blob/master/README.md"
+    puts "\nCommand not recognized.".red
+    puts "\nOpening #{readme}\n".green
+    Launchy.open(readme)
   end
 
   def create_pull_request
