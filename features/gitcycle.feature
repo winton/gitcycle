@@ -227,6 +227,6 @@ Scenario: QA issue list
   Then gitcycle runs
     And output includes
       """
-      qa_master
+      qa_config.user_master
         issue #issue.id\tconfig.user/ticket.id
       """

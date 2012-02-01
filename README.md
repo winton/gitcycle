@@ -116,7 +116,6 @@ Todo
 ----
 
 * On pass or fail, send email to Github email
-* Change QA branch name to qa_login_branch
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
