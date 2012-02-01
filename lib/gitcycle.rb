@@ -126,9 +126,11 @@ class Gitcycle
   def pull
     require_git && require_config
 
+    current_branch = branches(:current => true)
+
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch',
-      'branch[name]' => branches(:current => true),
+      'branch[name]' => current_branch,
       'include' => [ 'repo' ],
       'create' => 0
     )
@@ -140,7 +142,13 @@ class Gitcycle
         :branch => branch['source']
       )
     else
-      puts "Branch not found.\n".red
+      puts "\nRetrieving repo information from gitcycle.".green
+      repo = get('repo')
+
+      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
+
+      puts "\nPulling '#{repo['owner']}/#{current_branch}'.\n".green
+      run("git pull #{repo['owner']} #{current_branch}")
     end
   end
 
