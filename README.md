@@ -23,7 +23,7 @@ Type `gitc` + your ticket URL to create a new branch:
 Pull Changes from Upstream
 --------------------------
 
-When you're developing, you may need to pull new changes from the upstream branch that you will eventually merge your feature into:
+When you're developing, you may need to pull new changes from an upstream branch:
 
 	gitc pull
 
