@@ -13,7 +13,7 @@ Create Branch
 
 Checkout the branch that you will eventually merge your feature into:
 
-	git checkout master
+	gitc checkout master
 
 Type `gitc` + your ticket URL to create a new branch:
 
@@ -106,7 +106,7 @@ If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
 
 Checkout the branch that you will eventually merge your feature into:
 
-	git checkout master
+	gitc checkout master
 
 Type `gitc reset` + your ticket URL to reset the branch:
 
