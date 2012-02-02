@@ -122,4 +122,12 @@ Todo
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
+* Add comment on lighthouse with issue URL
+* Instead of detecting CONFLICT, use error status $? != 0
+* Label issues with ticket milestone?
+* gitc LH-ticket should not created a redis record right away, what happens if someone control-c
+* gitc -h or gitc help
+* gitc discuss should tag issue with 'Discuss'
+* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
+* gitc pull doesnt work in rc: https://gist.github.com/7e508977fbb762d186a6
 * Tag issue with milestone
