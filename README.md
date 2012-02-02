@@ -125,3 +125,4 @@ Todo
 * gitc LH-ticket should not created a redis record right away, what happens if someone control-c
 * gitc -h or gitc help
 * gitc discuss should tag issue with 'Discuss'
+* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
