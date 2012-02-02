@@ -117,8 +117,8 @@ Todo
 
 * Add ability to associate multiple branches/pull requests with one Lighthouse ticket
 * Add comment on lighthouse with issue URL
+* gitc discuss should tag issue with 'Discuss'
 * On pass or fail, send email to Github email
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
-* Instead of detecting CONFLICT, use error status $? != 0
