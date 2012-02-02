@@ -94,6 +94,12 @@ This will add a "pass" label to the issue and will complete the pull request by 
 More
 ----
 
+### Checkout Upstream Branch
+
+If you are working in a fork, it is easy to checkout upstream branches:
+
+	gitc checkout [BRANCH] [...]
+
 ### Reset Branch
 
 If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
@@ -106,12 +112,6 @@ Type `gitc reset` + your ticket URL to reset the branch:
 
 	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-### Track Upstream Branch
-
-If you are working in a fork, it is easy to track upstream branches:
-
-	gitc track [BRANCH] [...]
-
 Todo
 ----
 
@@ -122,4 +122,4 @@ Todo
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
-* gitc discuss should tag issue with 'Discuss'
+* Tag issue with milestone
