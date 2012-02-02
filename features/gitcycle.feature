@@ -206,16 +206,16 @@ Scenario: QA issue
     And output includes
       """
       Retrieving branch information from gitcycle.
-      Deleting old QA branch 'qa_master'.
+      Deleting old QA branch 'qa_config.user_master'.
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote 'config.owner'.
-      Checking out remote branch 'qa_master' from 'config.owner/config.repo/master'.
+      Checking out remote branch 'qa_config.user_master' from 'config.owner/config.repo/master'.
       Fetching remote 'origin'.
-      Pushing 'origin/qa_master'.
+      Pushing 'origin/qa_config.user_master'.
       Adding remote repo 'config.user/config.repo'.
       Fetching remote 'config.user'.
       Merging remote branch 'ticket.id' from 'config.user/config.repo'.
-      Pushing branch 'qa_master'.
+      Pushing branch 'qa_config.user_master'.
       Type 'gitc qa pass' to approve all issues in this branch.
       Type 'gitc qa fail' to reject all issues in this branch.
       """

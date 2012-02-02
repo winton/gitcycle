@@ -59,28 +59,37 @@ class Gitcycle
 
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
-
     name = branch['name']
-    owner, repo = branch['repo'].split(':')
 
-    unless branch['exists']
-      branch['home'] = @git_login
-      branch['source'] = branches(:current => true)
+    begin
+      owner, repo = branch['repo'].split(':')
 
-      unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
-        branch['source'] = q("What branch would you like to eventually merge into?")
+      unless branch['exists']
+        branch['home'] = @git_login
+        branch['source'] = branches(:current => true)
+
+        unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
+          branch['source'] = q("What branch would you like to eventually merge into?")
+        end
+
+        unless yes?("Would you like to name your branch '#{name}'?")
+          name = q("\nWhat would you like to name your branch?")
+          name = name.gsub(/[\s\W]/, '-')
+        end
+
+        checkout_remote_branch(
+          :owner => owner,
+          :repo => repo,
+          :branch => branch['source'],
+          :target => name
+        )
       end
-
-      unless yes?("Would you like to name your branch '#{name}'?")
-        name = q("\nWhat would you like to name your branch?")
-        name = name.gsub(/[\s\W]/, '-')
-      end
-
-      checkout_remote_branch(
-        :owner => owner,
-        :repo => repo,
-        :branch => branch['source'],
-        :target => name
+    rescue SystemExit, Interrupt
+      puts "\nDeleting branch from gitcycle.\n".green
+      branch = get('branch',
+        'branch[name]' => branch['name'],
+        'create' => 0,
+        'reset' => 1
       )
     end
 

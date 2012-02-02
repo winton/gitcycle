@@ -115,11 +115,10 @@ If you are working in a fork, it is easy to track upstream branches:
 Todo
 ----
 
+* Add ability to associate multiple branches/pull requests with one Lighthouse ticket
+* Add comment on lighthouse with issue URL
 * On pass or fail, send email to Github email
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
-* Add comment on lighthouse with issue URL
 * Instead of detecting CONFLICT, use error status $? != 0
-* Label issues with ticket milestone?
-* gitc LH-ticket should not created a redis record right away, what happens if someone control-c
