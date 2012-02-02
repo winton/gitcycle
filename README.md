@@ -122,3 +122,4 @@ Todo
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc reset happens on branch with Github issue, close the existing issue
+* gitc discuss should tag issue with 'Discuss'
