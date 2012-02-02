@@ -37,6 +37,24 @@ class Gitcycle
     start(args) if args
   end
 
+  def checkout(branch)
+    require_git && require_config
+
+    puts "\nRetrieving repo information from gitcycle.\n".green
+    repo = get('repo')
+
+    add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
+
+    unless branches(:match => branch)
+      puts "Creating branch '#{branch}' from '#{repo['owner']}/#{branch}'.\n".green
+      run("git branch --no-track #{branch} #{repo['owner']}/#{branch}")
+    end
+
+    puts "Checking out '#{branch}'.\n".green
+    run("git checkout #{branch}")
+  end
+  alias :co :checkout
+
   def create_branch(url_or_title, reset=false)
     require_git && require_config
 
@@ -59,28 +77,37 @@ class Gitcycle
 
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
-
     name = branch['name']
-    owner, repo = branch['repo'].split(':')
 
-    unless branch['exists']
-      branch['home'] = @git_login
-      branch['source'] = branches(:current => true)
+    begin
+      owner, repo = branch['repo'].split(':')
 
-      unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
-        branch['source'] = q("What branch would you like to eventually merge into?")
+      unless branch['exists']
+        branch['home'] = @git_login
+        branch['source'] = branches(:current => true)
+
+        unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
+          branch['source'] = q("What branch would you like to eventually merge into?")
+        end
+
+        unless yes?("Would you like to name your branch '#{name}'?")
+          name = q("\nWhat would you like to name your branch?")
+          name = name.gsub(/[\s\W]/, '-')
+        end
+
+        checkout_remote_branch(
+          :owner => owner,
+          :repo => repo,
+          :branch => branch['source'],
+          :target => name
+        )
       end
-
-      unless yes?("Would you like to name your branch '#{name}'?")
-        name = q("\nWhat would you like to name your branch?")
-        name = name.gsub(/[\s\W]/, '-')
-      end
-
-      checkout_remote_branch(
-        :owner => owner,
-        :repo => repo,
-        :branch => branch['source'],
-        :target => name
+    rescue SystemExit, Interrupt
+      puts "\nDeleting branch from gitcycle.\n".green
+      branch = get('branch',
+        'branch[name]' => branch['name'],
+        'create' => 0,
+        'reset' => 1
       )
     end
 
@@ -343,18 +370,6 @@ class Gitcycle
     end
   end
 
-  def track(*branches)
-    puts "\nRetrieving repo information from gitcycle.\n".green
-    repo = get('repo')
-
-    branches.each do |branch|
-      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
-
-      puts "Creating branch '#{branch}' from '#{repo['owner']}/#{branch}'.\n".green
-      run("git branch --no-track #{branch} #{repo['owner']}/#{branch}")
-    end
-  end
-
   private
 
   def add_remote_and_fetch(options={})
@@ -369,7 +384,7 @@ class Gitcycle
       run("git remote rm #{owner}") if remotes(:match => owner)
       run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
     end
-    
+
     puts "Fetching remote '#{owner}'.\n".green
     run("git fetch -q #{owner}")
   end

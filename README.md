@@ -94,6 +94,12 @@ This will add a "pass" label to the issue and will complete the pull request by 
 More
 ----
 
+### Checkout Upstream Branch
+
+If you are working in a fork, it is easy to checkout upstream branches:
+
+	gitc checkout [BRANCH] [...]
+
 ### Reset Branch
 
 If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
@@ -106,15 +112,12 @@ Type `gitc reset` + your ticket URL to reset the branch:
 
 	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-### Track Upstream Branch
-
-If you are working in a fork, it is easy to track upstream branches:
-
-	gitc track [BRANCH] [...]
-
 Todo
 ----
 
+* Add ability to associate multiple branches/pull requests with one Lighthouse ticket
+* Add comment on lighthouse with issue URL
+* gitc discuss should tag issue with 'Discuss'
 * On pass or fail, send email to Github email
 * Note you can use gitc with a string
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
@@ -127,3 +130,4 @@ Todo
 * gitc discuss should tag issue with 'Discuss'
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
 * gitc pull doesnt work in rc: https://gist.github.com/7e508977fbb762d186a6
+* Tag issue with milestone
