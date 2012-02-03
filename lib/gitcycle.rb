@@ -225,7 +225,7 @@ class Gitcycle
     if issues.empty?
       puts "\n"
       get('qa_branch').each do |branches|
-        puts "qa_#{branches['user']}_#{branches['source']}".green
+        puts "qa_#{branches['source']}_#{branches['user']}".green
         branches['branches'].each do |branch|
           puts "  #{"issue ##{branch['issue']}".yellow}\t#{branch['user']}/#{branch['branch']}"
         end
@@ -301,7 +301,7 @@ class Gitcycle
           run("git add . && git add . -u && git commit -a -F .git/MERGE_MSG")
 
           puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-          run("git push origin qa_#{qa_branch['user']}_#{qa_branch['source']}")
+          run("git push origin qa_#{qa_branch['source']}_#{qa_branch['user']}")
 
           puts "\nDe-conflicting on gitcycle.\n".green
           get('qa_branch',
@@ -537,7 +537,7 @@ class Gitcycle
       end
 
       source = qa_branch['source']
-      name = "qa_#{qa_branch['user']}_#{source}"
+      name = "qa_#{source}_#{qa_branch['user']}"
 
       unless qa_branch['branches'].empty?
         unless options[:preserve]
