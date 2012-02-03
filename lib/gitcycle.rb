@@ -37,17 +37,37 @@ class Gitcycle
     start(args) if args
   end
 
-  def checkout(branch)
+  def checkout(remote, branch=nil)
     require_git && require_config
 
-    puts "\nRetrieving repo information from gitcycle.\n".green
-    repo = get('repo')
+    branch, remote = remote, nil if branch.nil?
 
     unless branches(:match => branch)
-      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
+      collab = branch && remote
+
+      unless collab
+        puts "\nRetrieving repo information from gitcycle.\n".green
+        repo = get('repo')
+        remote = repo['owner']
+      end
       
-      puts "Creating branch '#{branch}' from '#{repo['owner']}/#{branch}'.\n".green
-      run("git branch --no-track #{branch} #{repo['owner']}/#{branch}")
+      add_remote_and_fetch(
+        :owner => remote,
+        :repo => @git_repo
+      )
+      
+      puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
+      run("git branch --no-track #{branch} #{remote}/#{branch}")
+
+      if collab
+        puts "Sending branch information to gitcycle.".green
+        get('branch',
+          'branch[home]' => remote,
+          'branch[name]' => branch,
+          'branch[collab]' => 1,
+          'create' => 1
+        )
+      end
     end
 
     puts "Checking out '#{branch}'.\n".green
@@ -165,11 +185,19 @@ class Gitcycle
     )
 
     if branch
-      merge_remote_branch(
-        :owner => branch['repo']['owner'],
-        :repo => branch['repo']['name'],
-        :branch => branch['source']
-      )
+      if branch['collab']
+        merge_remote_branch(
+          :owner => branch['home'],
+          :repo => branch['repo']['name'],
+          :branch => branch['name']
+        )
+      else
+        merge_remote_branch(
+          :owner => branch['repo']['owner'],
+          :repo => branch['repo']['name'],
+          :branch => branch['source']
+        )
+      end
     else
       puts "\nRetrieving repo information from gitcycle.".green
       repo = get('repo')
@@ -179,13 +207,16 @@ class Gitcycle
       puts "\nPulling '#{repo['owner']}/#{current_branch}'.\n".green
       run("git pull #{repo['owner']} #{current_branch}")
     end
+
+    branch
   end
 
   def push
-    branch = branches(:current => true)
+    branch = pull
+    remote = branch ? branch['home'] : 'origin'
 
-    puts "\nPushing branch '#{branch}'.\n".green
-    run("git push origin #{branch}")
+    puts "\nPushing branch '#{remote}/#{branch}'.\n".green
+    run("git push #{remote} #{branch}")
   end
 
   def qa(*issues)
