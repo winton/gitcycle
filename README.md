@@ -132,6 +132,7 @@ Todo
 * gitc pull doesnt work in rc: https://gist.github.com/7e508977fbb762d186a6
 * Tag issue with milestone
 * There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name
-* gitc log, diff, merge, rm, status, reset, mv, commit, diff
+* gitc log, diff, merge, rm, status, reset, mv, commit, diff, rebase (just pass though, some people do use this, but if we can get every command that peopele to be gitc instead, they'll start using gitc habitually)
 * gitc ready - possibly do syntax checks
 * gitc commands should not track branches, so that they have to use the gitc push vs using git push
+* gitc branches convention should be qa_rc_[username] instead of qa_[username]_rc  its easier to grep for qa_rc , though grepping can still be accomplisth by a regexp * (* git branch | grep -E qa_.*_rc
