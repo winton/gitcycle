@@ -135,4 +135,3 @@ Todo
 * gitc log, diff, merge, rm, status, reset, mv, commit, diff, rebase (just pass though, some people do use this, but if we can get every command that peopele to be gitc instead, they'll start using gitc habitually)
 * gitc ready - possibly do syntax checks
 * gitc commands should not track branches, so that they have to use the gitc push vs using git push
-* gitc branches convention should be qa_rc_[username] instead of qa_[username]_rc  its easier to grep for qa_rc , though grepping can still be accomplisth by a regexp * (* git branch | grep -E qa_.*_rc
