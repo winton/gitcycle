@@ -181,6 +181,13 @@ class Gitcycle
     end
   end
 
+  def push
+    branch = branches(:current => true)
+
+    puts "\nPushing branch '#{branch}'.\n".green
+    run("git push origin #{branch}")
+  end
+
   def qa(*issues)
     require_git && require_config
 
@@ -357,6 +364,14 @@ class Gitcycle
 
   def start(args=[])
     command = args.shift
+
+    `git --help`.scan(/\s{3}(\w+)\s{3}/).flatten.each do |cmd|
+      if command == cmd && !self.respond_to?(command)
+        args.unshift("git", command)
+        Kernel.exec(*args)
+      end
+    end
+
     if command.nil?
       puts "\nNo command specified\n".red
     elsif command[0..0] == '-'
