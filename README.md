@@ -133,4 +133,5 @@ Todo
 * Tag issue with milestone
 * There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name
 * gitc log, diff, merge, rm, status, reset, mv, commit, diff
-$ gitc ready - possibly do syntax checks
+* gitc ready - possibly do syntax checks
+* gitc commands should not track branches, so that they have to use the gitc push vs using git push
