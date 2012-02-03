@@ -6,7 +6,7 @@ $:.unshift lib unless $:.include?(lib)
 
 Gem::Specification.new do |s|
   s.name        = "gitcycle"
-  s.version     = '0.2.3'
+  s.version     = '0.2.4'
   s.platform    = Gem::Platform::RUBY
   s.authors     = [ 'Winton Welsh' ]
   s.email       = [ 'mail@wintoni.us' ]
