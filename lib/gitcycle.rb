@@ -185,7 +185,7 @@ class Gitcycle
     )
 
     if branch
-      if branch['collab']
+      if branch['collab'] == '1'
         merge_remote_branch(
           :owner => branch['home'],
           :repo => branch['repo']['name'],
