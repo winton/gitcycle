@@ -215,8 +215,8 @@ class Gitcycle
     branch = pull
     remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
 
-    puts "\nPushing branch '#{remote}/#{branch}'.\n".green
-    run("git push #{remote} #{branch}")
+    puts "\nPushing branch '#{remote}/#{branch['name']}'.\n".green
+    run("git push #{remote} #{branch['name']}")
   end
 
   def qa(*issues)
