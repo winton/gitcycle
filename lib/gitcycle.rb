@@ -43,9 +43,9 @@ class Gitcycle
     puts "\nRetrieving repo information from gitcycle.\n".green
     repo = get('repo')
 
-    add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
-
     unless branches(:match => branch)
+      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
+      
       puts "Creating branch '#{branch}' from '#{repo['owner']}/#{branch}'.\n".green
       run("git branch --no-track #{branch} #{repo['owner']}/#{branch}")
     end
