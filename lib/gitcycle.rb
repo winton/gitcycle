@@ -213,7 +213,7 @@ class Gitcycle
 
   def push
     branch = pull
-    remote = branch ? branch['home'] : 'origin'
+    remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
 
     puts "\nPushing branch '#{remote}/#{branch}'.\n".green
     run("git push #{remote} #{branch}")
@@ -355,7 +355,7 @@ class Gitcycle
     end
   end
 
-  def reset(ticket_or_url)
+  def redo(ticket_or_url)
     create_branch(ticket_or_url, true)
   end
 

@@ -3,6 +3,8 @@ Gitcycle
 
 Tame your development cycle.
 
+Gitcycle is a drop-in replacement for git that makes pull request dev cycles super easy.
+
 Get Started
 -----------
 
@@ -19,13 +21,17 @@ Type `gitc` + your ticket URL to create a new branch:
 
 	gitc https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-
 Pull Changes from Upstream
 --------------------------
 
 When you're developing, you may need to pull new changes from an upstream branch:
 
 	gitc pull
+
+Push Changes
+------------
+
+	gitc push
 
 Discuss Code
 ------------
@@ -98,11 +104,23 @@ More
 
 If you are working in a fork, it is easy to checkout upstream branches:
 
-	gitc checkout [BRANCH] [...]
+	gitc checkout [BRANCH]
 
-### Reset Branch
+### Collaborate
 
-If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
+Its easy to checkout branches from other forks:
+
+	gitc checkout [USER] [BRANCH]
+
+### QA Status
+
+See who is QA'ing what:
+
+	gitc qa
+
+### Redo Branch
+
+If you associate the wrong branch with a ticket, use `gitc redo` to fix it.
 
 Checkout the branch that you will eventually merge your feature into:
 
@@ -110,7 +128,7 @@ Checkout the branch that you will eventually merge your feature into:
 
 Type `gitc reset` + your ticket URL to reset the branch:
 
-	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+	gitc redo https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
 Todo
 ----
