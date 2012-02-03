@@ -131,3 +131,7 @@ Todo
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
 * gitc pull doesnt work in rc: https://gist.github.com/7e508977fbb762d186a6
 * Tag issue with milestone
+* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name
+* gitc log, diff, merge, rm, status, reset, mv, commit, diff
+* gitc ready - possibly do syntax checks
+* gitc commands should not track branches, so that they have to use the gitc push vs using git push
