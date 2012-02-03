@@ -142,13 +142,7 @@ Todo
 * If gitc reset happens on branch with Github issue, close the existing issue
 * Add comment on lighthouse with issue URL
 * Instead of detecting CONFLICT, use error status $? != 0
-* Label issues with ticket milestone?
-* gitc LH-ticket should not created a redis record right away, what happens if someone control-c
-* gitc -h or gitc help
+* Label issues with ticket milestone
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
-* gitc pull doesnt work in rc: https://gist.github.com/7e508977fbb762d186a6
-* Tag issue with milestone
-* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name
-* gitc discuss should tag issue with 'Discuss'
+* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
 * gitc ready - possibly do syntax checks
-* gitc commands should not track branches, so that they have to use the gitc push vs using git push
