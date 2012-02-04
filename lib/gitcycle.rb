@@ -626,8 +626,24 @@ class Gitcycle
     end
     params.chop! # trailing &
 
-    json = open("#{API}/#{path}.json?#{params}").read
-    Yajl::Parser.parse(json)
+    begin
+      json = open("#{API}/#{path}.json?#{params}").read
+    rescue Exception
+      puts "\nCould not connect to Gitcycle.".red
+      puts "\nPlease verify your Internet connection and try again later.\n".yellow
+      exit
+    end
+
+    error = json.match(/Gitcycle error reference code (\d+)/)[1]
+
+    if error
+      puts "\nSomething went wrong :(".red
+      puts "\nEmail error code #{error} to wwelsh@bleacherreport.com.".yellow
+      puts "\nInclude a gist of your terminal output if possible.\n".yellow
+      exit
+    else
+      Yajl::Parser.parse(json)
+    end
   end
 
   def load_config
