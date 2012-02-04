@@ -75,6 +75,20 @@ class Gitcycle
   end
   alias :co :checkout
 
+  def commit_all
+    branch_info = get('branch',
+      'branch[name]' => branches(:current => true),
+      'create' => 0
+    )
+
+    if branch_info && (title = branch_info["title"]) && id = branch_info["body"].match(/#\d+/)
+      commit_msg = "[#{id}] #{title}"
+    end
+
+    run "git add . && git commit -am" + (commit_msg ? " \"#{commit_msg}\"" : "")
+  end
+  alias :ca :commit_all
+
   def create_branch(url_or_title, reset=false)
     require_git && require_config
 
@@ -634,7 +648,8 @@ class Gitcycle
       exit
     end
 
-    error = json.match(/Gitcycle error reference code (\d+)/)[1]
+    match = json.match(/Gitcycle error reference code (\d+)/)
+    error = match && match[1]
 
     if error
       puts "\nSomething went wrong :(".red
