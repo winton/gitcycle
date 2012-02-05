@@ -126,7 +126,7 @@ Checkout the branch that you will eventually merge your feature into:
 
 	gitc checkout master
 
-Type `gitc reset` + your ticket URL to reset the branch:
+Type `gitc redo` + your ticket URL to reset the branch:
 
 	gitc redo https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 

@@ -75,19 +75,33 @@ class Gitcycle
   end
   alias :co :checkout
 
-  def commit_all
-    branch_info = get('branch',
-      'branch[name]' => branches(:current => true),
-      'create' => 0
-    )
+  def commit(*args)
+    msg = nil
 
-    if branch_info && (title = branch_info["title"]) && id = branch_info["body"].match(/#\d+/)
-      commit_msg = "[#{id}] #{title}"
+    if args.empty?
+      puts "\nRetrieving branch information from gitcycle.\n".green
+      branch = get('branch',
+        'branch[name]' => branches(:current => true),
+        'create' => 0
+      )
+
+      id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
+      title = branch["title"]
+
+      if branch && id
+        msg = "[#{id}]"
+        msg += " #{title}" if title
+      end
     end
 
-    run "git add . && git commit -am" + (commit_msg ? " \"#{commit_msg}\"" : "")
+    if msg
+      run("git add . -u && git commit -am #{msg.dump}")
+      Kernel.exec("git commit --amend")
+    else
+      exec_git(:commit, args)
+    end
   end
-  alias :ca :commit_all
+  alias :ci :commit
 
   def create_branch(url_or_title, reset=false)
     require_git && require_config
@@ -412,8 +426,7 @@ class Gitcycle
 
     `git --help`.scan(/\s{3}(\w+)\s{3}/).flatten.each do |cmd|
       if command == cmd && !self.respond_to?(command)
-        args.unshift("git", command)
-        Kernel.exec(*args)
+        exec_git(cmd, args)
       end
     end
 
@@ -594,6 +607,11 @@ class Gitcycle
         puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
       end
     end
+  end
+
+  def exec_git(command, args)  
+    args.unshift("git", command)
+    Kernel.exec(*args)
   end
 
   def fix_conflict(options)
