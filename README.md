@@ -8,7 +8,7 @@ About
 
 Gitcycle is a `git` wrapper that makes working on a team easy.
 
-It assumes you are working on a fork-based development cycle along side [GitHub Issues](https://github.com/features/projects/issues).
+It assumes you are using pull requests along side [GitHub Issues](https://github.com/features/projects/issues).
 
 It connects to email, Lighthouse, and Campfire if you want it to.
 
@@ -20,12 +20,12 @@ Visit [gitcycle.com](http://gitcycle.com) to set up your repository.
 gitc
 ----
 
-The `gitc` command does everything `git` does, but with some extras.
+The `gitc` command does everything `git` does, but with some extra features.
 
-Try using `gitc` for everything. It should "just work".
+Try using `gitc` for everything. It should just work.
 
-Create Branch From Ticket
--------------------------
+Branch From Ticket
+------------------
 
 First, checkout the branch that you will eventually merge your code into:
 
@@ -35,66 +35,66 @@ Type `gitc branch` + your ticket URL to create a new branch:
 
 	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-Pull Changes
-------------
+Pull
+----
 
-Use `gitc pull` without parameters. It will know what you're trying to do.
+Use `gitc pull` without parameters. It knows what you're trying to do.
 
 	gitc pull
 
 If you're working on a ticket branch, it will automatically pull the latest code from upstream.
 
-Commit Code
------------
+Commit
+------
 
-Commit all changes and open commit message in EDITOR with ticket info prefilled:
+Commit all changes and open commit message in EDITOR:
 
 	gitc commit
 
-Push Changes
-------------
+Ticket number and name are prefilled if present.
 
-Use `gitc push` without parameters. It will know what you're trying to do.
+Push
+----
+
+Use `gitc push` without parameters. It knows what you're trying to do.
 
 	gitc push
 
-Discuss Code
-------------
+Discuss
+-------
 
-After pushing one or two commits, put the code up for discussion:
+After pushing some commits, put the code up for discussion:
 
 	gitc discuss
 
-Mark as Ready
--------------
+Ready
+-----
 
-When the branch is ready for merging, mark it as ready:
+When the branch is ready for code review:
 
 	gitc ready
 
-This will mark the pull request as "Pending Review".
+This will label the pull request as "Pending Review".
 
 Code Review
 -----------
 
-Managers will periodically check for "Pending Review" issues on GitHub.
+Periodically check for "Pending Review" issues on GitHub.
 
-Once reviewed, they will mark the issue as reviewed:
+Once reviewed, label the issue as reviewed:
 
 	gitc reviewed [GITHUB ISSUE #] [...]
 
 Quality Assurance
 -----------------
 
-QA engineers will periodically check for "Pending QA" issues on Github.
+Periodically check for "Pending QA" issues on Github.
 
 To create a new QA branch:
 
 	gitc qa [GITHUB ISSUE #] [...]
 
-This will create a new QA branch containing the commits from the related Github issue numbers.
-
-This branch can be deployed to a staging environment for QA.
+Now you have a QA branch containing all commits from the specified Github issue numbers.
 
 QA Fail
 -------
@@ -107,7 +107,7 @@ To fail all issues:
 
 	gitc qa fail
 
-This will add a "fail" label to the issue.
+This adds a "fail" label to the issue.
 
 QA Pass
 ------- 
@@ -120,7 +120,7 @@ To pass all issues:
 
 	gitc qa pass
 
-This will add a "pass" label to the issue and will complete the pull request by merging the feature branch into the target branch.
+This adds a "pass" label to the issue and completes the pull request by merging the feature branch into the target branch.
 
 More
 ----

@@ -230,28 +230,31 @@ class Gitcycle
       'create' => 0
     )
 
-    if branch
-      if branch['collab'] == '1'
-        merge_remote_branch(
-          :owner => branch['home'],
-          :repo => branch['repo']['name'],
-          :branch => branch['name']
-        )
-      else
-        merge_remote_branch(
-          :owner => branch['repo']['owner'],
-          :repo => branch['repo']['name'],
-          :branch => branch['source']
-        )
-      end
+    collab = branch && branch['collab'] == '1'
+
+    if collab
+      # Merge from collab
+      merge_remote_branch(
+        :owner => branch['home'],
+        :repo => branch['repo']['name'],
+        :branch => branch['name']
+      )
     else
-      puts "\nRetrieving repo information from gitcycle.".green
-      repo = get('repo')
+      # Merge from upstream owner
+      merge_remote_branch(
+        :owner => branch['repo']['owner'],
+        :repo => branch['repo']['name'],
+        :branch => branch['source']
+      )
+    end
 
-      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
-
-      puts "\nPulling '#{repo['owner']}/#{current_branch}'.\n".green
-      run("git pull #{repo['owner']} #{current_branch}")
+    unless collab
+      # Merge from origin
+      merge_remote_branch(
+        :owner => @git_login,
+        :repo => @git_repo,
+        :branch => current_branch
+      )
     end
 
     branch
@@ -378,8 +381,8 @@ class Gitcycle
     require_git && require_config
 
     if issues.empty?
-      pull
-      branch = create_pull_request
+      branch = pull
+      create_pull_request(branch)
 
       if branch == false
         puts "Branch not found.\n".red
@@ -474,13 +477,14 @@ class Gitcycle
 
     unless $remotes[owner]
       $remotes[owner] = true
+      
       puts "Adding remote repo '#{owner}/#{repo}'.\n".green
       run("git remote rm #{owner}") if remotes(:match => owner)
       run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
-    end
 
-    puts "Fetching remote '#{owner}'.\n".green
-    run("git fetch -q #{owner}")
+      puts "Fetching remote '#{owner}'.\n".green
+      run("git fetch -q #{owner}")
+    end
   end
 
   def branches(options={})
@@ -552,13 +556,14 @@ class Gitcycle
     Launchy.open(readme)
   end
 
-  def create_pull_request
-    puts "\nRetrieving branch information from gitcycle.\n".green
-      
-    branch = get('branch',
-      'branch[name]' => branches(:current => true),
-      'create' => 0
-    )
+  def create_pull_request(branch=nil)
+    unless branch
+      puts "\nRetrieving branch information from gitcycle.\n".green  
+      branch = get('branch',
+        'branch[name]' => branches(:current => true),
+        'create' => 0
+      )
+    end
 
     if branch && !branch['issue_url']
       puts "Creating GitHub pull request.\n".green

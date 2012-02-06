@@ -175,7 +175,9 @@ Scenario: Ready issue w/ no parameters
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote 'config.owner'.
       Merging remote branch 'master' from 'config.owner/config.repo'.
-      Retrieving branch information from gitcycle.
+      Adding remote repo 'config.user/config.repo'.
+      Fetching remote 'config.user'.
+      Merging remote branch 'ticket.id' from 'config.user/config.repo'.
       Labeling issue as 'Pending Review'.
       """
 
