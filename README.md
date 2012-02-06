@@ -28,6 +28,13 @@ When you're developing, you may need to pull new changes from an upstream branch
 
 	gitc pull
 
+Commit Code
+-----------
+
+Commit all changes and open commit message in EDITOR with ticket info prefilled:
+
+	gitc commit
+
 Push Changes
 ------------
 
