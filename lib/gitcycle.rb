@@ -243,11 +243,21 @@ class Gitcycle
         :branch => branch['name']
       )
     elsif branch
-      # Merge from upstream owner
+      # Merge from upstream source branch
       merge_remote_branch(
         :owner => branch['repo']['owner'],
         :repo => branch['repo']['name'],
         :branch => branch['source']
+      )
+    else
+      puts "\nRetrieving repo information from gitcycle.\n".green
+      repo = get('repo')
+
+      # Merge from upstream branch with same name
+      merge_remote_branch(
+        :owner => repo['owner'],
+        :repo => repo['name'],
+        :branch => current_branch
       )
     end
 
@@ -733,10 +743,12 @@ class Gitcycle
 
     add_remote_and_fetch(options)
 
-    puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
-    run("git merge #{owner}/#{branch}")
+    if branches(:remote => true, :match => "#{owner}/#{branch}")
+      puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
+      run("git merge #{owner}/#{branch}")
 
-    fix_conflict(options)
+      fix_conflict(options)
+    end
   end
 
   def options?(args)
