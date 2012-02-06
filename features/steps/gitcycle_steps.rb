@@ -113,6 +113,7 @@ Given /^a new Lighthouse ticket$/ do
     :title => "Test ticket"
   )
   $ticket.save
+  $ticket.attributes['id'] = "master-#{$ticket.attributes['id']}"
 end
 
 When /^I execute gitcycle with nothing$/ do

@@ -45,18 +45,22 @@ class Gitcycle
 
     require_git && require_configs
 
+    params = {
+      'branch[source]' => branches(:current => true)
+    }
+
     if url && url.include?('lighthouseapp.com/')
-      params = { 'branch[lighthouse_url]' => url }
+      params.merge!('branch[lighthouse_url]' => url)
     elsif url && url.include?('github.com/')
-      params = { 'branch[issue_url]' => url }
+      params.merge!('branch[issue_url]' => url)
     elsif url
       puts "Gitcycle only supports Lighthouse or Github Issue URLs.".red
       exit
     elsif title
-      params = {
+      params.merge!(
         'branch[name]' => title,
         'branch[title]' => title
-      }
+      )
     else
       exec_git(:branch, args)
     end
@@ -72,7 +76,6 @@ class Gitcycle
 
       unless branch['exists']
         branch['home'] = @git_login
-        branch['source'] = branches(:current => true)
 
         unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
           branch['source'] = q("What branch would you like to eventually merge into?")
