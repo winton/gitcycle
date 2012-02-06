@@ -27,7 +27,9 @@ The idea, at least, is that you can completely drop `git` in favor of `gitc`.
 Create Branch From Ticket
 -------------------------
 
-First, checkout the branch that you will eventually merge your code into.
+First, checkout the branch that you will eventually merge your code into:
+
+	gitc checkout <branch>
 
 Type `gitc branch` + your ticket URL to create a new branch:
 
