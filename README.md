@@ -6,23 +6,23 @@ Tame your development cycle.
 About
 -----
 
-Gitcycle is a wrapper for `git` that makes working on a team easy.
+Gitcycle is a `git` wrapper that makes working on a team easy.
 
-Gitcycle assumes you are working on a fork-based development cycle along side [GitHub Issues](https://github.com/features/projects/issues).
+It assumes you are working on a fork-based development cycle along side [GitHub Issues](https://github.com/features/projects/issues).
 
-Gitcycle connects to email, Lighthouse, and Campfire if you want it to.
+It connects to email, Lighthouse, and Campfire if you want it to.
 
 Get Started
 -----------
 
 Visit [gitcycle.com](http://gitcycle.com) to set up your repository.
 
-Drop-In Replacement
--------------------
+gitc
+----
 
-The `gitc` command responds to everything `git` does, but adds some extra features.
+The `gitc` command does everything `git` does, but with some extras.
 
-The idea, at least, is that you can completely drop `git` in favor of `gitc`.
+Try using `gitc` for everything. It should "just work".
 
 Create Branch From Ticket
 -------------------------
