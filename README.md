@@ -1,11 +1,16 @@
 Gitcycle
 ========
 
-Gitcycle is a wrapper for git that makes working on a team easy.
+Tame your development cycle.
 
-By default, Gitcycle assumes you are working on a fork-based development cycle along side [GitHub Issues](https://github.com/features/projects/issues).
+About
+-----
 
-Gitcycle also connects to email, Lighthouse, and Campfire if you want it to.
+Gitcycle is a wrapper for `git` that makes working on a team easy.
+
+Gitcycle assumes you are working on a fork-based development cycle along side [GitHub Issues](https://github.com/features/projects/issues).
+
+Gitcycle connects to email, Lighthouse, and Campfire if you want it to.
 
 Get Started
 -----------
