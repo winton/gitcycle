@@ -175,7 +175,7 @@ class Gitcycle
       id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
 
       if branch && id
-        msg = "[#{id}]"
+        msg = "[##{id}]"
         msg += " #{branch["title"]}" if branch["title"]
       end
     end
