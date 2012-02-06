@@ -3,67 +3,98 @@ Gitcycle
 
 Tame your development cycle.
 
+About
+-----
+
+Gitcycle is a `git` wrapper that makes working on a team easy.
+
+It assumes you are using pull requests along side [GitHub Issues](https://github.com/features/projects/issues).
+
+It connects to email, Lighthouse, and Campfire if you want it to.
+
 Get Started
 -----------
 
-Visit [gitcycle.com](http://gitcycle.com) to set up your environment.
+Visit [gitcycle.com](http://gitcycle.com) to set up your repository.
 
-Create Branch
--------------
+gitc
+----
 
-Checkout the branch that you will eventually merge your feature into:
+The `gitc` command does everything `git` does, but with some extra features.
 
-	gitc checkout master
+Try using `gitc` for everything. It should just work.
 
-Type `gitc` + your ticket URL to create a new branch:
+Branch From Ticket
+------------------
 
-	gitc https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+First, checkout the branch that you will eventually merge your code into:
 
+	gitc checkout <branch>
 
-Pull Changes from Upstream
---------------------------
+Type `gitc branch` + your ticket URL to create a new branch:
 
-When you're developing, you may need to pull new changes from an upstream branch:
+	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+
+Pull
+----
+
+Use `gitc pull` without parameters. It knows what you're trying to do.
 
 	gitc pull
 
-Discuss Code
-------------
+If you're working on a ticket branch, it will automatically pull the latest code from upstream.
 
-After pushing one or two commits, put the code up for discussion:
+Commit
+------
+
+Commit all changes and open commit message in EDITOR:
+
+	gitc commit
+
+Ticket number and name are prefilled if present.
+
+Push
+----
+
+Use `gitc push` without parameters. It knows what you're trying to do.
+
+	gitc push
+
+Discuss
+-------
+
+After pushing some commits, put the code up for discussion:
 
 	gitc discuss
 
-Mark as Ready
--------------
+Ready
+-----
 
-When the branch is ready for merging, mark it as ready:
+When the branch is ready for code review:
 
 	gitc ready
 
-This will mark the pull request as "Pending Review".
+This will label the pull request as "Pending Review".
 
 Code Review
 -----------
 
-Managers will periodically check for "Pending Review" issues on GitHub.
+Periodically check for "Pending Review" issues on GitHub.
 
-Once reviewed, they will mark the issue as reviewed:
+Once reviewed, label the issue as reviewed:
 
 	gitc reviewed [GITHUB ISSUE #] [...]
 
 Quality Assurance
 -----------------
 
-QA engineers will periodically check for "Pending QA" issues on Github.
+Periodically check for "Pending QA" issues on Github.
 
 To create a new QA branch:
 
 	gitc qa [GITHUB ISSUE #] [...]
 
-This will create a new QA branch containing the commits from the related Github issue numbers.
-
-This branch can be deployed to a staging environment for QA.
+Now you have a QA branch containing all commits from the specified Github issue numbers.
 
 QA Fail
 -------
@@ -76,7 +107,7 @@ To fail all issues:
 
 	gitc qa fail
 
-This will add a "fail" label to the issue.
+This adds a "fail" label to the issue.
 
 QA Pass
 ------- 
@@ -89,7 +120,7 @@ To pass all issues:
 
 	gitc qa pass
 
-This will add a "pass" label to the issue and will complete the pull request by merging the feature branch into the target branch.
+This adds a "pass" label to the issue and completes the pull request by merging the feature branch into the target branch.
 
 More
 ----
@@ -98,19 +129,25 @@ More
 
 If you are working in a fork, it is easy to checkout upstream branches:
 
-	gitc checkout [BRANCH] [...]
+	gitc checkout [BRANCH]
 
-### Reset Branch
+### Collaborate
 
-If you associate the wrong branch with a ticket, use `gitc reset` to fix it.
+Checkout branches from other forks:
 
-Checkout the branch that you will eventually merge your feature into:
+	gitc checkout [USER] [BRANCH]
 
-	gitc checkout master
+### QA Status
 
-Type `gitc reset` + your ticket URL to reset the branch:
+See who is QA'ing what:
 
-	gitc reset https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+	gitc qa
+
+### Redo Branch
+
+If you associate the wrong branch with a ticket, use `gitc redo` to fix it.
+
+	gitc redo https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
 Todo
 ----
@@ -124,9 +161,7 @@ Todo
 * If gitc reset happens on branch with Github issue, close the existing issue
 * Add comment on lighthouse with issue URL
 * Instead of detecting CONFLICT, use error status $? != 0
-* Label issues with ticket milestone?
-* gitc LH-ticket should not created a redis record right away, what happens if someone control-c
-* gitc -h or gitc help
+* Label issues with ticket milestone
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
 * gitc pull doesnt work in rc: https://gist.github.com/7e508977fbb762d186a6
 * Tag issue with milestone
@@ -136,3 +171,5 @@ Todo
 * gitc commands should not track branches, so that they have to use the gitc push vs using git push
 $ gitc st - shortcut
 * issues aren't assigned to people
+* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
+* gitc ready - possibly do syntax checks

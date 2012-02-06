@@ -113,6 +113,7 @@ Given /^a new Lighthouse ticket$/ do
     :title => "Test ticket"
   )
   $ticket.save
+  $ticket.attributes['id'] = "master-#{$ticket.attributes['id']}"
 end
 
 When /^I execute gitcycle with nothing$/ do
@@ -139,12 +140,12 @@ When /^I execute gitcycle setup$/ do
   ].join(' ')
 end
 
-When /^I execute gitcycle with the Lighthouse ticket URL$/ do
-  $execute << $ticket.url
+When /^I execute gitcycle branch with the Lighthouse ticket URL$/ do
+  $execute << "branch #{$ticket.url}"
 end
 
-When /^I execute gitcycle reset with the Lighthouse ticket URL$/ do
-  $execute << "reset #{$ticket.url}"
+When /^I execute gitcycle redo with the Lighthouse ticket URL$/ do
+  $execute << "redo #{$ticket.url}"
 end
 
 When /^I cd to the (.*) repo$/ do |user|

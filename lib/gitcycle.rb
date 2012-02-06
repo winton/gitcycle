@@ -37,43 +37,35 @@ class Gitcycle
     start(args) if args
   end
 
-  def checkout(branch)
-    require_git && require_config
+  def branch(*args)
+    url = args.detect { |arg| arg =~ /^https?:\/\// }
+    title = args.detect { |arg| arg =~ /\s/ }
 
-    puts "\nRetrieving repo information from gitcycle.\n".green
-    repo = get('repo')
+    exec_git(:branch, args) unless url || title
 
-    unless branches(:match => branch)
-      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
-      
-      puts "Creating branch '#{branch}' from '#{repo['owner']}/#{branch}'.\n".green
-      run("git branch --no-track #{branch} #{repo['owner']}/#{branch}")
-    end
+    require_git && require_configs
 
-    puts "Checking out '#{branch}'.\n".green
-    run("git checkout #{branch}")
-  end
-  alias :co :checkout
+    params = {
+      'branch[source]' => branches(:current => true)
+    }
 
-  def create_branch(url_or_title, reset=false)
-    require_git && require_config
-
-    params = {}
-
-    if url_or_title.strip[0..3] == 'http'
-      if url_or_title.include?('lighthouseapp.com/')
-        params = { 'branch[lighthouse_url]' => url_or_title }
-      elsif url_or_title.include?('github.com/')
-        params = { 'branch[issue_url]' => url_or_title }
-      end
+    if url && url.include?('lighthouseapp.com/')
+      params.merge!('branch[lighthouse_url]' => url)
+    elsif url && url.include?('github.com/')
+      params.merge!('branch[issue_url]' => url)
+    elsif url
+      puts "Gitcycle only supports Lighthouse or Github Issue URLs.".red
+      exit
+    elsif title
+      params.merge!(
+        'branch[name]' => title,
+        'branch[title]' => title
+      )
     else
-      params = {
-        'branch[name]' => url_or_title,
-        'branch[title]' => url_or_title
-      }
+      exec_git(:branch, args)
     end
 
-    params['reset'] = '1' if reset
+    params['reset'] = '1' if args.include?('--redo')
 
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
@@ -84,7 +76,6 @@ class Gitcycle
 
       unless branch['exists']
         branch['home'] = @git_login
-        branch['source'] = branches(:current => true)
 
         unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
           branch['source'] = q("What branch would you like to eventually merge into?")
@@ -126,6 +117,82 @@ class Gitcycle
     puts "\n"
   end
 
+  def checkout(*args)
+    if args.length > 2 || options?(args)
+      exec_git(:checkout, args)
+    end
+
+    require_git && require_config
+
+    remote, branch = args
+    remote, branch = nil, remote if branch.nil?
+
+    unless branches(:match => branch)
+      collab = branch && remote
+
+      unless collab
+        puts "\nRetrieving repo information from gitcycle.\n".green
+        repo = get('repo')
+        remote = repo['owner']
+      end
+      
+      add_remote_and_fetch(
+        :owner => remote,
+        :repo => @git_repo
+      )
+      
+      puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
+      run("git branch --no-track #{branch} #{remote}/#{branch}")
+
+      if collab
+        puts "Sending branch information to gitcycle.".green
+        get('branch',
+          'branch[home]' => remote,
+          'branch[name]' => branch,
+          'branch[collab]' => 1,
+          'create' => 1
+        )
+      end
+    end
+
+    puts "Checking out '#{branch}'.\n".green
+    run("git checkout #{branch}")
+  end
+  alias :co :checkout
+
+  def commit(*args)
+    msg = nil
+
+    if args.empty?
+      require_git && require_config
+
+      puts "\nRetrieving branch information from gitcycle.\n".green
+      branch = get('branch',
+        'branch[name]' => branches(:current => true),
+        'create' => 0
+      )
+
+      id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
+
+      if branch && id
+        msg = "[#{id}]"
+        msg += " #{branch["title"]}" if branch["title"]
+      end
+    end
+
+    cmd = "git add . && git add . -u && git commit -a"
+
+    if msg
+      run(cmd + "m #{msg.dump}")
+      Kernel.exec("git commit --amend")
+    elsif args.empty?
+      run(cmd)
+    else
+      exec_git(:commit, args)
+    end
+  end
+  alias :ci :commit
+
   def discuss(*issues)
     require_git && require_config
 
@@ -152,7 +219,9 @@ class Gitcycle
     end
   end
 
-  def pull
+  def pull(*args)
+    exec_git(:pull, args) if args.length > 0
+
     require_git && require_config
 
     current_branch = branches(:current => true)
@@ -164,28 +233,56 @@ class Gitcycle
       'create' => 0
     )
 
-    if branch
+    collab = branch && branch['collab'] == '1'
+
+    if collab
+      # Merge from collab
+      merge_remote_branch(
+        :owner => branch['home'],
+        :repo => branch['repo']['name'],
+        :branch => branch['name']
+      )
+    elsif branch
+      # Merge from upstream source branch
       merge_remote_branch(
         :owner => branch['repo']['owner'],
         :repo => branch['repo']['name'],
         :branch => branch['source']
       )
     else
-      puts "\nRetrieving repo information from gitcycle.".green
+      puts "\nRetrieving repo information from gitcycle.\n".green
       repo = get('repo')
 
-      add_remote_and_fetch(:owner => repo['owner'], :repo => repo['name'])
-
-      puts "\nPulling '#{repo['owner']}/#{current_branch}'.\n".green
-      run("git pull #{repo['owner']} #{current_branch}")
+      # Merge from upstream branch with same name
+      merge_remote_branch(
+        :owner => repo['owner'],
+        :repo => repo['name'],
+        :branch => current_branch
+      )
     end
+
+    unless collab
+      # Merge from origin
+      merge_remote_branch(
+        :owner => @git_login,
+        :repo => @git_repo,
+        :branch => current_branch
+      )
+    end
+
+    branch
   end
 
-  def push
-    branch = branches(:current => true)
+  def push(*args)
+    exec_git(:push, args) if args.length > 0
 
-    puts "\nPushing branch '#{branch}'.\n".green
-    run("git push origin #{branch}")
+    require_git && require_config
+
+    branch = pull
+    remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
+
+    puts "\nPushing branch '#{remote}/#{branch['name']}'.\n".green
+    run("git push #{remote} #{branch['name']}")
   end
 
   def qa(*issues)
@@ -297,8 +394,8 @@ class Gitcycle
     require_git && require_config
 
     if issues.empty?
-      pull
-      branch = create_pull_request
+      branch = pull
+      create_pull_request(branch)
 
       if branch == false
         puts "Branch not found.\n".red
@@ -324,8 +421,9 @@ class Gitcycle
     end
   end
 
-  def reset(ticket_or_url)
-    create_branch(ticket_or_url, true)
+  def redo(*args)
+    args << "--redo"
+    branch(*args)
   end
 
   def reviewed(*issues)
@@ -367,19 +465,16 @@ class Gitcycle
 
     `git --help`.scan(/\s{3}(\w+)\s{3}/).flatten.each do |cmd|
       if command == cmd && !self.respond_to?(command)
-        args.unshift("git", command)
-        Kernel.exec(*args)
+        exec_git(cmd, args)
       end
     end
 
     if command.nil?
       puts "\nNo command specified\n".red
-    elsif command[0..0] == '-'
+    elsif command =~ /^-/
       command_not_recognized
     elsif self.respond_to?(command)
       send(command, *args)
-    elsif args.empty?
-      create_branch(command)
     else
       command_not_recognized
     end
@@ -395,13 +490,14 @@ class Gitcycle
 
     unless $remotes[owner]
       $remotes[owner] = true
+      
       puts "Adding remote repo '#{owner}/#{repo}'.\n".green
       run("git remote rm #{owner}") if remotes(:match => owner)
       run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
-    end
 
-    puts "Fetching remote '#{owner}'.\n".green
-    run("git fetch -q #{owner}")
+      puts "Fetching remote '#{owner}'.\n".green
+      run("git fetch -q #{owner}")
+    end
   end
 
   def branches(options={})
@@ -473,13 +569,14 @@ class Gitcycle
     Launchy.open(readme)
   end
 
-  def create_pull_request
-    puts "\nRetrieving branch information from gitcycle.\n".green
-      
-    branch = get('branch',
-      'branch[name]' => branches(:current => true),
-      'create' => 0
-    )
+  def create_pull_request(branch=nil)
+    unless branch
+      puts "\nRetrieving branch information from gitcycle.\n".green  
+      branch = get('branch',
+        'branch[name]' => branches(:current => true),
+        'create' => 0
+      )
+    end
 
     if branch && !branch['issue_url']
       puts "Creating GitHub pull request.\n".green
@@ -551,6 +648,11 @@ class Gitcycle
     end
   end
 
+  def exec_git(command, args)  
+    args.unshift("git", command)
+    Kernel.exec(*args.collect(&:to_s))
+  end
+
   def fix_conflict(options)
     owner = options[:owner]
     repo = options[:repo]
@@ -595,8 +697,25 @@ class Gitcycle
     end
     params.chop! # trailing &
 
-    json = open("#{API}/#{path}.json?#{params}").read
-    Yajl::Parser.parse(json)
+    begin
+      json = open("#{API}/#{path}.json?#{params}").read
+    rescue Exception
+      puts "\nCould not connect to Gitcycle.".red
+      puts "\nPlease verify your Internet connection and try again later.\n".yellow
+      exit
+    end
+
+    match = json.match(/Gitcycle error reference code (\d+)/)
+    error = match && match[1]
+
+    if error
+      puts "\nSomething went wrong :(".red
+      puts "\nEmail error code #{error} to wwelsh@bleacherreport.com.".yellow
+      puts "\nInclude a gist of your terminal output if possible.\n".yellow
+      exit
+    else
+      Yajl::Parser.parse(json)
+    end
   end
 
   def load_config
@@ -624,10 +743,16 @@ class Gitcycle
 
     add_remote_and_fetch(options)
 
-    puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
-    run("git merge #{owner}/#{branch}")
+    if branches(:remote => true, :match => "#{owner}/#{branch}")
+      puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
+      run("git merge #{owner}/#{branch}")
 
-    fix_conflict(options)
+      fix_conflict(options)
+    end
+  end
+
+  def options?(args)
+    args.any? { |arg| arg =~ /^-/ }
   end
 
   def remotes(options={})

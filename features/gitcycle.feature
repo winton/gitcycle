@@ -20,7 +20,7 @@ Scenario: Feature branch w/ custom branch name
   Given a fresh set of repositories
     And a new Lighthouse ticket
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
     And I enter "y"
     And I enter "n"
     And I enter "ticket.id-rename"
@@ -44,7 +44,7 @@ Scenario: Feature branch
   Given a fresh set of repositories
     And a new Lighthouse ticket
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
     And I enter "y"
     And I enter "y"
   Then gitcycle runs
@@ -62,10 +62,10 @@ Scenario: Feature branch
       """
     And redis entries valid
 
-Scenario: Reset feature branch
+Scenario: Redo feature branch
   Given a fresh set of repositories
   When I cd to the user repo
-    And I execute gitcycle reset with the Lighthouse ticket URL
+    And I execute gitcycle redo with the Lighthouse ticket URL
     And I enter "y"
     And I enter "y"
   Then gitcycle runs
@@ -86,7 +86,7 @@ Scenario: Reset feature branch
 
 Scenario: Checkout via ticket w/ existing branch
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
   Then gitcycle runs
     And output includes
       """
@@ -98,7 +98,7 @@ Scenario: Checkout via ticket w/ existing branch
 Scenario: Checkout via ticket w/ fresh repo
   Given a fresh set of repositories
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
   Then gitcycle runs
     And output includes
       """
@@ -175,7 +175,9 @@ Scenario: Ready issue w/ no parameters
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote 'config.owner'.
       Merging remote branch 'master' from 'config.owner/config.repo'.
-      Retrieving branch information from gitcycle.
+      Adding remote repo 'config.user/config.repo'.
+      Fetching remote 'config.user'.
+      Merging remote branch 'ticket.id' from 'config.user/config.repo'.
       Labeling issue as 'Pending Review'.
       """
 
@@ -206,16 +208,16 @@ Scenario: QA issue
     And output includes
       """
       Retrieving branch information from gitcycle.
-      Deleting old QA branch 'qa_config.user_master'.
+      Deleting old QA branch 'qa_master_config.user'.
       Adding remote repo 'config.owner/config.repo'.
       Fetching remote 'config.owner'.
-      Checking out remote branch 'qa_config.user_master' from 'config.owner/config.repo/master'.
+      Checking out remote branch 'qa_master_config.user' from 'config.owner/config.repo/master'.
       Fetching remote 'origin'.
-      Pushing 'origin/qa_config.user_master'.
+      Pushing 'origin/qa_master_config.user'.
       Adding remote repo 'config.user/config.repo'.
       Fetching remote 'config.user'.
       Merging remote branch 'ticket.id' from 'config.user/config.repo'.
-      Pushing branch 'qa_config.user_master'.
+      Pushing branch 'qa_master_config.user'.
       Type 'gitc qa pass' to approve all issues in this branch.
       Type 'gitc qa fail' to reject all issues in this branch.
       """
@@ -227,6 +229,6 @@ Scenario: QA issue list
   Then gitcycle runs
     And output includes
       """
-      qa_config.user_master
+      qa_master_config.user
         issue #issue.id\tconfig.user/ticket.id
       """
