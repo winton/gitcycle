@@ -173,3 +173,4 @@ $ gitc st - shortcut
 * issues aren't assigned to people
 * There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
 * gitc ready - possibly do syntax checks
+* gitc branch should check if a branch already exists and warn user for ticket
