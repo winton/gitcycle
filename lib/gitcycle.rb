@@ -242,7 +242,7 @@ class Gitcycle
         :repo => branch['repo']['name'],
         :branch => branch['name']
       )
-    else
+    elsif branch
       # Merge from upstream owner
       merge_remote_branch(
         :owner => branch['repo']['owner'],
