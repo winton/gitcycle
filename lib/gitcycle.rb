@@ -37,98 +37,31 @@ class Gitcycle
     start(args) if args
   end
 
-  def checkout(*args)
-    require_git && require_config
+  def branch(*args)
+    url = args.detect { |arg| arg =~ /^https?:\/\// }
+    title = args.detect { |arg| arg =~ /\s/ }
 
-    if args.length > 2 || options?(args)
-      exec_git(:checkout, args)
-    end
+    exec_git(:branch, args) unless url || title
 
-    remote, branch = args
-    remote, branch = nil, remote if branch.nil?
+    require_git && require_configs
 
-    unless branches(:match => branch)
-      collab = branch && remote
-
-      unless collab
-        puts "\nRetrieving repo information from gitcycle.\n".green
-        repo = get('repo')
-        remote = repo['owner']
-      end
-      
-      add_remote_and_fetch(
-        :owner => remote,
-        :repo => @git_repo
-      )
-      
-      puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
-      run("git branch --no-track #{branch} #{remote}/#{branch}")
-
-      if collab
-        puts "Sending branch information to gitcycle.".green
-        get('branch',
-          'branch[home]' => remote,
-          'branch[name]' => branch,
-          'branch[collab]' => 1,
-          'create' => 1
-        )
-      end
-    end
-
-    puts "Checking out '#{branch}'.\n".green
-    run("git checkout #{branch}")
-  end
-  alias :co :checkout
-
-  def commit(*args)
-    msg = nil
-
-    if args.empty?
-      require_git && require_config
-
-      puts "\nRetrieving branch information from gitcycle.\n".green
-      branch = get('branch',
-        'branch[name]' => branches(:current => true),
-        'create' => 0
-      )
-
-      id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
-      title = branch["title"]
-
-      if branch && id
-        msg = "[#{id}]"
-        msg += " #{title}" if title
-      end
-    end
-
-    if msg
-      run("git add . -u && git commit -am #{msg.dump}")
-      Kernel.exec("git commit --amend")
-    else
-      exec_git(:commit, args)
-    end
-  end
-  alias :ci :commit
-
-  def create_branch(url_or_title, reset=false)
-    require_git && require_config
-
-    params = {}
-
-    if url_or_title.strip[0..3] == 'http'
-      if url_or_title.include?('lighthouseapp.com/')
-        params = { 'branch[lighthouse_url]' => url_or_title }
-      elsif url_or_title.include?('github.com/')
-        params = { 'branch[issue_url]' => url_or_title }
-      end
-    else
+    if url && url.include?('lighthouseapp.com/')
+      params = { 'branch[lighthouse_url]' => url }
+    elsif url && url.include?('github.com/')
+      params = { 'branch[issue_url]' => url }
+    elsif url
+      puts "Gitcycle only supports Lighthouse or Github Issue URLs.".red
+      exit
+    elsif title
       params = {
-        'branch[name]' => url_or_title,
-        'branch[title]' => url_or_title
+        'branch[name]' => title,
+        'branch[title]' => title
       }
+    else
+      exec_git(:branch, args)
     end
 
-    params['reset'] = '1' if reset
+    params['reset'] = '1' if args.include?('--redo')
 
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
@@ -180,6 +113,82 @@ class Gitcycle
 
     puts "\n"
   end
+
+  def checkout(*args)
+    if args.length > 2 || options?(args)
+      exec_git(:checkout, args)
+    end
+
+    require_git && require_config
+
+    remote, branch = args
+    remote, branch = nil, remote if branch.nil?
+
+    unless branches(:match => branch)
+      collab = branch && remote
+
+      unless collab
+        puts "\nRetrieving repo information from gitcycle.\n".green
+        repo = get('repo')
+        remote = repo['owner']
+      end
+      
+      add_remote_and_fetch(
+        :owner => remote,
+        :repo => @git_repo
+      )
+      
+      puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
+      run("git branch --no-track #{branch} #{remote}/#{branch}")
+
+      if collab
+        puts "Sending branch information to gitcycle.".green
+        get('branch',
+          'branch[home]' => remote,
+          'branch[name]' => branch,
+          'branch[collab]' => 1,
+          'create' => 1
+        )
+      end
+    end
+
+    puts "Checking out '#{branch}'.\n".green
+    run("git checkout #{branch}")
+  end
+  alias :co :checkout
+
+  def commit(*args)
+    msg = nil
+
+    if args.empty?
+      require_git && require_config
+
+      puts "\nRetrieving branch information from gitcycle.\n".green
+      branch = get('branch',
+        'branch[name]' => branches(:current => true),
+        'create' => 0
+      )
+
+      id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
+
+      if branch && id
+        msg = "[#{id}]"
+        msg += " #{branch["title"]}" if branch["title"]
+      end
+    end
+
+    cmd = "git add . && git add . -u && git commit -a"
+
+    if msg
+      run(cmd + "m #{msg.dump}")
+      Kernel.exec("git commit --amend")
+    elsif args.empty?
+      run(cmd)
+    else
+      exec_git(:commit, args)
+    end
+  end
+  alias :ci :commit
 
   def discuss(*issues)
     require_git && require_config
@@ -396,8 +405,9 @@ class Gitcycle
     end
   end
 
-  def redo(ticket_or_url)
-    create_branch(ticket_or_url, true)
+  def redo(*args)
+    args << "--redo"
+    branch(*args)
   end
 
   def reviewed(*issues)
@@ -445,12 +455,10 @@ class Gitcycle
 
     if command.nil?
       puts "\nNo command specified\n".red
-    elsif command[0..0] == '-'
+    elsif command =~ /^-/
       command_not_recognized
     elsif self.respond_to?(command)
       send(command, *args)
-    elsif args.empty?
-      create_branch(command)
     else
       command_not_recognized
     end
@@ -624,7 +632,7 @@ class Gitcycle
 
   def exec_git(command, args)  
     args.unshift("git", command)
-    Kernel.exec(*args)
+    Kernel.exec(*args.collect(&:to_s))
   end
 
   def fix_conflict(options)
@@ -724,7 +732,7 @@ class Gitcycle
   end
 
   def options?(args)
-    args.any? { |arg| arg[0..0] == '-' }
+    args.any? { |arg| arg =~ /^-/ }
   end
 
   def remotes(options={})

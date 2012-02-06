@@ -20,7 +20,7 @@ Scenario: Feature branch w/ custom branch name
   Given a fresh set of repositories
     And a new Lighthouse ticket
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
     And I enter "y"
     And I enter "n"
     And I enter "ticket.id-rename"
@@ -44,7 +44,7 @@ Scenario: Feature branch
   Given a fresh set of repositories
     And a new Lighthouse ticket
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
     And I enter "y"
     And I enter "y"
   Then gitcycle runs
@@ -86,7 +86,7 @@ Scenario: Redo feature branch
 
 Scenario: Checkout via ticket w/ existing branch
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
   Then gitcycle runs
     And output includes
       """
@@ -98,7 +98,7 @@ Scenario: Checkout via ticket w/ existing branch
 Scenario: Checkout via ticket w/ fresh repo
   Given a fresh set of repositories
   When I cd to the user repo
-    And I execute gitcycle with the Lighthouse ticket URL
+    And I execute gitcycle branch with the Lighthouse ticket URL
   Then gitcycle runs
     And output includes
       """

@@ -1,32 +1,41 @@
 Gitcycle
 ========
 
-Tame your development cycle.
+Gitcycle is a wrapper for git that makes working on a team easy.
 
-Gitcycle is a drop-in replacement for git that makes pull request dev cycles super easy.
+By default, Gitcycle assumes you are working on a fork-based development cycle along side [GitHub Issues](https://github.com/features/projects/issues).
+
+Gitcycle also connects to email, Lighthouse, and Campfire if you want it to.
 
 Get Started
 -----------
 
-Visit [gitcycle.com](http://gitcycle.com) to set up your environment.
+Visit [gitcycle.com](http://gitcycle.com) to set up your repository.
 
-Create Branch
--------------
+Drop-In Replacement
+-------------------
 
-Checkout the branch that you will eventually merge your feature into:
+The `gitc` command responds to everything `git` does, but adds some extra features.
 
-	gitc checkout master
+The idea, at least, is that you can completely drop `git` in favor of `gitc`.
 
-Type `gitc` + your ticket URL to create a new branch:
+Create Branch From Ticket
+-------------------------
 
-	gitc https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+First, checkout the branch that you will eventually merge your code into.
 
-Pull Changes from Upstream
---------------------------
+Type `gitc branch` + your ticket URL to create a new branch:
 
-When you're developing, you may need to pull new changes from an upstream branch:
+	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+
+Pull Changes
+------------
+
+Use `gitc pull` without parameters. It will know what you're trying to do.
 
 	gitc pull
+
+If you're working on a ticket branch, it will automatically pull the latest code from upstream.
 
 Commit Code
 -----------
@@ -37,6 +46,8 @@ Commit all changes and open commit message in EDITOR with ticket info prefilled:
 
 Push Changes
 ------------
+
+Use `gitc push` without parameters. It will know what you're trying to do.
 
 	gitc push
 
@@ -115,7 +126,7 @@ If you are working in a fork, it is easy to checkout upstream branches:
 
 ### Collaborate
 
-Its easy to checkout branches from other forks:
+Checkout branches from other forks:
 
 	gitc checkout [USER] [BRANCH]
 
@@ -128,12 +139,6 @@ See who is QA'ing what:
 ### Redo Branch
 
 If you associate the wrong branch with a ticket, use `gitc redo` to fix it.
-
-Checkout the branch that you will eventually merge your feature into:
-
-	gitc checkout master
-
-Type `gitc redo` + your ticket URL to reset the branch:
 
 	gitc redo https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 

@@ -139,8 +139,8 @@ When /^I execute gitcycle setup$/ do
   ].join(' ')
 end
 
-When /^I execute gitcycle with the Lighthouse ticket URL$/ do
-  $execute << $ticket.url
+When /^I execute gitcycle branch with the Lighthouse ticket URL$/ do
+  $execute << "branch #{$ticket.url}"
 end
 
 When /^I execute gitcycle redo with the Lighthouse ticket URL$/ do
