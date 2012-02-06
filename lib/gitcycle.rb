@@ -37,10 +37,15 @@ class Gitcycle
     start(args) if args
   end
 
-  def checkout(remote, branch=nil)
+  def checkout(*args)
     require_git && require_config
 
-    branch, remote = remote, nil if branch.nil?
+    if args.length > 2 || options?(args)
+      exec_git(:checkout, args)
+    end
+
+    remote, branch = args
+    remote, branch = nil, remote if branch.nil?
 
     unless branches(:match => branch)
       collab = branch && remote
@@ -79,6 +84,8 @@ class Gitcycle
     msg = nil
 
     if args.empty?
+      require_git && require_config
+
       puts "\nRetrieving branch information from gitcycle.\n".green
       branch = get('branch',
         'branch[name]' => branches(:current => true),
@@ -200,7 +207,9 @@ class Gitcycle
     end
   end
 
-  def pull
+  def pull(*args)
+    exec_git(:pull, args) if args.length > 0
+
     require_git && require_config
 
     current_branch = branches(:current => true)
@@ -239,7 +248,11 @@ class Gitcycle
     branch
   end
 
-  def push
+  def push(*args)
+    exec_git(:push, args) if args.length > 0
+
+    require_git && require_config
+
     branch = pull
     remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
 
@@ -708,6 +721,10 @@ class Gitcycle
     run("git merge #{owner}/#{branch}")
 
     fix_conflict(options)
+  end
+
+  def options?(args)
+    args.any? { |arg| arg[0..0] == '-' }
   end
 
   def remotes(options={})
