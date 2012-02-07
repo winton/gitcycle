@@ -281,8 +281,9 @@ class Gitcycle
     branch = pull
     remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
 
-    puts "\nPushing branch '#{remote}/#{branch['name']}'.\n".green
-    run("git push #{remote} #{branch['name']}")
+    branch = branches(:current => true)
+    puts "\nPushing branch '#{remote}/#{branch}'.\n".green
+    run("git push #{remote} #{branch}")
   end
 
   def qa(*issues)
