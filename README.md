@@ -29,7 +29,7 @@ Branch From Ticket
 
 First, checkout the branch that you will eventually merge your code into:
 
-	gitc checkout <branch>
+	gitc checkout [BRANCH]
 
 Type `gitc branch` + your ticket URL to create a new branch:
 
@@ -81,55 +81,49 @@ Code Review
 
 Periodically check for "Pending Review" issues on GitHub.
 
-Once reviewed, label the issue as reviewed:
+### Pass
 
-	gitc reviewed [GITHUB ISSUE #] [...]
+	gitc review pass [GITHUB ISSUE #] [...]
+
+Label the issue "Pending QA".
+
+### Fail
+
+	gitc review fail [GITHUB ISSUE #] [...]
+
+Label the issue "Fail".
 
 Quality Assurance
 -----------------
 
 Periodically check for "Pending QA" issues on Github.
 
-To create a new QA branch:
+### Create QA Branch
 
 	gitc qa [GITHUB ISSUE #] [...]
 
 Now you have a QA branch containing all commits from the specified Github issue numbers.
 
-QA Fail
--------
+### Fail
 
-If a feature does not pass QA:
+	gitc qa fail [GITHUB ISSUE #]
 
-	gitc qa fail [GITHUB ISSUE #] [...]
+Label the issue with "Fail" and regenerate the QA branch without the failing issue.
 
-To fail all issues:
-
-	gitc qa fail
-
-This adds a "fail" label to the issue.
-
-QA Pass
-------- 
-
-If a feature passes QA:
-
-	gitc qa pass [GITHUB ISSUE #] [...]
-
-To pass all issues:
+### Pass
 
 	gitc qa pass
 
-This adds a "pass" label to the issue and completes the pull request by merging the feature branch into the target branch.
+Label all issues "Pass" and the merge the QA branch into target branch.
 
-More
-----
+### Status
 
-### Checkout Upstream Branch
+See who is QA'ing what:
 
-If you are working in a fork, it is easy to checkout upstream branches:
+	gitc qa
 
-	gitc checkout [BRANCH]
+Checkout
+--------
 
 ### Collaborate
 
@@ -137,36 +131,34 @@ Checkout branches from other forks:
 
 	gitc checkout [USER] [BRANCH]
 
-### QA Status
+### From Ticket
 
-See who is QA'ing what:
+Checkout a branch from a ticket URL:
 
-	gitc qa
+	gitc checkout [TICKET URL]
 
-### Redo Branch
+### Upstream Branch
 
-If you associate the wrong branch with a ticket, use `gitc redo` to fix it.
+Gitcycle automatically knows if you are checking out an upstream branch:
 
-	gitc redo https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+	gitc checkout [BRANCH]
 
 Todo
 ----
 
 * Add comment on lighthouse with issue URL
 * Label issues with ticket milestone
-* Add ability to associate multiple branches/pull requests with one Lighthouse ticket
+* Issues aren't assigned to people
 * Add comment on lighthouse with issue URL
-* gitc discuss should tag issue with 'Discuss'
 * On pass or fail, send email to Github email
-* Note you can use gitc with a string
+* Note you can use gitc with a string (and get this working)
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc redo happens on branch with Github issue, close the existing issue
 * Instead of detecting CONFLICT, use error status $? != 0
-* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
-* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name.  Also, when I gitc reviewed failed [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
-* gitc discuss should tag issue with 'Discuss'
 * gitc ready - possibly do syntax checks
 $ gitc st - shortcut
 * issues aren't assigned to people
 * There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
 * gitc qa pass 1234 # doesnt update lighthouse and screws up git issue tags
+* [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
+* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
