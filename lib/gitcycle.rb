@@ -65,34 +65,29 @@ class Gitcycle
       exec_git(:branch, args)
     end
 
-    params['reset'] = '1' if args.include?('--redo')
-
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
     name = branch['name']
 
     begin
       owner, repo = branch['repo'].split(':')
+      branch['home'] = @git_login
 
-      unless branch['exists']
-        branch['home'] = @git_login
-
-        unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
-          branch['source'] = q("What branch would you like to eventually merge into?")
-        end
-
-        unless yes?("Would you like to name your branch '#{name}'?")
-          name = q("\nWhat would you like to name your branch?")
-          name = name.gsub(/[\s\W]/, '-')
-        end
-
-        checkout_remote_branch(
-          :owner => owner,
-          :repo => repo,
-          :branch => branch['source'],
-          :target => name
-        )
+      unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
+        branch['source'] = q("What branch would you like to eventually merge into?")
       end
+
+      unless yes?("Would you like to name your branch '#{name}'?")
+        name = q("\nWhat would you like to name your branch?")
+        name = name.gsub(/[\s\W]/, '-')
+      end
+
+      checkout_remote_branch(
+        :owner => owner,
+        :repo => repo,
+        :branch => branch['source'],
+        :target => name
+      )
     rescue SystemExit, Interrupt
       puts "\nDeleting branch from gitcycle.\n".green
       branch = get('branch',
@@ -102,17 +97,13 @@ class Gitcycle
       )
     end
 
-    if branch['exists']
-      checkout_or_track(:name => name, :remote => 'origin')
-    else
-      puts "Sending branch information to gitcycle.".green
-      get('branch',
-        'branch[home]' => branch['home'],
-        'branch[name]' => branch['name'],
-        'branch[rename]' => name != branch['name'] ? name : nil,
-        'branch[source]' => branch['source']
-      )
-    end
+    puts "Sending branch information to gitcycle.".green
+    get('branch',
+      'branch[home]' => branch['home'],
+      'branch[name]' => branch['name'],
+      'branch[rename]' => name != branch['name'] ? name : nil,
+      'branch[source]' => branch['source']
+    )
 
     puts "\n"
   end
@@ -124,39 +115,45 @@ class Gitcycle
 
     require_git && require_config
 
-    remote, branch = args
-    remote, branch = nil, remote if branch.nil?
+    if args.length == 1 && args[0] =~ /^https?:\/\//
+      puts "\nRetrieving branch information from gitcycle.\n".green
+      branch = get('branch', 'branch[lighthouse_url]' => args[0])
+      checkout_or_track(:name => branch['name'], :remote => 'origin')
+    else
+      remote, branch = args
+      remote, branch = nil, remote if branch.nil?
 
-    unless branches(:match => branch)
-      collab = branch && remote
+      unless branches(:match => branch)
+        collab = branch && remote
 
-      unless collab
-        puts "\nRetrieving repo information from gitcycle.\n".green
-        repo = get('repo')
-        remote = repo['owner']
-      end
-      
-      add_remote_and_fetch(
-        :owner => remote,
-        :repo => @git_repo
-      )
-      
-      puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
-      run("git branch --no-track #{branch} #{remote}/#{branch}")
-
-      if collab
-        puts "Sending branch information to gitcycle.".green
-        get('branch',
-          'branch[home]' => remote,
-          'branch[name]' => branch,
-          'branch[collab]' => 1,
-          'create' => 1
+        unless collab
+          puts "\nRetrieving repo information from gitcycle.\n".green
+          repo = get('repo')
+          remote = repo['owner']
+        end
+        
+        add_remote_and_fetch(
+          :owner => remote,
+          :repo => @git_repo
         )
-      end
-    end
+        
+        puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
+        run("git branch --no-track #{branch} #{remote}/#{branch}")
 
-    puts "Checking out '#{branch}'.\n".green
-    run("git checkout #{branch}")
+        if collab
+          puts "Sending branch information to gitcycle.".green
+          get('branch',
+            'branch[home]' => remote,
+            'branch[name]' => branch,
+            'branch[collab]' => 1,
+            'create' => 1
+          )
+        end
+      end
+
+      puts "Checking out '#{branch}'.\n".green
+      run("git checkout #{branch}")
+    end
   end
   alias :co :checkout
 
@@ -426,11 +423,6 @@ class Gitcycle
         'scope' => 'repo'
       )
     end
-  end
-
-  def redo(*args)
-    args << "--redo"
-    branch(*args)
   end
 
   def review(pass_fail, *issues)

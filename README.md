@@ -29,7 +29,7 @@ Branch From Ticket
 
 First, checkout the branch that you will eventually merge your code into:
 
-	gitc checkout <branch>
+	gitc checkout [BRANCH]
 
 Type `gitc branch` + your ticket URL to create a new branch:
 
@@ -108,18 +108,24 @@ Now you have a QA branch containing all commits from the specified Github issue 
 
 	gitc qa fail [GITHUB ISSUE #]
 
-Label the issue with "Fail" and regenerate the QA branch with the failing issue.
+Label the issue with "Fail" and regenerate the QA branch without the failing issue.
 
 ### Pass
 
 	gitc qa pass
 
-Label the issue "Pass" and the merge the QA branch into target branch.
+Label all issues "Pass" and the merge the QA branch into target branch.
 
-More
-----
+### Status
 
-### Checkout Upstream Branch
+See who is QA'ing what:
+
+	gitc qa
+
+Checkout
+--------
+
+### Upstream Branch
 
 If you are working in a fork, it is easy to checkout upstream branches:
 
@@ -130,18 +136,6 @@ If you are working in a fork, it is easy to checkout upstream branches:
 Checkout branches from other forks:
 
 	gitc checkout [USER] [BRANCH]
-
-### QA Status
-
-See who is QA'ing what:
-
-	gitc qa
-
-### Redo Branch
-
-If you associate the wrong branch with a ticket, use `gitc redo` to fix it.
-
-	gitc redo https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
 Todo
 ----
