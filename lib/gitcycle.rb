@@ -396,7 +396,7 @@ class Gitcycle
 
     if issues.empty?
       branch = pull
-      create_pull_request(branch)
+      branch = create_pull_request(branch)
 
       if branch == false
         puts "Branch not found.\n".red
