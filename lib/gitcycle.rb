@@ -433,14 +433,12 @@ class Gitcycle
     branch(*args)
   end
 
-  def reviewed(*issues)
+  def review(pass_fail, *issues)
     require_git && require_config
 
-    if issues.include?("fail")
-      issues = issues.reject{|x| x=='fail'}
+    if pass_fail == 'fail'
       label = 'Fail'
     else
-      issues = issues.reject{|x| x=='pass'}
       label = 'Pending QA'
     end
 

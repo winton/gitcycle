@@ -191,13 +191,13 @@ Scenario: Ready issue w/ parameters
 Scenario: Reviewed issue w/ no parameters
   When I cd to the user repo
     And I checkout ticket.id
-    And I execute gitcycle with "reviewed"
+    And I execute gitcycle with "review pass"
   Then gitcycle runs
     And output includes "Labeling issue as 'Pending QA'."
 
 Scenario: Reviewed issue w/ parameters
   When I cd to the user repo
-    And I execute gitcycle with "reviewed issue.id"
+    And I execute gitcycle with "review pass issue.id"
   Then gitcycle runs
     And output includes "Labeling issues as 'Pending QA'."
 

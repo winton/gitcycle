@@ -81,9 +81,17 @@ Code Review
 
 Periodically check for "Pending Review" issues on GitHub.
 
-Once reviewed, label the issue as reviewed:
+If an issue passes review:
 
-	gitc reviewed [GITHUB ISSUE #] [...]
+	gitc review pass [GITHUB ISSUE #] [...]
+
+Label the issue "Pending QA".
+
+If an issue fails review:
+
+	gitc review fail [GITHUB ISSUE #] [...]
+
+Label the issue "Fail".
 
 Quality Assurance
 -----------------
@@ -96,31 +104,17 @@ To create a new QA branch:
 
 Now you have a QA branch containing all commits from the specified Github issue numbers.
 
-QA Fail
--------
+If an issue fails QA:
 
-If a feature does not pass QA:
+	gitc qa fail [GITHUB ISSUE #]
 
-	gitc qa fail [GITHUB ISSUE #] [...]
+Label the issue with "Fail" and regenerate the QA branch with the failing issue.
 
-To fail all issues:
-
-	gitc qa fail
-
-This adds a "fail" label to the issue.
-
-QA Pass
-------- 
-
-If a feature passes QA:
-
-	gitc qa pass [GITHUB ISSUE #] [...]
-
-To pass all issues:
+If all issues pass QA:
 
 	gitc qa pass
 
-This adds a "pass" label to the issue and completes the pull request by merging the feature branch into the target branch.
+Label the issue "Pass" and the merge the QA branch into target branch.
 
 More
 ----
