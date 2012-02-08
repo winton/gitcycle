@@ -147,19 +147,14 @@ Todo
 ----
 
 * Label issues with ticket milestone
-* Add ability to associate multiple branches/pull requests with one Lighthouse ticket
+* Issues aren't assigned to people
 * Add comment on lighthouse with issue URL
-* gitc discuss should tag issue with 'Discuss'
 * On pass or fail, send email to Github email
-* Note you can use gitc with a string
+* Note you can use gitc with a string (and get this working)
 * gitc qa pass, should not set ticket to pending-approval if its already resolved
 * If gitc redo happens on branch with Github issue, close the existing issue
-* Add comment on lighthouse with issue URL
 * Instead of detecting CONFLICT, use error status $? != 0
-* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
-* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name.  Also, when I gitc reviewed failed [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
-* gitc discuss should tag issue with 'Discuss'
 * gitc ready - possibly do syntax checks
 $ gitc st - shortcut
-* issues aren't assigned to people
-* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
+* There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending *, but remove the Branch Name.  Also, when I gitc reviewed failed [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
+* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
