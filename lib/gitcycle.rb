@@ -202,6 +202,12 @@ class Gitcycle
       if branch == false
         puts "Branch not found.\n".red
       elsif branch['issue_url']
+        puts "\nLabeling issue as 'Discuss'.\n".green
+        get('label',
+          'branch[name]' => branch['name'],
+          'labels' => [ 'Discuss' ]
+        )
+
         puts "Opening issue: #{branch['issue_url']}\n".green
         Launchy.open(branch['issue_url'])
       else
@@ -403,7 +409,7 @@ class Gitcycle
       elsif branch['issue_url']
         puts "\nLabeling issue as 'Pending Review'.\n".green
         get('label',
-          'branch[name]' => branches(:current => true),
+          'branch[name]' => branch['name'],
           'labels' => [ 'Pending Review' ]
         )
 

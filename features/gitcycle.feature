@@ -147,6 +147,7 @@ Scenario: Discuss commits w/ no parameters and something committed
       """
       Retrieving branch information from gitcycle.
       Creating GitHub pull request.
+      Labeling issue as 'Discuss'.
       """
     And output includes "Opening issue" with URL
     And URL is a valid issue
