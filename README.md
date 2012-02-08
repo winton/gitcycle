@@ -125,17 +125,23 @@ See who is QA'ing what:
 Checkout
 --------
 
-### Upstream Branch
-
-If you are working in a fork, it is easy to checkout upstream branches:
-
-	gitc checkout [BRANCH]
-
 ### Collaborate
 
 Checkout branches from other forks:
 
 	gitc checkout [USER] [BRANCH]
+
+### From Ticket
+
+Checkout a branch from a ticket URL:
+
+	gitc checkout [TICKET URL]
+
+### Upstream Branch
+
+Gitcycle automatically knows if you are checking out an upstream branch:
+
+	gitc checkout [BRANCH]
 
 Todo
 ----
