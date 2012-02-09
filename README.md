@@ -147,6 +147,7 @@ Todo
 ----
 
 * Add comment on lighthouse with issue URL
+* If its failed, lets get rid of Pending Review or Pending QA, not sure how I feel about Pending Review + Fail, maybe just a Fail Review
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
 * gitc merge chrisped/branch-with-reverts # to quickly revert changes
 * Label issues with ticket milestone
