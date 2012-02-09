@@ -147,7 +147,8 @@ Todo
 ----
 
 * Add comment on lighthouse with issue URL
-* If its failed, lets get rid of Pending Review or Pending QA, not sure how I feel about Pending Review + Fail, maybe just a Fail Review
+* Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
+	Lighthouse ticket changes to pending-qa if ticket is not the same as the parent.
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
 * gitc merge chrisped/branch-with-reverts # to quickly revert changes
 * Label issues with ticket milestone
