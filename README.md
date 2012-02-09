@@ -148,6 +148,7 @@ Todo
 
 * Add comment on lighthouse with issue URL
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
+* gitc merge chrisped/branch-with-reverts # to quickly revert changes
 * Label issues with ticket milestone
 * Issues aren't assigned to people
 * Add comment on lighthouse with issue URL
