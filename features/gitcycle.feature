@@ -201,6 +201,22 @@ Scenario: QA issue
       Type 'gitc qa fail' to reject all issues in this branch.
       """
 
+Scenario: QA issue pass
+  When I cd to the owner repo
+    And I checkout qa_master_config.user
+    And I execute gitcycle with "qa pass"
+  Then gitcycle runs
+    And output includes
+      """
+      Retrieving branch information from gitcycle.
+      Checking out branch 'master'.
+      Adding remote repo 'config.user/config.repo'.
+      Fetching remote 'config.user'.
+      Merging remote branch 'ticket.id' from 'config.user/config.repo'.
+      Pushing branch 'master'.
+      Labeling all issues as 'Pass'.
+      """
+
 Scenario: QA issue list
   When I cd to the owner repo
     And I checkout master

@@ -175,6 +175,12 @@ Then /^gitcycle runs$/ do
   end
 end
 
+Then /^gitcycle runs with exit$/ do
+  $execute.each do |cmd|
+    lambda { run_gitcycle(cmd) }.should raise_error SystemExit
+  end
+end
+
 Then /^gitcycle\.yml should be valid$/ do
   gitcycle = YAML.load(File.read(GITCYCLE))
 
