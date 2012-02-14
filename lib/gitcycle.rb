@@ -595,8 +595,14 @@ class Gitcycle
       if options[:qa_branch]
         qa_branch = options[:qa_branch]
       else
+        source = branches(:current => true)
+        
+        unless yes?("\nDo you want to create a QA branch from '#{source}'?")
+          source = q("What branch would you like to base this QA branch off of?")
+        end
+        
         puts "\nRetrieving branch information from gitcycle.\n".green
-        qa_branch = get('qa_branch', 'issues' => issues)
+        qa_branch = get('qa_branch', 'issues' => issues, 'source' => source)
       end
 
       source = qa_branch['source']

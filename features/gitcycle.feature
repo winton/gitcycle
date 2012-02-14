@@ -183,9 +183,11 @@ Scenario: QA issue
   When I cd to the owner repo
     And I checkout master
     And I execute gitcycle with "qa issue.id"
+    And I enter "y"
   Then gitcycle runs
     And output includes
       """
+      Do you want to create a QA branch from 'master'? (y/n)
       Retrieving branch information from gitcycle.
       Deleting old QA branch 'qa_master_config.user'.
       Adding remote repo 'config.owner/config.repo'.

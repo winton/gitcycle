@@ -146,7 +146,6 @@ Gitcycle automatically knows if you are checking out an upstream branch:
 Todo
 ----
 
-* QA Branch -> LH ticket update not working
 * Conflict recording not working
 * Add comment on lighthouse with issue URL
 * Allow QA branches to be created from any branch and allow any issue to merge into it
