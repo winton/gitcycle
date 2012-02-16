@@ -595,8 +595,14 @@ class Gitcycle
       if options[:qa_branch]
         qa_branch = options[:qa_branch]
       else
+        source = branches(:current => true)
+        
+        unless yes?("\nDo you want to create a QA branch from '#{source}'?")
+          source = q("What branch would you like to base this QA branch off of?")
+        end
+        
         puts "\nRetrieving branch information from gitcycle.\n".green
-        qa_branch = get('qa_branch', 'issues' => issues)
+        qa_branch = get('qa_branch', 'issues' => issues, 'source' => source)
       end
 
       source = qa_branch['source']
@@ -623,16 +629,22 @@ class Gitcycle
           puts "\n"
         end
 
+        warnings = {}
+
         qa_branch['branches'][range].each do |branch|
           issue = branch['issue']
           owner, repo = branch['repo'].split(':')
           home = branch['home']
-          branch = branch['branch']
+
+          if source != branch['source']
+            warnings[branch['source']] ||= []
+            warnings[branch['source']] << branch['issue']
+          end
 
           output = merge_remote_branch(
             :owner => home,
             :repo => repo,
-            :branch => branch,
+            :branch => branch['branch'],
             :issue => issue,
             :issues => qa_branch['branches'].collect { |b| b['issue'] },
             :type => :to_qa
@@ -641,6 +653,17 @@ class Gitcycle
 
         puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
         puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
+
+        unless warnings.empty?
+          puts "\n#{"WARNING:".red} If you pass this QA branch, the following branches will merge into '#{source.yellow}':\n"
+          
+          warnings.each do |(branch, issues)|
+            issues.collect! { |issue| "##{issue}" }
+            puts "  #{branch.yellow} (#{issues.join(', ')})"
+          end
+          
+          puts "\nBe sure this is correct!\n".yellow
+        end
       end
     end
   end

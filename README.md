@@ -146,7 +146,9 @@ Gitcycle automatically knows if you are checking out an upstream branch:
 Todo
 ----
 
+* Conflict recording not working
 * Add comment on lighthouse with issue URL
+* Allow QA branches to be created from any branch and allow any issue to merge into it
 * Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
 	Lighthouse ticket changes to pending-qa if ticket is not the same as the parent.
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
