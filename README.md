@@ -170,3 +170,4 @@ $ gitc st - shortcut
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
 * gitc qa resolved is not working, we need gitc qa pass to merge the whole branch into the target branch
 * gitc qa clean # to clean up old branches
+* gitc qa pass # if ticket resolved, it should stay resolved
