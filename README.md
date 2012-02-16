@@ -171,3 +171,4 @@ $ gitc st - shortcut
 * gitc qa resolved is not working, we need gitc qa pass to merge the whole branch into the target branch
 * gitc qa clean # to clean up old branches
 * gitc qa pass # if ticket resolved, it should stay resolved
+* gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
