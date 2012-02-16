@@ -166,3 +166,5 @@ $ gitc st - shortcut
 * gitc qa pass 1234 # doesnt update lighthouse and screws up git issue tags
 * [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
+* gitc qa resolved is not working, we need gitc qa pass to merge the whole branch into the target branch
+* gitc qa clean # to clean up old branches
