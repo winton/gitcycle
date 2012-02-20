@@ -1,22 +1,5 @@
 # Feature: gitcycle
 
-# Scenario: Ready issue
-#   When I cd to the user repo
-#     And I checkout ticket.id
-#     And I execute gitcycle with "ready"
-#   Then gitcycle runs
-#     And output includes
-#       """
-#       Retrieving branch information from gitcycle.
-#       Adding remote repo 'config.owner/config.repo'.
-#       Fetching remote 'config.owner'.
-#       Merging remote branch 'master' from 'config.owner/config.repo'.
-#       Adding remote repo 'config.user/config.repo'.
-#       Fetching remote 'config.user'.
-#       Merging remote branch 'ticket.id' from 'config.user/config.repo'.
-#       Labeling issue as 'Pending Review'.
-#       """
-
 # Scenario: Reviewed issue w/ no parameters
 #   When I cd to the user repo
 #     And I checkout ticket.id
