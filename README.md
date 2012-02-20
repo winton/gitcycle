@@ -168,3 +168,4 @@ $ gitc st - shortcut
 * gitc qa pass 1234 # doesnt update lighthouse and screws up git issue tags
 * [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
+* When conflict happens on gitc qa pass, label does not get updated on issue
