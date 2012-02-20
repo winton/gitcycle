@@ -77,6 +77,10 @@ class Gitcycle
         branch['source'] = q("What branch would you like to eventually merge into?")
       end
 
+      if branch['source'].include?('/')
+        branch['home'], branch['source'] = branch['source'].split('/')
+      end
+
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
@@ -145,7 +149,6 @@ class Gitcycle
           get('branch',
             'branch[home]' => remote,
             'branch[name]' => branch,
-            'branch[collab]' => 1,
             'create' => 1
           )
         end
@@ -236,9 +239,7 @@ class Gitcycle
       'create' => 0
     )
 
-    collab = branch && branch['collab'] == '1'
-
-    if collab
+    if collab?(branch)
       # Merge from collab
       merge_remote_branch(
         :owner => branch['home'],
@@ -264,7 +265,7 @@ class Gitcycle
       )
     end
 
-    unless collab
+    unless collab?(branch)
       # Merge from origin
       merge_remote_branch(
         :owner => @git_login,
@@ -281,12 +282,11 @@ class Gitcycle
 
     require_git && require_config
 
-    branch = pull
-    remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
-
+    pull
     branch = branches(:current => true)
-    puts "\nPushing branch '#{remote}/#{branch}'.\n".green
-    run("git push #{remote} #{branch}")
+
+    puts "\nPushing branch 'origin/#{branch}'.\n".green
+    run("git push origin #{branch}")
   end
 
   def qa(*issues)
@@ -397,31 +397,26 @@ class Gitcycle
   def ready(*issues)
     require_git && require_config
 
-    if issues.empty?
-      branch = pull
-      branch = create_pull_request(branch)
+    branch = pull
+    branch = create_pull_request(branch)
 
-      if branch == false
-        puts "Branch not found.\n".red
-      elsif branch['issue_url']
-        puts "\nLabeling issue as 'Pending Review'.\n".green
-        get('label',
-          'branch[name]' => branch['name'],
-          'labels' => [ 'Pending Review' ]
-        )
-
-        puts "Opening issue: #{branch['issue_url']}\n".green
-        Launchy.open(branch['issue_url'])
-      else
-        puts "You have not pushed any commits to '#{branch['name']}'.\n".red
-      end
-    else
-      puts "\nLabeling issues as 'Pending Review'.\n".green
+    if branch == false
+      puts "Branch not found.\n".red
+    elsif branch['name'].include?('/')
+      remote, branch = branch['name'].split('/')
+      puts "\nPushing branch '#{remote}/#{branch}'.\n".green
+      run("git push #{remote} #{branch}")
+    elsif branch['issue_url']
+      puts "\nLabeling issue as 'Pending Review'.\n".green
       get('label',
-        'issues' => issues,
-        'labels' => [ 'Pending Review' ],
-        'scope' => 'repo'
+        'branch[name]' => branch['name'],
+        'labels' => [ 'Pending Review' ]
       )
+
+      puts "Opening issue: #{branch['issue_url']}\n".green
+      Launchy.open(branch['issue_url'])
+    else
+      puts "You have not pushed any commits to '#{branch['name']}'.\n".red
     end
   end
 
@@ -557,6 +552,12 @@ class Gitcycle
 
     puts "Pushing 'origin/#{target}'.\n".green
     run("git push origin #{target}")
+  end
+
+  def collab?(branch)
+    branch &&
+    branch['home'] != branch['user'] &&
+    branch['home'] != branch['repo'].split(':')[0]
   end
 
   def command_not_recognized
