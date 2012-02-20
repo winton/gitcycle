@@ -169,3 +169,7 @@ $ gitc st - shortcut
 * [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
 * gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
 * When conflict happens on gitc qa pass, label does not get updated on issue
+* gitc qa resolved is not working, we need gitc qa pass to merge the whole branch into the target branch
+* gitc qa clean # to clean up old branches
+* gitc qa pass # if ticket resolved, it should stay resolved
+* gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
