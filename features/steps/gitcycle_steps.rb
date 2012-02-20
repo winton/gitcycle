@@ -164,7 +164,7 @@ When /^I execute gitcycle with "([^\"]*)"$/ do |cmd|
   $execute << gsub_variables(cmd)
 end
 
-When /^I answer yes to everything$/ do
+When /^I give default input$/ do
   step "I enter \"y\""
   step "I enter \"y\""
 end

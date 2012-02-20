@@ -1,46 +1,5 @@
 # Feature: gitcycle
 
-# Scenario: Discuss commits w/ no parameters and nothing committed
-#   When I cd to the user repo
-#     And I checkout ticket.id
-#     And I execute gitcycle with "discuss"
-#   Then gitcycle runs
-#     And output includes
-#       """
-#       Retrieving branch information from gitcycle.
-#       Creating GitHub pull request.
-#       You must push code before opening a pull request.
-#       """
-#     And redis entries valid
-
-# Scenario: Discuss commits w/ no parameters and something committed
-#   When I cd to the user repo
-#     And I checkout ticket.id
-#     And I commit something
-#     And I execute gitcycle with "discuss"
-#   Then gitcycle runs
-#     And output includes
-#       """
-#       Retrieving branch information from gitcycle.
-#       Creating GitHub pull request.
-#       Labeling issue as 'Discuss'.
-#       """
-#     And output includes "Opening issue" with URL
-#     And URL is a valid issue
-#     And redis entries valid
-
-# Scenario: Discuss commits w/ parameters
-#   When I cd to the user repo
-#     And I checkout ticket.id
-#     And I execute gitcycle with "discuss issue.id"
-#   Then gitcycle runs
-#     And output includes "Retrieving branch information from gitcycle."
-#     And output does not include "Creating GitHub pull request."
-#     And output does not include "Branch not found."
-#     And output does not include "You must push code before opening a pull request."
-#     And output includes "Opening issue" with URL
-#     And URL is a valid issue
-
 # Scenario: Ready issue
 #   When I cd to the user repo
 #     And I checkout ticket.id

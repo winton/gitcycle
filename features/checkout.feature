@@ -4,7 +4,7 @@ Scenario: Existing branch
   Given a fresh set of repositories
   When I cd to the user repo
     And I execute gitcycle branch with a new URL or string
-    And I answer yes to everything
+    And I give default input
     And I execute gitcycle checkout with the last URL or string
     And gitcycle runs
   Then output includes
