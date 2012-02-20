@@ -21,6 +21,7 @@ Before do |scenario|
   $execute = []
   $input = []
   $remotes = nil
+  $ticket = nil
 end
 
 def branches(options={})
@@ -46,6 +47,9 @@ def gsub_variables(str)
   if $ticket
     str = str.gsub('ticket.id', $ticket.attributes['id'])
   end
+  if $tickets
+    str = str.gsub('last_ticket.id', $tickets.last.attributes['id'])
+  end
   if $url
     issue_id = $url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
     str = str.gsub('issue.id', issue_id)
@@ -63,23 +67,70 @@ def log(match)
 end
 
 def repos(reload=false)
-  if $repos && !reload
-    $repos
-  else
-    owner = "#{BASE}/features/fixtures/owner"
-    user = "#{BASE}/features/fixtures/user"
-    
-    FileUtils.rm_rf(owner)
-    FileUtils.rm_rf(user)
-    
+  fixtures = "#{BASE}/features/fixtures"
+
+  if !$repo_cache_created || !$repos || reload
+    Dir.chdir(fixtures)
+  end
+
+  if !$repo_cache_created || reload
     system [
-      "cd #{BASE}/features/fixtures",
-      "git clone git@github.com:#{config['owner']}/#{config['repo']}.git owner",
-      "git clone git@github.com:#{config['user']}/#{config['repo']}.git user"
+      "rm -rf #{fixtures}/owner_cache",
+      "rm -rf #{fixtures}/user_cache",
+      "mkdir -p #{fixtures}/owner_cache",
+      "cd #{fixtures}/owner_cache",
+      "git init .",
+      "git remote add origin git@github.com:#{config['owner']}/#{config['repo']}.git",
+      "echo 'first commit' > README",
+      "git add .",
+      "git commit -a -m 'First commit'",
+      "git push origin master --force",
+      "git fetch",
+      "cd #{fixtures}",
+      "rm -rf user_cache",
+      "cp -r owner_cache user_cache",
+      "cd user_cache",
+      "git remote rm origin",
+      "git remote add origin git@github.com:#{config['user']}/#{config['repo']}.git",
+      "git fetch",
+      "git push origin master --force"
     ].join(' && ')
 
-    $repos = { :owner => owner, :user => user }
+    unless $repo_cache_created
+      # Clear all branches.
+      [ 'owner', 'user' ].each do |type|
+        system(
+          "cd #{fixtures}/#{type}_cache && " +
+          [
+            "git branch -r",
+            "grep origin/",
+            "grep -v master$",
+            "grep -v HEAD",
+            "cut -d/ -f2-",
+            "while read line; do git push origin :$line; git branch -D $line; done;"
+          ].join(' | ')
+          )
+      end
+    end
+
+    $repo_cache_created = true
   end
+
+  if !$repos || reload
+    $repos = {}
+
+    [ 'owner', 'user' ].each do |type|
+      FileUtils.rm_rf("#{fixtures}/#{type}")
+      $repos[type.to_sym] = "#{fixtures}/#{type}"
+
+      system [
+        "cd #{fixtures}",
+        "cp -R #{type}_cache #{type}"
+      ].join(' && ')
+    end
+  end
+
+  $repos
 end
 
 def run_gitcycle(cmd)
@@ -105,23 +156,17 @@ Given /^a fresh set of repositories$/ do
   repos(true)
 end
 
-Given /^a new Lighthouse ticket$/ do
-  $ticket = Lighthouse::Ticket.new(
-    :body => "test",
-    :project_id => config['lighthouse']['project'],
-    :state => "open",
-    :title => "Test ticket"
-  )
-  $ticket.save
-  $ticket.attributes['id'] = "master-#{$ticket.attributes['id']}"
-end
-
 When /^I execute gitcycle with nothing$/ do
   $execute << nil
 end
 
 When /^I execute gitcycle with "([^\"]*)"$/ do |cmd|
   $execute << gsub_variables(cmd)
+end
+
+When /^I answer yes to everything$/ do
+  step "I enter \"y\""
+  step "I enter \"y\""
 end
 
 When /^I execute gitcycle setup$/ do
@@ -140,8 +185,22 @@ When /^I execute gitcycle setup$/ do
   ].join(' ')
 end
 
-When /^I execute gitcycle (.*) with the Lighthouse ticket URL$/ do |cmd|
+When /^I execute gitcycle (.*) with a new URL or string$/ do |cmd|
+  $ticket = Lighthouse::Ticket.new(
+    :body => "test",
+    :project_id => config['lighthouse']['project'],
+    :state => "open",
+    :title => "Test ticket"
+  )
+  $ticket.save
+  $ticket.attributes['id'] = "master-#{$ticket.attributes['id']}"
+  $tickets ||= []
+  $tickets << $ticket
   $execute << "#{cmd} #{$ticket.url}"
+end
+
+When /^I execute gitcycle (.*) with the last URL or string$/ do |cmd|
+  $execute << "#{cmd} #{$tickets.last.url}"
 end
 
 When /^I cd to the (.*) repo$/ do |user|
@@ -169,10 +228,8 @@ When /^I checkout (.+)$/ do |branch|
   `git checkout #{branch}`
 end
 
-Then /^gitcycle runs$/ do
-  $execute.each do |cmd|
-    run_gitcycle(cmd)
-  end
+When /^gitcycle runs$/ do
+  run_gitcycle($execute.shift) until $execute.empty?
 end
 
 Then /^gitcycle runs with exit$/ do
@@ -213,7 +270,7 @@ Then /^output does not include \"([^\"]*)"$/ do |expected|
 end
 
 Then /^redis entries valid$/ do
-  add = @scenario_title.include?('custom branch name') ? "-rename" : ""
+  add = @scenario_title.include?('Custom branch name') ? "-rename" : ""
   branch = $redis.hget(
     [
       "users",
