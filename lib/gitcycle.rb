@@ -155,7 +155,7 @@ class Gitcycle
       end
 
       puts "Checking out '#{branch}'.\n".green
-      run("git checkout #{branch}")
+      run("git checkout -q #{branch}")
     end
   end
   alias :co :checkout
@@ -286,7 +286,7 @@ class Gitcycle
     branch = branches(:current => true)
 
     puts "\nPushing branch 'origin/#{branch}'.\n".green
-    run("git push origin #{branch}")
+    run("git push origin #{branch} -q")
   end
 
   def qa(*issues)
@@ -371,7 +371,7 @@ class Gitcycle
           run("git add . && git add . -u && git commit -a -F .git/MERGE_MSG")
 
           puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-          run("git push origin qa_#{qa_branch['source']}_#{qa_branch['user']}")
+          run("git push origin qa_#{qa_branch['source']}_#{qa_branch['user']} -q")
 
           puts "\nDe-conflicting on gitcycle.\n".green
           get('qa_branch',
@@ -405,7 +405,7 @@ class Gitcycle
     elsif branch['name'].include?('/')
       remote, branch = branch['name'].split('/')
       puts "\nPushing branch '#{remote}/#{branch}'.\n".green
-      run("git push #{remote} #{branch}")
+      run("git push #{remote} #{branch} -q")
     elsif branch['issue_url']
       puts "\nLabeling issue as 'Pending Review'.\n".green
       get('label',
@@ -509,14 +509,14 @@ class Gitcycle
 
     if branches(:match => name)
       puts "Checking out branch '#{name}'.\n".green
-      run("git checkout #{name}")
+      run("git checkout #{name} -q")
     else
       puts "Tracking branch '#{remote}/#{name}'.\n".green
       run("git fetch -q #{remote}")
-      run("git checkout -b #{name} #{remote}/#{name}")
+      run("git checkout -q -b #{name} #{remote}/#{name}")
     end
 
-    run("git pull #{remote} #{name}")
+    run("git pull #{remote} #{name} -q")
   end
 
   def checkout_remote_branch(options={})
@@ -527,12 +527,12 @@ class Gitcycle
 
     if branches(:match => target)
       if yes?("You already have a branch called '#{target}'. Overwrite?")
-        run("git push origin :#{target}")
-        run("git checkout master")
+        run("git push origin :#{target} -q")
+        run("git checkout master -q")
         run("branch -D #{target}")
       else
-        run("git checkout #{target}")
-        run("git pull origin #{target}")
+        run("git checkout #{target} -q")
+        run("git pull origin #{target} -q")
         return
       end
     end
@@ -540,18 +540,18 @@ class Gitcycle
     add_remote_and_fetch(options)
     
     puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
-    run("git checkout -b #{target} #{owner}/#{branch}")
+    run("git checkout -q -b #{target} #{owner}/#{branch}")
 
     puts "Fetching remote 'origin'.\n".green
     run("git fetch -q origin")
 
     if branches(:remote => true, :match => "origin/#{target}")
       puts "Pulling 'origin/#{target}'.\n".green
-      run("git pull origin #{target}")
+      run("git pull origin #{target} -q")
     end
 
     puts "Pushing 'origin/#{target}'.\n".green
-    run("git push origin #{target}")
+    run("git push origin #{target} -q")
   end
 
   def collab?(branch)
@@ -614,10 +614,10 @@ class Gitcycle
           if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
             if branches(:match => name)
-              run("git checkout master")
+              run("git checkout master -q")
               run("git branch -D #{name}")
             end
-            run("git push origin :#{name}")
+            run("git push origin :#{name} -q")
           end
 
           checkout_remote_branch(
@@ -697,7 +697,7 @@ class Gitcycle
     elsif type # from_qa or to_qa
       branch = branches(:current => true)
       puts "Pushing branch '#{branch}'.\n".green
-      run("git push origin #{branch}")
+      run("git push origin #{branch} -q")
     end
   end
 
@@ -766,7 +766,7 @@ class Gitcycle
 
     if branches(:remote => true, :match => "#{owner}/#{branch}")
       puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
-      run("git merge #{owner}/#{branch}")
+      run("git merge #{owner}/#{branch} -q")
 
       fix_conflict(options)
     end

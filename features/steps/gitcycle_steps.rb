@@ -74,30 +74,33 @@ def repos(reload=false)
   end
 
   if !$repo_cache_created || reload
+    $stdout.puts "Creating cached fixture repositories..."
+
     system [
       "rm -rf #{fixtures}/owner_cache",
       "rm -rf #{fixtures}/user_cache",
       "mkdir -p #{fixtures}/owner_cache",
       "cd #{fixtures}/owner_cache",
-      "git init .",
+      "git init . -q",
       "git remote add origin git@github.com:#{config['owner']}/#{config['repo']}.git",
       "echo 'first commit' > README",
       "git add .",
-      "git commit -a -m 'First commit'",
-      "git push origin master --force",
-      "git fetch",
+      "git commit -q -a -m 'First commit'",
+      "git push origin master --force -q",
+      "git fetch -q",
       "cd #{fixtures}",
       "rm -rf user_cache",
       "cp -r owner_cache user_cache",
       "cd user_cache",
       "git remote rm origin",
       "git remote add origin git@github.com:#{config['user']}/#{config['repo']}.git",
-      "git fetch",
-      "git push origin master --force"
+      "git fetch -q",
+      "git push origin master --force -q"
     ].join(' && ')
 
     unless $repo_cache_created
-      # Clear all branches.
+      $stdout.puts "Clearing old fixture branches..."
+
       [ 'owner', 'user' ].each do |type|
         system(
           "cd #{fixtures}/#{type}_cache && " +
@@ -107,7 +110,7 @@ def repos(reload=false)
             "grep -v master$",
             "grep -v HEAD",
             "cut -d/ -f2-",
-            "while read line; do git push origin :$line; git branch -D $line; done;"
+            "while read line; do git push origin :$line -q; git branch -D $line; done;"
           ].join(' | ')
           )
       end
@@ -219,13 +222,13 @@ When /^I commit something$/ do
   branch = branches(:current => true)
   $commit_msg = "#{@scenario_title} - #{rand}"
   File.open('README', 'w') {|f| f.write($commit_msg) }
-  `git add . && git add . -u && git commit -a -m '#{$commit_msg}'`
-  `git push origin #{branch}`
+  `git add . && git add . -u && git commit -q -a -m '#{$commit_msg}'`
+  `git push origin #{branch} -q`
 end
 
 When /^I checkout (.+)$/ do |branch|
   branch = gsub_variables(branch)
-  `git checkout #{branch}`
+  `git checkout #{branch} -q`
 end
 
 When /^gitcycle runs$/ do
