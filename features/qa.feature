@@ -15,21 +15,21 @@ Scenario: QA issue
     And I enter "y"
     And gitcycle runs
   Then output includes
-      """
-      Do you want to create a QA branch from 'master'? (y/n)
-      Retrieving branch information from gitcycle.
-      Adding remote repo 'config.owner/config.repo'.
-      Fetching remote 'config.owner'.
-      Checking out remote branch 'qa_master_config.user' from 'config.owner/config.repo/master'.
-      Fetching remote 'origin'.
-      Pushing 'origin/qa_master_config.user'.
-      Adding remote repo 'config.user/config.repo'.
-      Fetching remote 'config.user'.
-      Merging remote branch 'ticket.id' from 'config.user/config.repo'.
-      Pushing branch 'qa_master_config.user'.
-      Type 'gitc qa pass' to approve all issues in this branch.
-      Type 'gitc qa fail' to reject all issues in this branch.
-      """
+    """
+    Do you want to create a QA branch from 'master'? (y/n)
+    Retrieving branch information from gitcycle.
+    Adding remote repo 'config.owner/config.repo'.
+    Fetching remote 'config.owner'.
+    Checking out remote branch 'qa_master_config.user' from 'config.owner/config.repo/master'.
+    Fetching remote 'origin'.
+    Pushing 'origin/qa_master_config.user'.
+    Adding remote repo 'config.user/config.repo'.
+    Fetching remote 'config.user'.
+    Merging remote branch 'ticket.id' from 'config.user/config.repo'.
+    Pushing branch 'qa_master_config.user'.
+    Type 'gitc qa pass' to approve all issues in this branch.
+    Type 'gitc qa fail' to reject all issues in this branch.
+    """
 
 Scenario: QA issue pass
   Given a fresh set of repositories
