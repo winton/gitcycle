@@ -10,9 +10,9 @@ Scenario: Existing branch
   Then output includes
     """
     Retrieving branch information from gitcycle.
-    Checking out branch 'ticket.id'.
+    Checking out branch 'master-ticket.id'.
     """
-    And current branch is "ticket.id"
+    And current branch is "master-ticket.id"
 
 Scenario: Fresh repo
   Given a fresh set of repositories
@@ -22,6 +22,6 @@ Scenario: Fresh repo
   Then output includes
     """
     Retrieving branch information from gitcycle.
-    Tracking branch 'origin/last_ticket.id'.
+    Tracking branch 'origin/master-last_ticket.id'.
     """
-    And current branch is "last_ticket.id"
+    And current branch is "master-last_ticket.id"

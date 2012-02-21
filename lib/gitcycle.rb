@@ -405,12 +405,15 @@ class Gitcycle
     require_git && require_config
 
     branch = pull
-    branch = create_pull_request(branch)
+
+    if branch && !collab?(branch)
+      branch = create_pull_request(branch)
+    end
 
     if branch == false
       puts "Branch not found.\n".red
-    elsif branch['name'].include?('/')
-      remote, branch = branch['name'].split('/')
+    elsif collab?(branch)
+      remote, branch = branch['home'], branch['source']
       puts "\nPushing branch '#{remote}/#{branch}'.\n".green
       run("git push #{remote} #{branch} -q")
     elsif branch['issue_url']
@@ -560,9 +563,15 @@ class Gitcycle
   end
 
   def collab?(branch)
-    branch &&
+    return false unless branch
+    owner =
+      if branch['repo'].is_a?(::Hash)
+        branch['repo']['owner']
+      else
+        branch['repo'].split(':')[0]
+      end
     branch['home'] != branch['user'] &&
-    branch['home'] != branch['repo'].split(':')[0]
+    branch['home'] != owner
   end
 
   def command_not_recognized

@@ -23,6 +23,7 @@ Before do |scenario|
     end
     $url = url
   end
+
   @scenario_title = scenario.title
   $execute = []
   $input = []
@@ -150,6 +151,9 @@ def run_gitcycle(cmd)
     @output << "#{str}\n"
     puts str
   end
+  if @scenario_title.include?('Collaborator')
+    @gitcycle.stub(:collab?).and_return(true)
+  end
   if cmd
     @gitcycle.start(Shellwords.split(cmd))
   else
@@ -206,7 +210,6 @@ When /^I execute gitcycle (.*) with a new URL or string$/ do |cmd|
     :title => "Test ticket"
   )
   $ticket.save
-  $ticket.attributes['id'] = "master-#{$ticket.attributes['id']}"
   $tickets ||= []
   $tickets << $ticket
   $execute << "#{cmd} #{$ticket.url}"
@@ -241,6 +244,11 @@ When /^I checkout (.+)$/ do |branch|
   `git checkout #{branch} -q`
 end
 
+When /^I push (.+)$/ do |branch|
+  branch = gsub_variables(branch)
+  `git push origin #{branch} -q`
+end
+
 When /^gitcycle runs$/ do
   run_gitcycle($execute.shift) until $execute.empty?
 end
@@ -273,6 +281,7 @@ end
 
 Then /^output includes$/ do |expected|
   expected = gsub_variables(expected).gsub('\t', "\t")
+  $stdout.puts expected
   @output.gsub(/\n+/, "\n").include?(expected).should == true
 end
 
@@ -282,7 +291,20 @@ Then /^output does not include \"([^\"]*)"$/ do |expected|
 end
 
 Then /^redis entries valid$/ do
-  add = @scenario_title.include?('Custom branch name') ? "-rename" : ""
+  collab = @scenario_title.include?('Collaborator')
+  before =
+    if collab
+      "br-some_branch-"
+    else
+      "master-"
+    end
+  after = 
+    if @scenario_title.include?('Custom branch name')
+      "-rename"
+    else
+      ""
+    end
+  ticket_id = "#{before}#{$ticket.attributes['id']}#{after}"
   branch = $redis.hget(
     [
       "users",
@@ -291,19 +313,19 @@ Then /^redis entries valid$/ do
       "#{config['owner']}:#{config['repo']}",
       "branches"
     ].join('/'),
-    $ticket.attributes['id'] + add
+    ticket_id
   )
   branch = Yajl::Parser.parse(branch)
   should = {
     'lighthouse_url' => $ticket.url,
     'body' => "<div><p>test</p></div>\n\n#{$ticket.url}",
-    'home' => ENV['REPO'] == 'owner' ? config['owner'] : config['user'],
-    'name' => $ticket.attributes['id'] + add,
-    'id' => $ticket.attributes['id'] + add,
+    'home' => collab || ENV['REPO'] == 'owner' ? config['owner'] : config['user'],
+    'name' => ticket_id,
+    'id' => ticket_id,
     'title' => $ticket.title,
     'repo' => "#{config['owner']}:#{config['repo']}",
     'user' => config['user'],
-    'source' => 'master'
+    'source' => collab ? 'some_branch' : 'master'
   }
   if @scenario_title == 'No parameters and something committed'
     should['issue_url'] = $github_url

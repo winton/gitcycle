@@ -25,7 +25,7 @@ Scenario: QA issue
     Pushing 'origin/qa_master_config.user'.
     Adding remote repo 'config.user/config.repo'.
     Fetching remote 'config.user'.
-    Merging remote branch 'ticket.id' from 'config.user/config.repo'.
+    Merging remote branch 'master-ticket.id' from 'config.user/config.repo'.
     Pushing branch 'qa_master_config.user'.
     Type 'gitc qa pass' to approve all issues in this branch.
     Type 'gitc qa fail' to reject all issues in this branch.
@@ -80,5 +80,5 @@ Scenario: QA issue list
   Then output includes
     """
     qa_master_config.user
-      issue #issue.id\tconfig.user/last_ticket.id
+      issue #issue.id\tconfig.user/master-last_ticket.id
     """
