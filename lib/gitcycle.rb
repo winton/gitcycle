@@ -25,6 +25,8 @@ class Gitcycle
     end
   
   def initialize(args=nil)
+    $remotes = {}
+
     if ENV['CONFIG']
       @config_path = File.expand_path(ENV['CONFIG'])
     else
@@ -477,8 +479,6 @@ class Gitcycle
   def add_remote_and_fetch(options={})
     owner = options[:owner]
     repo = options[:repo]
-
-    $remotes ||= {}
 
     unless $remotes[owner]
       $remotes[owner] = true

@@ -17,6 +17,7 @@ require "gitcycle"
 $redis = Redis.new
 
 Before do |scenario|
+  Launchy.stub(:open) { |url| $github_url = url }
   @scenario_title = scenario.title
   $execute = []
   $input = []
@@ -50,8 +51,8 @@ def gsub_variables(str)
   if $tickets
     str = str.gsub('last_ticket.id', $tickets.last.attributes['id'])
   end
-  if $url
-    issue_id = $url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
+  if $github_url
+    issue_id = $github_url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
     str = str.gsub('issue.id', issue_id)
   end
   str = str.gsub('env.home', ENV['REPO'] == 'owner' ? config['owner'] : config['user'])
@@ -258,8 +259,7 @@ end
 
 Then /^output includes \"([^\"]*)" with URL$/ do |expected|
   expected = gsub_variables(expected)
-  @output.include?(expected).should == true
-  $url = @output.match(/#{expected}.*(https?:\/\/[^\s]+)/)[1]
+  @output.should =~ /#{expected}.*(https?:\/\/[^\s]+)/
 end
 
 Then /^output includes$/ do |expected|
@@ -297,7 +297,7 @@ Then /^redis entries valid$/ do
     'source' => 'master'
   }
   if @scenario_title == 'Discuss commits w/ no parameters and something committed'
-    should['issue_url'] = $url
+    should['issue_url'] = $github_url
   end
   branch.should == should
 end
@@ -311,5 +311,5 @@ Then /^git log should contain the last commit$/ do
 end
 
 Then /^URL is a valid issue$/ do
-  $url.should =~ /https:\/\/github.com\/.+\/issues\/\d+/
+  $github_url.should =~ /https:\/\/github.com\/.+\/issues\/\d+/
 end
