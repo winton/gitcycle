@@ -326,19 +326,24 @@ class Gitcycle
           end
         end
 
-        branches.each do |branch|
-          if pass_fail == 'pass'
+        if pass_fail == 'pass'
+          if issues.empty?
+            owner, repo = qa_branch['repo'].split(':')
             merge_remote_branch(
-              :owner => branch['home'],
-              :repo => branch['repo'].split(':')[1],
-              :branch => branch['branch'],
-              :issue => branch['issue'],
-              :issues => qa_branch['branches'].collect { |b| b['issue'] },
+              :owner => owner,
+              :repo => repo,
+              :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
               :type => :from_qa
             )
+          else
+            puts "\nYou cannot pass individual issues. You must pass the entire QA branch.\n".red
+            puts "\nPlease run 'gitc qa pass' to pass the entire QA branch.".green
+            exit
           end
+        end
 
-          unless issues.empty?
+        unless issues.empty?
+          branches.each do |branch|
             puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
             get('label',
               'qa_branch[source]' => qa_branch['source'],
@@ -685,7 +690,7 @@ class Gitcycle
     if $? != 0
       puts "Conflict occurred when merging '#{branch}'#{" (issue ##{issue})" if issue}.\n".red
       
-      if type # from_qa or to_qa
+      if type == :to_qa
         puts "Please resolve this conflict with '#{owner}'.\n".yellow
       
         puts "\nSending conflict information to gitcycle.\n".green

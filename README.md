@@ -148,7 +148,6 @@ Todo
 
 * Conflict recording not working
 * Add comment on lighthouse with issue URL
-* Allow QA branches to be created from any branch and allow any issue to merge into it
 * Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
 	Lighthouse ticket changes to pending-qa if ticket is not the same as the parent.
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
@@ -167,9 +166,6 @@ $ gitc st - shortcut
 * There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
 * gitc qa pass 1234 # doesnt update lighthouse and screws up git issue tags
 * [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
-* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
-* When conflict happens on gitc qa pass, label does not get updated on issue
-* gitc qa resolved is not working, we need gitc qa pass to merge the whole branch into the target branch
 * gitc qa clean # to clean up old branches
 * gitc qa pass # if ticket resolved, it should stay resolved
 * gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
