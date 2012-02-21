@@ -43,7 +43,7 @@ end
 
 def config(reload=false)
   @config = nil if reload
-  @config ||= YAML.load(File.read("#{BASE}/features/config.yml"))
+  @config ||= YAML.load(File.read("#{BASE}/features/config/config.yml"))
   Lighthouse.account = @config['lighthouse']['account']
   Lighthouse.token = @config['lighthouse']['token']
   @config
