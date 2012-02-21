@@ -25,11 +25,11 @@ Scenario: No parameters and something committed
     And I execute gitcycle with "discuss"
     And gitcycle runs
   Then output includes
-      """
-      Retrieving branch information from gitcycle.
-      Creating GitHub pull request.
-      Labeling issue as 'Discuss'.
-      """
+    """
+    Retrieving branch information from gitcycle.
+    Creating GitHub pull request.
+    Labeling issue as 'Discuss'.
+    """
     And output includes "Opening issue" with URL
     And URL is a valid issue
     And redis entries valid
