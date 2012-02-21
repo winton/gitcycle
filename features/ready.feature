@@ -12,6 +12,8 @@ Scenario: Ready issue
   Then output includes
     """
     Retrieving branch information from gitcycle.
+    Adding remote repo 'config.owner/config.repo'.
+    Fetching remote 'config.owner'.
     Merging remote branch 'master' from 'config.owner/config.repo'.
     Adding remote repo 'config.user/config.repo'.
     Fetching remote 'config.user'.

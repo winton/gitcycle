@@ -67,6 +67,10 @@ class Gitcycle
       exec_git(:branch, args)
     end
 
+    unless yes?("\nYour work will eventually merge into '#{params['branch[source]']}'. Is this correct?")
+      params['branch[source]'] = q("What branch would you like to eventually merge into?")
+    end
+
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
     name = branch['name']
@@ -74,10 +78,6 @@ class Gitcycle
     begin
       owner, repo = branch['repo'].split(':')
       branch['home'] = @git_login
-
-      unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
-        branch['source'] = q("What branch would you like to eventually merge into?")
-      end
 
       if branch['source'].include?('/')
         branch['home'], branch['source'] = branch['source'].split('/')

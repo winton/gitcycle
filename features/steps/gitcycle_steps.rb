@@ -17,7 +17,12 @@ require "gitcycle"
 $redis = Redis.new
 
 Before do |scenario|
-  Launchy.stub(:open) { |url| $github_url = url }
+  Launchy.stub :open do |url|
+    if url =~ /https:\/\/github.com\/.+\/issues\/\d+/
+      $github_url = url
+    end
+    $url = url
+  end
   @scenario_title = scenario.title
   $execute = []
   $input = []
@@ -160,6 +165,10 @@ Given /^a fresh set of repositories$/ do
   repos(true)
 end
 
+When /^I create a new branch "([^\"]*)"$/ do |branch|
+  `git branch #{branch}`
+end
+
 When /^I execute gitcycle with nothing$/ do
   $execute << nil
 end
@@ -296,7 +305,7 @@ Then /^redis entries valid$/ do
     'user' => config['user'],
     'source' => 'master'
   }
-  if @scenario_title == 'Discuss commits w/ no parameters and something committed'
+  if @scenario_title == 'No parameters and something committed'
     should['issue_url'] = $github_url
   end
   branch.should == should

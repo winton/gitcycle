@@ -1,6 +1,6 @@
 Feature: Discuss
 
-Scenario: Discuss commits w/ no parameters and nothing committed
+Scenario: No parameters and nothing committed
   Given a fresh set of repositories
   When I cd to the user repo
     And I execute gitcycle branch with a new URL or string
@@ -15,7 +15,7 @@ Scenario: Discuss commits w/ no parameters and nothing committed
     """
     And redis entries valid
 
-Scenario: Discuss commits w/ no parameters and something committed
+Scenario: No parameters and something committed
   Given a fresh set of repositories
   When I cd to the user repo
     And I execute gitcycle branch with a new URL or string
@@ -34,7 +34,7 @@ Scenario: Discuss commits w/ no parameters and something committed
     And URL is a valid issue
     And redis entries valid
 
-Scenario: Discuss commits w/ parameters
+Scenario: Parameters
   When I cd to the user repo
     And I execute gitcycle with "discuss issue.id"
     And gitcycle runs
