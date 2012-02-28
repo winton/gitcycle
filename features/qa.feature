@@ -42,18 +42,31 @@ Scenario: QA issue pass w/ issue number
     And gitcycle runs
     And I cd to the owner repo
     And I checkout master
-    And I execute gitcycle with "qa issue.id"
+    And I execute gitcycle with "qa pass issue.id"
     And I enter "y"
     And gitcycle runs
-    And I checkout qa_master_config.user
-    And I execute gitcycle with "qa pass issue.number"
-    And gitcycle runs with exit
   Then output includes
     """
+    WARNING: This issue will merge straight into 'master' without testing.
+    Continue? (y/n)
+    Retrieving branch information from gitcycle.
+    Deleting old QA branch 'qa_master_config.user'.
+    Adding remote repo 'config.owner/config.repo'.
+    Fetching remote 'config.owner'.
+    Checking out remote branch 'qa_master_config.user' from 'config.owner/config.repo/master'.
+    Fetching remote 'origin'.
+    Pushing 'origin/qa_master_config.user'.
+    Adding remote repo 'config.user/config.repo'.
+    Fetching remote 'config.user'.
+    Merging remote branch 'master-ticket.id' from 'config.user/config.repo'.
+    Pushing branch 'qa_master_config.user'.
     Retrieving branch information from gitcycle.
     Checking out branch 'master'.
-    You cannot pass individual issues. You must pass the entire QA branch.
-    Please run 'gitc qa pass' to pass the entire QA branch.
+    Adding remote repo 'config.owner/config.repo'.
+    Fetching remote 'config.owner'.
+    Merging remote branch 'qa_master_config.user' from 'config.owner/config.repo'.
+    Pushing branch 'master'.
+    Labeling all issues as 'Pass'.
     """
 
 Scenario: QA issue pass

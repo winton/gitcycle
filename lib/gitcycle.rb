@@ -305,14 +305,30 @@ class Gitcycle
       end
     elsif issues.first == 'fail' || issues.first == 'pass'
       branch = branches(:current => true)
-      label = issues.first.capitalize
+      pass_fail = issues.first
+      label = pass_fail.capitalize
+      issues = issues[1..-1]
 
-      if branch =~ /^qa_/
+      if pass_fail == 'pass' && !issues.empty?
+        puts "\nWARNING: #{
+          issues.length == 1 ? "This issue" : "These issues"
+        } will merge straight into '#{branch}' without testing.\n".red
+        
+        if yes?("Continue?")
+          qa_branch = create_qa_branch(
+            :instructions => false,
+            :issues => issues,
+            :source => branch
+          )
+          `git checkout qa_#{qa_branch['source']}_#{qa_branch['user']} -q`
+          $remotes = {}
+          qa('pass')
+        else
+          exit
+        end
+      elsif branch =~ /^qa_/
         puts "\nRetrieving branch information from gitcycle.\n".green
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
-
-        pass_fail = issues.first
-        issues = issues[1..-1]
 
         if pass_fail == 'pass'
           checkout_or_track(:name => qa_branch['source'], :remote => 'origin')
@@ -326,20 +342,14 @@ class Gitcycle
           end
         end
 
-        if pass_fail == 'pass'
-          if issues.empty?
-            owner, repo = qa_branch['repo'].split(':')
-            merge_remote_branch(
-              :owner => owner,
-              :repo => repo,
-              :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
-              :type => :from_qa
-            )
-          else
-            puts "\nYou cannot pass individual issues. You must pass the entire QA branch.\n".red
-            puts "\nPlease run 'gitc qa pass' to pass the entire QA branch.".green
-            exit
-          end
+        if pass_fail == 'pass' && issues.empty?
+          owner, repo = qa_branch['repo'].split(':')
+          merge_remote_branch(
+            :owner => owner,
+            :repo => repo,
+            :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
+            :type => :from_qa
+          )
         end
 
         unless issues.empty?
@@ -603,17 +613,21 @@ class Gitcycle
   end
 
   def create_qa_branch(options)
+    instructions = options[:instructions]
     issues = options[:issues]
     range = options[:range] || (0..-1)
+    source = options[:source]
 
     if (issues && !issues.empty?) || options[:qa_branch]
       if options[:qa_branch]
         qa_branch = options[:qa_branch]
       else
-        source = branches(:current => true)
-        
-        unless yes?("\nDo you want to create a QA branch from '#{source}'?")
-          source = q("What branch would you like to base this QA branch off of?")
+        unless source
+          source = branches(:current => true)
+          
+          unless yes?("\nDo you want to create a QA branch from '#{source}'?")
+            source = q("What branch would you like to base this QA branch off of?")
+          end
         end
         
         puts "\nRetrieving branch information from gitcycle.\n".green
@@ -666,8 +680,10 @@ class Gitcycle
           )
         end
 
-        puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
-        puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
+        unless options[:instructions] == false
+          puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
+          puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
+        end
 
         unless warnings.empty?
           puts "\n#{"WARNING:".red} If you pass this QA branch, the following branches will merge into '#{source.yellow}':\n"
@@ -680,6 +696,8 @@ class Gitcycle
           puts "\nBe sure this is correct!\n".yellow
         end
       end
+
+      qa_branch
     end
   end
 

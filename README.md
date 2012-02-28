@@ -35,6 +35,11 @@ Type `gitc branch` + your ticket URL to create a new branch:
 
 	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
+To collaborate with another user, use a full path when prompted:
+
+	Q: What branch would you like to eventually merge into?
+	A: user/branch
+
 Pull
 ----
 
@@ -116,6 +121,13 @@ Label the issue with "Fail" and regenerate the QA branch without the failing iss
 
 Label all issues "Pass" and the merge the QA branch into target branch.
 
+### Immediate Pass
+
+	gitc checkout [TARGET BRANCH]
+	gitc qa pass [GITHUB ISSUE #] [...]
+
+Immediately merge issue into the target branch.
+
 ### Status
 
 See who is QA'ing what:
@@ -124,12 +136,6 @@ See who is QA'ing what:
 
 Checkout
 --------
-
-### Collaborate
-
-Checkout branches from other forks:
-
-	gitc checkout [USER] [BRANCH]
 
 ### From Ticket
 
