@@ -147,6 +147,7 @@ Todo
 ----
 
 * Conflict recording not working
+* gitc qa pass [issue] should use a qa_rc_tongueroo_temp branch so it doesnt blow away the changes in the qa_rc_tongueroo branch
 * Add comment on lighthouse with issue URL
 * Allow QA branches to be created from any branch and allow any issue to merge into it
 * Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
@@ -172,3 +173,4 @@ $ gitc st - shortcut
 * gitc qa clean # to clean up old branches
 * gitc qa pass # if ticket resolved, it should stay resolved
 * gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
+* fail should change to inactive
