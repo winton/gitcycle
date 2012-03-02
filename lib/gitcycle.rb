@@ -752,6 +752,9 @@ class Gitcycle
 
     begin
       json = open("#{API}/#{path}.json?#{params}").read
+    rescue  OpenURI::HTTPError 
+      puts "Did you mean to do: git branch #{hash['branch[lighthouse_url]']} ?".yellow
+      exit
     rescue Exception
       puts "\nCould not connect to Gitcycle.".red
       puts "\nPlease verify your Internet connection and try again later.\n".yellow
