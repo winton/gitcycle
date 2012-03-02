@@ -128,6 +128,7 @@ class Gitcycle
         checkout_or_track(:name => branch['name'], :remote => 'origin')
       else
         puts "\nBranch not found!\n".red
+        puts "\nDid you mean: gitc branch #{args[0]}\n".yellow
       end
     else
       remote, branch = args
