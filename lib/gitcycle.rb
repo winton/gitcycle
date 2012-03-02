@@ -123,8 +123,12 @@ class Gitcycle
 
     if args.length == 1 && args[0] =~ /^https?:\/\//
       puts "\nRetrieving branch information from gitcycle.\n".green
-      branch = get('branch', 'branch[lighthouse_url]' => args[0])
-      checkout_or_track(:name => branch['name'], :remote => 'origin')
+      branch = get('branch', 'branch[lighthouse_url]' => args[0], 'create' => 0)
+      if branch
+        checkout_or_track(:name => branch['name'], :remote => 'origin')
+      else
+        puts "\nBranch not found!\n".red
+      end
     else
       remote, branch = args
       remote, branch = nil, remote if branch.nil?

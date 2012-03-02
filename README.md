@@ -175,3 +175,4 @@ $ gitc st - shortcut
 * gitc qa clean # to clean up old branches
 * gitc qa pass # if ticket resolved, it should stay resolved
 * gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
+* If feature branch changed between QA branch creation and QA merge, alert QA engineer
