@@ -550,7 +550,7 @@ class Gitcycle
 
     if branches(:match => target)
       if yes?("You already have a branch called '#{target}'. Overwrite?")
-        run("git push origin :#{target}")
+        run("git push origin :#{target} -q")
         run("git checkout master -q")
         run("git branch -D #{target}")
       else
@@ -574,7 +574,7 @@ class Gitcycle
     end
 
     puts "Pushing 'origin/#{target}'.\n".green
-    run("git push origin #{target}")
+    run("git push origin #{target} -q")
   end
 
   def collab?(branch)
