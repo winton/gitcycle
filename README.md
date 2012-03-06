@@ -35,6 +35,11 @@ Type `gitc branch` + your ticket URL to create a new branch:
 
 	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
+To collaborate with another user, use a full path when prompted:
+
+	Q: What branch would you like to eventually merge into?
+	A: user/branch
+
 Pull
 ----
 
@@ -116,6 +121,13 @@ Label the issue with "Fail" and regenerate the QA branch without the failing iss
 
 Label all issues "Pass" and the merge the QA branch into target branch.
 
+### Immediate Pass
+
+	gitc checkout [TARGET BRANCH]
+	gitc qa pass [GITHUB ISSUE #] [...]
+
+Immediately merge issue into the target branch.
+
 ### Status
 
 See who is QA'ing what:
@@ -124,12 +136,6 @@ See who is QA'ing what:
 
 Checkout
 --------
-
-### Collaborate
-
-Checkout branches from other forks:
-
-	gitc checkout [USER] [BRANCH]
 
 ### From Ticket
 
@@ -150,7 +156,6 @@ Todo
 * gitc qa pass [issue] should use a qa_rc_tongueroo_temp branch so it doesnt blow away the changes in the qa_rc_tongueroo branch
 * gitc qa pass (all), doesnt update lighthouse to state pending-approval 
 * Add comment on lighthouse with issue URL
-* Allow QA branches to be created from any branch and allow any issue to merge into it
 * Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
 	Lighthouse ticket changes to pending-qa if ticket is not the same as the parent.
 * gitc pull is not merging in br/rc 
@@ -171,9 +176,8 @@ $ gitc st - shortcut
 * There's still a Tagging Issue I tried to fix parseLabel http://d.pr/8eOS , Pass should remove Pending, but remove the Branch Name
 * gitc qa pass 1234 # doesnt update lighthouse and screws up git issue tags
 * [issue number] it marks it pending-qa and failed.. not correct.  I'll take a look at this over the weekend -Tung
-* gitc qa pass # since we're changing this to pass all the tickets, we need to loop through all the merged issues and update the lighthouse state to pending-qa
-* gitc qa resolved is not working, we need gitc qa pass to merge the whole branch into the target branch
 * gitc qa clean # to clean up old branches
 * gitc qa pass # if ticket resolved, it should stay resolved
 * gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
 * fail should change to inactive
+* If feature branch changed between QA branch creation and QA merge, alert QA engineer

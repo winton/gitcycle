@@ -17,10 +17,18 @@ require "gitcycle"
 $redis = Redis.new
 
 Before do |scenario|
+  Launchy.stub :open do |url|
+    if url =~ /https:\/\/github.com\/.+\/issues\/\d+/
+      $github_url = url
+    end
+    $url = url
+  end
+
   @scenario_title = scenario.title
   $execute = []
   $input = []
   $remotes = nil
+  $ticket = nil
 end
 
 def branches(options={})
@@ -36,7 +44,7 @@ end
 
 def config(reload=false)
   @config = nil if reload
-  @config ||= YAML.load(File.read("#{BASE}/features/config.yml"))
+  @config ||= YAML.load(File.read("#{BASE}/features/config/config.yml"))
   Lighthouse.account = @config['lighthouse']['account']
   Lighthouse.token = @config['lighthouse']['token']
   @config
@@ -46,8 +54,11 @@ def gsub_variables(str)
   if $ticket
     str = str.gsub('ticket.id', $ticket.attributes['id'])
   end
-  if $url
-    issue_id = $url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
+  if $tickets
+    str = str.gsub('last_ticket.id', $tickets.last.attributes['id'])
+  end
+  if $github_url
+    issue_id = $github_url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
     str = str.gsub('issue.id', issue_id)
   end
   str = str.gsub('env.home', ENV['REPO'] == 'owner' ? config['owner'] : config['user'])
@@ -63,23 +74,73 @@ def log(match)
 end
 
 def repos(reload=false)
-  if $repos && !reload
-    $repos
-  else
-    owner = "#{BASE}/features/fixtures/owner"
-    user = "#{BASE}/features/fixtures/user"
-    
-    FileUtils.rm_rf(owner)
-    FileUtils.rm_rf(user)
-    
+  fixtures = "#{BASE}/features/fixtures"
+
+  if !$repo_cache_created || !$repos || reload
+    Dir.chdir(fixtures)
+  end
+
+  if !$repo_cache_created || reload
+    $stdout.puts "Creating cached fixture repositories..."
+
     system [
-      "cd #{BASE}/features/fixtures",
-      "git clone git@github.com:#{config['owner']}/#{config['repo']}.git owner",
-      "git clone git@github.com:#{config['user']}/#{config['repo']}.git user"
+      "rm -rf #{fixtures}/owner_cache",
+      "rm -rf #{fixtures}/user_cache",
+      "mkdir -p #{fixtures}/owner_cache",
+      "cd #{fixtures}/owner_cache",
+      "git init . -q",
+      "git remote add origin git@github.com:#{config['owner']}/#{config['repo']}.git",
+      "echo 'first commit' > README",
+      "git add .",
+      "git commit -q -a -m 'First commit'",
+      "git push origin master --force -q",
+      "git fetch -q",
+      "cd #{fixtures}",
+      "rm -rf user_cache",
+      "cp -r owner_cache user_cache",
+      "cd user_cache",
+      "git remote rm origin",
+      "git remote add origin git@github.com:#{config['user']}/#{config['repo']}.git",
+      "git fetch -q",
+      "git push origin master --force -q"
     ].join(' && ')
 
-    $repos = { :owner => owner, :user => user }
+    unless $repo_cache_created
+      $stdout.puts "Clearing old fixture branches..."
+
+      [ 'owner', 'user' ].each do |type|
+        system(
+          "cd #{fixtures}/#{type}_cache && " +
+          [
+            "git branch -r",
+            "grep origin/",
+            "grep -v master$",
+            "grep -v HEAD",
+            "cut -d/ -f2-",
+            "while read line; do git push origin :$line -q; git branch -D $line; done;"
+          ].join(' | ')
+          )
+      end
+    end
+
+    $repo_cache_created = true
   end
+
+  if !$repos || reload
+    $repos = {}
+
+    [ 'owner', 'user' ].each do |type|
+      FileUtils.rm_rf("#{fixtures}/#{type}")
+      $repos[type.to_sym] = "#{fixtures}/#{type}"
+
+      system [
+        "cd #{fixtures}",
+        "cp -R #{type}_cache #{type}"
+      ].join(' && ')
+    end
+  end
+
+  $repos
 end
 
 def run_gitcycle(cmd)
@@ -89,6 +150,9 @@ def run_gitcycle(cmd)
     str = str.gsub(/\e\[\d{1,2}m/, '')
     @output << "#{str}\n"
     puts str
+  end
+  if @scenario_title.include?('Collaborator')
+    @gitcycle.stub(:collab?).and_return(true)
   end
   if cmd
     @gitcycle.start(Shellwords.split(cmd))
@@ -105,15 +169,8 @@ Given /^a fresh set of repositories$/ do
   repos(true)
 end
 
-Given /^a new Lighthouse ticket$/ do
-  $ticket = Lighthouse::Ticket.new(
-    :body => "test",
-    :project_id => config['lighthouse']['project'],
-    :state => "open",
-    :title => "Test ticket"
-  )
-  $ticket.save
-  $ticket.attributes['id'] = "master-#{$ticket.attributes['id']}"
+When /^I create a new branch "([^\"]*)"$/ do |branch|
+  `git branch #{branch}`
 end
 
 When /^I execute gitcycle with nothing$/ do
@@ -122,6 +179,11 @@ end
 
 When /^I execute gitcycle with "([^\"]*)"$/ do |cmd|
   $execute << gsub_variables(cmd)
+end
+
+When /^I give default input$/ do
+  step "I enter \"y\""
+  step "I enter \"y\""
 end
 
 When /^I execute gitcycle setup$/ do
@@ -140,8 +202,21 @@ When /^I execute gitcycle setup$/ do
   ].join(' ')
 end
 
-When /^I execute gitcycle (.*) with the Lighthouse ticket URL$/ do |cmd|
+When /^I execute gitcycle (.*) with a new URL or string$/ do |cmd|
+  $ticket = Lighthouse::Ticket.new(
+    :body => "test",
+    :project_id => config['lighthouse']['project'],
+    :state => "open",
+    :title => "Test ticket"
+  )
+  $ticket.save
+  $tickets ||= []
+  $tickets << $ticket
   $execute << "#{cmd} #{$ticket.url}"
+end
+
+When /^I execute gitcycle (.*) with the last URL or string$/ do |cmd|
+  $execute << "#{cmd} #{$tickets.last.url}"
 end
 
 When /^I cd to the (.*) repo$/ do |user|
@@ -160,19 +235,22 @@ When /^I commit something$/ do
   branch = branches(:current => true)
   $commit_msg = "#{@scenario_title} - #{rand}"
   File.open('README', 'w') {|f| f.write($commit_msg) }
-  `git add . && git add . -u && git commit -a -m '#{$commit_msg}'`
-  `git push origin #{branch}`
+  `git add . && git add . -u && git commit -q -a -m '#{$commit_msg}'`
+  `git push origin #{branch} -q`
 end
 
 When /^I checkout (.+)$/ do |branch|
   branch = gsub_variables(branch)
-  `git checkout #{branch}`
+  `git checkout #{branch} -q`
 end
 
-Then /^gitcycle runs$/ do
-  $execute.each do |cmd|
-    run_gitcycle(cmd)
-  end
+When /^I push (.+)$/ do |branch|
+  branch = gsub_variables(branch)
+  `git push origin #{branch} -q`
+end
+
+When /^gitcycle runs$/ do
+  run_gitcycle($execute.shift) until $execute.empty?
 end
 
 Then /^gitcycle runs with exit$/ do
@@ -198,12 +276,12 @@ end
 
 Then /^output includes \"([^\"]*)" with URL$/ do |expected|
   expected = gsub_variables(expected)
-  @output.include?(expected).should == true
-  $url = @output.match(/#{expected}.*(https?:\/\/[^\s]+)/)[1]
+  @output.should =~ /#{expected}.*(https?:\/\/[^\s]+)/
 end
 
 Then /^output includes$/ do |expected|
   expected = gsub_variables(expected).gsub('\t', "\t")
+  $stdout.puts expected
   @output.gsub(/\n+/, "\n").include?(expected).should == true
 end
 
@@ -213,7 +291,20 @@ Then /^output does not include \"([^\"]*)"$/ do |expected|
 end
 
 Then /^redis entries valid$/ do
-  add = @scenario_title.include?('custom branch name') ? "-rename" : ""
+  collab = @scenario_title.include?('Collaborator')
+  before =
+    if collab
+      "br-some_branch-"
+    else
+      "master-"
+    end
+  after = 
+    if @scenario_title.include?('Custom branch name')
+      "-rename"
+    else
+      ""
+    end
+  ticket_id = "#{before}#{$ticket.attributes['id']}#{after}"
   branch = $redis.hget(
     [
       "users",
@@ -222,22 +313,22 @@ Then /^redis entries valid$/ do
       "#{config['owner']}:#{config['repo']}",
       "branches"
     ].join('/'),
-    $ticket.attributes['id'] + add
+    ticket_id
   )
   branch = Yajl::Parser.parse(branch)
   should = {
     'lighthouse_url' => $ticket.url,
     'body' => "<div><p>test</p></div>\n\n#{$ticket.url}",
-    'home' => ENV['REPO'] == 'owner' ? config['owner'] : config['user'],
-    'name' => $ticket.attributes['id'] + add,
-    'id' => $ticket.attributes['id'] + add,
+    'home' => collab || ENV['REPO'] == 'owner' ? config['owner'] : config['user'],
+    'name' => ticket_id,
+    'id' => ticket_id,
     'title' => $ticket.title,
     'repo' => "#{config['owner']}:#{config['repo']}",
     'user' => config['user'],
-    'source' => 'master'
+    'source' => collab ? 'some_branch' : 'master'
   }
-  if @scenario_title == 'Discuss commits w/ no parameters and something committed'
-    should['issue_url'] = $url
+  if @scenario_title == 'No parameters and something committed'
+    should['issue_url'] = $github_url
   end
   branch.should == should
 end
@@ -251,5 +342,5 @@ Then /^git log should contain the last commit$/ do
 end
 
 Then /^URL is a valid issue$/ do
-  $url.should =~ /https:\/\/github.com\/.+\/issues\/\d+/
+  $github_url.should =~ /https:\/\/github.com\/.+\/issues\/\d+/
 end

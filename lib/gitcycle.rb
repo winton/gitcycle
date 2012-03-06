@@ -25,6 +25,8 @@ class Gitcycle
     end
   
   def initialize(args=nil)
+    $remotes = {}
+
     if ENV['CONFIG']
       @config_path = File.expand_path(ENV['CONFIG'])
     else
@@ -65,6 +67,10 @@ class Gitcycle
       exec_git(:branch, args)
     end
 
+    unless yes?("\nYour work will eventually merge into '#{params['branch[source]']}'. Is this correct?")
+      params['branch[source]'] = q("What branch would you like to eventually merge into?")
+    end
+
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
     name = branch['name']
@@ -73,8 +79,8 @@ class Gitcycle
       owner, repo = branch['repo'].split(':')
       branch['home'] = @git_login
 
-      unless yes?("\nYour work will eventually merge into '#{branch['source']}'. Is this correct?")
-        branch['source'] = q("What branch would you like to eventually merge into?")
+      if branch['source'].include?('/')
+        branch['home'], branch['source'] = branch['source'].split('/')
       end
 
       unless yes?("Would you like to name your branch '#{name}'?")
@@ -117,8 +123,13 @@ class Gitcycle
 
     if args.length == 1 && args[0] =~ /^https?:\/\//
       puts "\nRetrieving branch information from gitcycle.\n".green
-      branch = get('branch', 'branch[lighthouse_url]' => args[0])
-      checkout_or_track(:name => branch['name'], :remote => 'origin')
+      branch = get('branch', 'branch[lighthouse_url]' => args[0], 'create' => 0)
+      if branch
+        checkout_or_track(:name => branch['name'], :remote => 'origin')
+      else
+        puts "\nBranch not found!\n".red
+        puts "\nDid you mean: gitc branch #{args[0]}\n".yellow
+      end
     else
       remote, branch = args
       remote, branch = nil, remote if branch.nil?
@@ -145,14 +156,13 @@ class Gitcycle
           get('branch',
             'branch[home]' => remote,
             'branch[name]' => branch,
-            'branch[collab]' => 1,
             'create' => 1
           )
         end
       end
 
       puts "Checking out '#{branch}'.\n".green
-      run("git checkout #{branch}")
+      run("git checkout -q #{branch}")
     end
   end
   alias :co :checkout
@@ -236,9 +246,7 @@ class Gitcycle
       'create' => 0
     )
 
-    collab = branch && branch['collab'] == '1'
-
-    if collab
+    if collab?(branch)
       # Merge from collab
       merge_remote_branch(
         :owner => branch['home'],
@@ -264,7 +272,7 @@ class Gitcycle
       )
     end
 
-    unless collab
+    unless collab?(branch)
       # Merge from origin
       merge_remote_branch(
         :owner => @git_login,
@@ -281,12 +289,11 @@ class Gitcycle
 
     require_git && require_config
 
-    branch = pull
-    remote = branch && branch['collab'] == '1' ? branch['home'] : 'origin'
-
+    pull
     branch = branches(:current => true)
-    puts "\nPushing branch '#{remote}/#{branch}'.\n".green
-    run("git push #{remote} #{branch}")
+
+    puts "\nPushing branch 'origin/#{branch}'.\n".green
+    run("git push origin #{branch} -q")
   end
 
   def qa(*issues)
@@ -303,14 +310,30 @@ class Gitcycle
       end
     elsif issues.first == 'fail' || issues.first == 'pass'
       branch = branches(:current => true)
-      label = issues.first.capitalize
+      pass_fail = issues.first
+      label = pass_fail.capitalize
+      issues = issues[1..-1]
 
-      if branch =~ /^qa_/
+      if pass_fail == 'pass' && !issues.empty?
+        puts "\nWARNING: #{
+          issues.length == 1 ? "This issue" : "These issues"
+        } will merge straight into '#{branch}' without testing.\n".red
+        
+        if yes?("Continue?")
+          qa_branch = create_qa_branch(
+            :instructions => false,
+            :issues => issues,
+            :source => branch
+          )
+          `git checkout qa_#{qa_branch['source']}_#{qa_branch['user']} -q`
+          $remotes = {}
+          qa('pass')
+        else
+          exit
+        end
+      elsif branch =~ /^qa_/
         puts "\nRetrieving branch information from gitcycle.\n".green
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
-
-        pass_fail = issues.first
-        issues = issues[1..-1]
 
         if pass_fail == 'pass'
           checkout_or_track(:name => qa_branch['source'], :remote => 'origin')
@@ -324,19 +347,18 @@ class Gitcycle
           end
         end
 
-        branches.each do |branch|
-          if pass_fail == 'pass'
-            merge_remote_branch(
-              :owner => branch['home'],
-              :repo => branch['repo'].split(':')[1],
-              :branch => branch['branch'],
-              :issue => branch['issue'],
-              :issues => qa_branch['branches'].collect { |b| b['issue'] },
-              :type => :from_qa
-            )
-          end
+        if pass_fail == 'pass' && issues.empty?
+          owner, repo = qa_branch['repo'].split(':')
+          merge_remote_branch(
+            :owner => owner,
+            :repo => repo,
+            :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
+            :type => :from_qa
+          )
+        end
 
-          unless issues.empty?
+        unless issues.empty?
+          branches.each do |branch|
             puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
             get('label',
               'qa_branch[source]' => qa_branch['source'],
@@ -371,7 +393,7 @@ class Gitcycle
           run("git add . && git add . -u && git commit -a -F .git/MERGE_MSG")
 
           puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-          run("git push origin qa_#{qa_branch['source']}_#{qa_branch['user']}")
+          run("git push origin qa_#{qa_branch['source']}_#{qa_branch['user']} -q")
 
           puts "\nDe-conflicting on gitcycle.\n".green
           get('qa_branch',
@@ -397,31 +419,29 @@ class Gitcycle
   def ready(*issues)
     require_git && require_config
 
-    if issues.empty?
-      branch = pull
+    branch = pull
+
+    if branch && !collab?(branch)
       branch = create_pull_request(branch)
+    end
 
-      if branch == false
-        puts "Branch not found.\n".red
-      elsif branch['issue_url']
-        puts "\nLabeling issue as 'Pending Review'.\n".green
-        get('label',
-          'branch[name]' => branch['name'],
-          'labels' => [ 'Pending Review' ]
-        )
-
-        puts "Opening issue: #{branch['issue_url']}\n".green
-        Launchy.open(branch['issue_url'])
-      else
-        puts "You have not pushed any commits to '#{branch['name']}'.\n".red
-      end
-    else
-      puts "\nLabeling issues as 'Pending Review'.\n".green
+    if branch == false
+      puts "Branch not found.\n".red
+    elsif collab?(branch)
+      remote, branch = branch['home'], branch['source']
+      puts "\nPushing branch '#{remote}/#{branch}'.\n".green
+      run("git push #{remote} #{branch} -q")
+    elsif branch['issue_url']
+      puts "\nLabeling issue as 'Pending Review'.\n".green
       get('label',
-        'issues' => issues,
-        'labels' => [ 'Pending Review' ],
-        'scope' => 'repo'
+        'branch[name]' => branch['name'],
+        'labels' => [ 'Pending Review' ]
       )
+
+      puts "Opening issue: #{branch['issue_url']}\n".green
+      Launchy.open(branch['issue_url'])
+    else
+      puts "You have not pushed any commits to '#{branch['name']}'.\n".red
     end
   end
 
@@ -483,8 +503,6 @@ class Gitcycle
     owner = options[:owner]
     repo = options[:repo]
 
-    $remotes ||= {}
-
     unless $remotes[owner]
       $remotes[owner] = true
       
@@ -514,14 +532,14 @@ class Gitcycle
 
     if branches(:match => name)
       puts "Checking out branch '#{name}'.\n".green
-      run("git checkout #{name}")
+      run("git checkout #{name} -q")
     else
       puts "Tracking branch '#{remote}/#{name}'.\n".green
       run("git fetch -q #{remote}")
-      run("git checkout -b #{name} #{remote}/#{name}")
+      run("git checkout -q -b #{name} #{remote}/#{name}")
     end
 
-    run("git pull #{remote} #{name}")
+    run("git pull #{remote} #{name} -q")
   end
 
   def checkout_remote_branch(options={})
@@ -532,12 +550,12 @@ class Gitcycle
 
     if branches(:match => target)
       if yes?("You already have a branch called '#{target}'. Overwrite?")
-        run("git push origin :#{target}")
-        run("git checkout master")
-        run("branch -D #{target}")
+        run("git push origin :#{target} -q")
+        run("git checkout master -q")
+        run("git branch -D #{target}")
       else
-        run("git checkout #{target}")
-        run("git pull origin #{target}")
+        run("git checkout #{target} -q")
+        run("git pull origin #{target} -q")
         return
       end
     end
@@ -545,18 +563,30 @@ class Gitcycle
     add_remote_and_fetch(options)
     
     puts "Checking out remote branch '#{target}' from '#{owner}/#{repo}/#{branch}'.\n".green
-    run("git checkout -b #{target} #{owner}/#{branch}")
+    run("git checkout -q -b #{target} #{owner}/#{branch}")
 
     puts "Fetching remote 'origin'.\n".green
     run("git fetch -q origin")
 
     if branches(:remote => true, :match => "origin/#{target}")
       puts "Pulling 'origin/#{target}'.\n".green
-      run("git pull origin #{target}")
+      run("git pull origin #{target} -q")
     end
 
     puts "Pushing 'origin/#{target}'.\n".green
-    run("git push origin #{target}")
+    run("git push origin #{target} -q")
+  end
+
+  def collab?(branch)
+    return false unless branch
+    owner =
+      if branch['repo'].is_a?(::Hash)
+        branch['repo']['owner']
+      else
+        branch['repo'].split(':')[0]
+      end
+    branch['home'] != branch['user'] &&
+    branch['home'] != owner
   end
 
   def command_not_recognized
@@ -588,17 +618,21 @@ class Gitcycle
   end
 
   def create_qa_branch(options)
+    instructions = options[:instructions]
     issues = options[:issues]
     range = options[:range] || (0..-1)
+    source = options[:source]
 
     if (issues && !issues.empty?) || options[:qa_branch]
       if options[:qa_branch]
         qa_branch = options[:qa_branch]
       else
-        source = branches(:current => true)
-        
-        unless yes?("\nDo you want to create a QA branch from '#{source}'?")
-          source = q("What branch would you like to base this QA branch off of?")
+        unless source
+          source = branches(:current => true)
+          
+          unless yes?("\nDo you want to create a QA branch from '#{source}'?")
+            source = q("What branch would you like to base this QA branch off of?")
+          end
         end
         
         puts "\nRetrieving branch information from gitcycle.\n".green
@@ -613,10 +647,10 @@ class Gitcycle
           if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
             if branches(:match => name)
-              run("git checkout master")
+              run("git checkout master -q")
               run("git branch -D #{name}")
             end
-            run("git push origin :#{name}")
+            run("git push origin :#{name} -q")
           end
 
           checkout_remote_branch(
@@ -651,8 +685,10 @@ class Gitcycle
           )
         end
 
-        puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
-        puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
+        unless options[:instructions] == false
+          puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
+          puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
+        end
 
         unless warnings.empty?
           puts "\n#{"WARNING:".red} If you pass this QA branch, the following branches will merge into '#{source.yellow}':\n"
@@ -665,6 +701,8 @@ class Gitcycle
           puts "\nBe sure this is correct!\n".yellow
         end
       end
+
+      qa_branch
     end
   end
 
@@ -684,7 +722,7 @@ class Gitcycle
     if $? != 0
       puts "Conflict occurred when merging '#{branch}'#{" (issue ##{issue})" if issue}.\n".red
       
-      if type # from_qa or to_qa
+      if type == :to_qa
         puts "Please resolve this conflict with '#{owner}'.\n".yellow
       
         puts "\nSending conflict information to gitcycle.\n".green
@@ -696,7 +734,7 @@ class Gitcycle
     elsif type # from_qa or to_qa
       branch = branches(:current => true)
       puts "Pushing branch '#{branch}'.\n".green
-      run("git push origin #{branch}")
+      run("git push origin #{branch} -q")
     end
   end
 
@@ -765,7 +803,7 @@ class Gitcycle
 
     if branches(:remote => true, :match => "#{owner}/#{branch}")
       puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
-      run("git merge #{owner}/#{branch}")
+      run("git merge #{owner}/#{branch} -q")
 
       fix_conflict(options)
     end

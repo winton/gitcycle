@@ -2,7 +2,7 @@
 *.gem
 .bundle
 coverage
-features/config.yml
+features/config/config.yml
 features/fixtures
 Gemfile.lock
 pkg
