@@ -153,6 +153,8 @@ Todo
 * Allow QA branches to be created from any branch and allow any issue to merge into it
 * Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
 	Lighthouse ticket changes to pending-qa if ticket is not the same as the parent.
+* gitc pull is not merging in br/rc 
+* gitc push # when I'm a 'Both' person pushs to origin which is br, I still feel this should push to the fork directly.  Example here: https://gist.github.com/955f5b549d8d9ae1043a
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
 * gitc merge chrisped/branch-with-reverts # to quickly revert changes
 * Label issues with ticket milestone
