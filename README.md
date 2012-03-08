@@ -152,6 +152,12 @@ Gitcycle automatically knows if you are checking out an upstream branch:
 Todo
 ----
 
+* gitc ready - issue already closed, will open a new issue
+Nice to haves:
+* gitc branch [lh]
+* gitc branch [gitissue]
+* gitc ready # switch me back to rc or master
+
 * Conflict recording not working
 * gitc qa pass [issue] should use a qa_rc_tongueroo_temp branch so it doesnt blow away the changes in the qa_rc_tongueroo branch
 	* not working : https://gist.github.com/819c99281f5d6492de47
