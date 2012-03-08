@@ -153,9 +153,15 @@ Todo
 ----
 
 * Conflict recording not working
+* gitc qa pass [issue] should use a qa_rc_tongueroo_temp branch so it doesnt blow away the changes in the qa_rc_tongueroo branch
+	* not working : https://gist.github.com/819c99281f5d6492de47
+* gitc qa pass (all), doesnt update lighthouse to state pending-approval 
 * Add comment on lighthouse with issue URL
+* Multiple issues with one lighthouse tickets, wont update lh states
 * Collab fork should change gitc ready to auo merge to the parent fork.  gitc pull should pull from br and parent fork.  gitc push should push to your same fork.
 	Lighthouse ticket changes to pending-qa if ticket is not the same as the parent.
+* gitc pull is not merging in br/rc 
+* gitc push # when I'm a 'Both' person pushs to origin which is br, I still feel this should push to the fork directly.  Example here: https://gist.github.com/955f5b549d8d9ae1043a
 * Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
 * gitc merge chrisped/branch-with-reverts # to quickly revert changes
 * Label issues with ticket milestone
@@ -175,4 +181,5 @@ $ gitc st - shortcut
 * gitc qa clean # to clean up old branches
 * gitc qa pass # if ticket resolved, it should stay resolved
 * gitc ready # if pull requests already created, it should prompt and explain that a new branch and issue is being created, consider effect of multiple developers
+* fail should change to inactive
 * If feature branch changed between QA branch creation and QA merge, alert QA engineer
