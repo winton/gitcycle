@@ -327,7 +327,8 @@ Then /^redis entries valid$/ do
     'user' => config['user'],
     'source' => collab ? 'some_branch' : 'master'
   }
-  if @scenario_title == 'No parameters and something committed'
+  if @scenario_title.include?("(Discuss)") && @scenario_title.include?("something committed")
+    should['labels'] = 'Branch - master'
     should['issue_url'] = $github_url
   end
   branch.should == should
