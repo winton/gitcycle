@@ -1,6 +1,6 @@
 Feature: Discuss
 
-Scenario: No parameters and nothing committed
+Scenario: (Discuss) No parameters and nothing committed
   Given a fresh set of repositories
   When I cd to the user repo
     And I execute gitcycle branch with a new URL or string
@@ -15,7 +15,7 @@ Scenario: No parameters and nothing committed
     """
     And redis entries valid
 
-Scenario: No parameters and something committed
+Scenario: (Discuss) No parameters and something committed
   Given a fresh set of repositories
   When I cd to the user repo
     And I execute gitcycle branch with a new URL or string
