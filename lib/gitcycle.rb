@@ -1,9 +1,10 @@
 require 'rubygems'
 
 require 'fileutils'
-require 'open-uri'
 require 'uri'
 require 'yaml'
+require 'httpclient'
+require 'httpi'
 
 gem 'launchy', '= 2.0.5'
 require 'launchy'
@@ -756,7 +757,8 @@ class Gitcycle
     params.chop! # trailing &
 
     begin
-      json = open("#{API}/#{path}.json?#{params}").read
+      req = HTTPI::Request.new "#{API}/#{path}.json?#{params}"
+      json = HTTPI.get(req).body
     rescue Exception
       puts "\nCould not connect to Gitcycle.".red
       puts "\nPlease verify your Internet connection and try again later.\n".yellow
