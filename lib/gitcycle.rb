@@ -762,7 +762,8 @@ class Gitcycle
     begin
       req = HTTPI::Request.new "#{API}/#{path}.json?#{params}"
       json = HTTPI.get(req).body
-    rescue Exception
+    rescue Exception => error
+      puts error.to_s
       puts "\nCould not connect to Gitcycle.".red
       puts "\nPlease verify your Internet connection and try again later.\n".yellow
       exit
