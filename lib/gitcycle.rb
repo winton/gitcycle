@@ -742,8 +742,11 @@ class Gitcycle
   def get(path, hash={})
     hash.merge!(
       :login => @login,
-      :token => @token
+      :token => @token,
+      :uid   => (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
     )
+
+    puts "\nTransaction ID: #{hash[:uid]}".green
 
     params = ''
     hash[:session] = 0
