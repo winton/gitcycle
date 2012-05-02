@@ -1,9 +1,10 @@
 require 'rubygems'
 
 require 'fileutils'
-require 'open-uri'
 require 'uri'
 require 'yaml'
+require 'httpclient'
+require 'httpi'
 
 gem 'launchy', '= 2.0.5'
 require 'launchy'
@@ -741,8 +742,11 @@ class Gitcycle
   def get(path, hash={})
     hash.merge!(
       :login => @login,
-      :token => @token
+      :token => @token,
+      :uid   => (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
     )
+
+    puts "\nTransaction ID: #{hash[:uid]}".green
 
     params = ''
     hash[:session] = 0
@@ -756,8 +760,10 @@ class Gitcycle
     params.chop! # trailing &
 
     begin
-      json = open("#{API}/#{path}.json?#{params}").read
-    rescue Exception
+      req = HTTPI::Request.new "#{API}/#{path}.json?#{params}"
+      json = HTTPI.get(req).body
+    rescue Exception => error
+      puts error.to_s
       puts "\nCould not connect to Gitcycle.".red
       puts "\nPlease verify your Internet connection and try again later.\n".yellow
       exit

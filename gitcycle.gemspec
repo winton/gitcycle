@@ -28,4 +28,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency "launchy", "= 2.0.5"
   s.add_dependency "yajl-ruby", "= 1.1.0"
+  s.add_dependency "httpclient", "= 2.1.5"
+  s.add_dependency "httpi", "= 0.9.6"
 end
