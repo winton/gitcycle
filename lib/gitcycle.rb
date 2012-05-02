@@ -550,12 +550,12 @@ class Gitcycle
 
     if branches(:match => target)
       if yes?("You already have a branch called '#{target}'. Overwrite?")
-        run("git push origin :#{target} -q")
-        run("git checkout master -q")
-        run("git branch -D #{target}")
+        run_safe("git push origin :#{target} -q")
+        run_safe("git checkout master -q")
+        run_safe("git branch -D #{target}")
       else
-        run("git checkout #{target} -q")
-        run("git pull origin #{target} -q")
+        run_safe("git checkout #{target} -q")
+        run_safe("git pull origin #{target} -q")
         return
       end
     end
@@ -856,6 +856,14 @@ class Gitcycle
       puts cmd
     else
       `#{cmd}`
+    end
+  end
+
+  def run_safe(cmd)
+    run(cmd)
+    if $? != 0
+      puts "The last command was supposed to run without error, but it didn't :(\n".red
+      puts "Please copy this session's output and send it to to gitcycle@bleacherreport.com.\n".yellow
     end
   end
 
