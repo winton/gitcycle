@@ -422,7 +422,8 @@ class Gitcycle
     branch = pull
 
     if branch && !collab?(branch)
-      branch = create_pull_request(branch)
+      force = branch['labels'] && branch['labels'].include?('Pass')
+      branch = create_pull_request(branch, force)
     end
 
     if branch == false
@@ -596,7 +597,7 @@ class Gitcycle
     Launchy.open(readme)
   end
 
-  def create_pull_request(branch=nil)
+  def create_pull_request(branch=nil, force=false)
     unless branch
       puts "\nRetrieving branch information from gitcycle.\n".green  
       branch = get('branch',
@@ -605,7 +606,7 @@ class Gitcycle
       )
     end
 
-    if branch && !branch['issue_url']
+    if branch && (force || !branch['issue_url'])
       puts "Creating GitHub pull request.\n".green
       branch = get('branch',
         'branch[create_pull_request]' => true,
