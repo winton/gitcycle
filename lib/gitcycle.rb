@@ -863,7 +863,7 @@ class Gitcycle
     run(cmd)
     if $? != 0
       puts "The last command was supposed to run without error, but it didn't :(\n".red
-      puts "Please copy this session's output and send it to to gitcycle@bleacherreport.com.\n".yellow
+      puts "Please copy this session's output and send it to gitcycle@bleacherreport.com.\n".yellow
     end
   end
 
