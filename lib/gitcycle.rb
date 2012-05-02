@@ -643,6 +643,13 @@ class Gitcycle
       name = "qa_#{source}_#{qa_branch['user']}"
 
       unless qa_branch['branches'].empty?
+        qa_branch['branches'][range].each do |branch|
+          if source != branch['source']
+            puts "You can only QA issues based on '#{source}'\n".red
+            exit
+          end
+        end
+
         unless options[:preserve]
           if branches(:match => name, :all => true)
             puts "Deleting old QA branch '#{name}'.\n".green
@@ -663,17 +670,10 @@ class Gitcycle
           puts "\n"
         end
 
-        warnings = {}
-
         qa_branch['branches'][range].each do |branch|
           issue = branch['issue']
           owner, repo = branch['repo'].split(':')
           home = branch['home']
-
-          if source != branch['source']
-            warnings[branch['source']] ||= []
-            warnings[branch['source']] << branch['issue']
-          end
 
           output = merge_remote_branch(
             :owner => home,
@@ -688,17 +688,6 @@ class Gitcycle
         unless options[:instructions] == false
           puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
           puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
-        end
-
-        unless warnings.empty?
-          puts "\n#{"WARNING:".red} If you pass this QA branch, the following branches will merge into '#{source.yellow}':\n"
-          
-          warnings.each do |(branch, issues)|
-            issues.collect! { |issue| "##{issue}" }
-            puts "  #{branch.yellow} (#{issues.join(', ')})"
-          end
-          
-          puts "\nBe sure this is correct!\n".yellow
         end
       end
 
