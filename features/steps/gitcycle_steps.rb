@@ -259,6 +259,11 @@ When /^I resolve the conflict/ do
   File.open('README', 'w') {|f| f.write($commit_msg) }
 end
 
+When /^I wait for (.+) seconds/ do |seconds|
+  $stdout.puts "Waiting #{seconds} seconds..."
+  sleep seconds.to_i
+end
+
 Then /^gitcycle runs with exit$/ do
   $execute.each do |cmd|
     lambda { run_gitcycle(cmd) }.should raise_error SystemExit

@@ -38,9 +38,11 @@ Scenario: Reopen pull request
     And I execute gitcycle with "qa pass issue.id"
     And I enter "y"
     And gitcycle runs
+    And I wait for 5 seconds
     And I cd to the user repo
     And I checkout master-ticket.id
     And I commit something
+    And I wait for 5 seconds
     And I execute gitcycle with "ready"
     And gitcycle runs
   Then output includes

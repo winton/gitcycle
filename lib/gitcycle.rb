@@ -68,9 +68,10 @@ class Gitcycle
     end
 
     unless yes?("\nYour work will eventually merge into '#{params['branch[source]']}'. Is this correct?")
-      source = params['branch[source]'] = q("What branch would you like to eventually merge into?")
+      params['branch[source]'] = q("What branch would you like to eventually merge into?")
     end
 
+    source = params['branch[source]']
     if source.include?('/')
       params['branch[home]'], params['branch[source]'] = source.split('/')
       params['branch[collab]'] = 1
@@ -247,7 +248,7 @@ class Gitcycle
       'create' => 0
     )
 
-    if branch['collab']
+    if branch && branch['collab']
       # Merge from collab
       merge_remote_branch(
         :owner => branch['home'],
@@ -273,7 +274,7 @@ class Gitcycle
       )
     end
 
-    unless branch['collab']
+    unless branch && branch['collab']
       # Merge from origin
       merge_remote_branch(
         :owner => @git_login,
@@ -782,7 +783,7 @@ class Gitcycle
 
     if branches(:remote => true, :match => "#{owner}/#{branch}")
       puts "\nMerging remote branch '#{branch}' from '#{owner}/#{repo}'.\n".green
-      run("git merge #{owner}/#{branch} -q")
+      run("git merge #{owner}/#{branch}")
 
       fix_conflict(options)
     end
