@@ -18,6 +18,7 @@ $redis = Redis.new
 
 Before do |scenario|
   Launchy.stub :open do |url|
+    $last_url = $url
     if url =~ /https:\/\/github.com\/.+\/issues\/\d+/
       $github_url = url
     end
@@ -253,6 +254,11 @@ When /^gitcycle runs$/ do
   run_gitcycle($execute.shift) until $execute.empty?
 end
 
+When /^I resolve the conflict/ do
+  $commit_msg = "#{@scenario_title} - #{rand}"
+  File.open('README', 'w') {|f| f.write($commit_msg) }
+end
+
 Then /^gitcycle runs with exit$/ do
   $execute.each do |cmd|
     lambda { run_gitcycle(cmd) }.should raise_error SystemExit
@@ -327,6 +333,7 @@ Then /^redis entries valid$/ do
     'user' => config['user'],
     'source' => collab ? 'some_branch' : 'master'
   }
+  should['collab'] = '1' if collab
   if @scenario_title.include?("(Discuss)") && @scenario_title.include?("something committed")
     should['labels'] = 'Branch - master'
     should['issue_url'] = $github_url
@@ -344,4 +351,8 @@ end
 
 Then /^URL is a valid issue$/ do
   $github_url.should =~ /https:\/\/github.com\/.+\/issues\/\d+/
+end
+
+Then /^URL is not the same as the last$/ do
+  $last_url.should_not == $url
 end

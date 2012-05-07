@@ -68,7 +68,12 @@ class Gitcycle
     end
 
     unless yes?("\nYour work will eventually merge into '#{params['branch[source]']}'. Is this correct?")
-      params['branch[source]'] = q("What branch would you like to eventually merge into?")
+      source = params['branch[source]'] = q("What branch would you like to eventually merge into?")
+    end
+
+    if source.include?('/')
+      params['branch[home]'], params['branch[source]'] = source.split('/')
+      params['branch[collab]'] = 1
     end
 
     puts "\nRetrieving branch information from gitcycle.\n".green
@@ -77,11 +82,7 @@ class Gitcycle
 
     begin
       owner, repo = branch['repo'].split(':')
-      branch['home'] = @git_login
-
-      if branch['source'].include?('/')
-        branch['home'], branch['source'] = branch['source'].split('/')
-      end
+      branch['home'] ||= @git_login
 
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
@@ -89,7 +90,7 @@ class Gitcycle
       end
 
       checkout_remote_branch(
-        :owner => owner,
+        :owner => branch['collab'] ? branch['home'] : owner,
         :repo => repo,
         :branch => branch['source'],
         :target => name
@@ -246,7 +247,7 @@ class Gitcycle
       'create' => 0
     )
 
-    if collab?(branch)
+    if branch['collab']
       # Merge from collab
       merge_remote_branch(
         :owner => branch['home'],
@@ -272,7 +273,7 @@ class Gitcycle
       )
     end
 
-    unless collab?(branch)
+    unless branch['collab']
       # Merge from origin
       merge_remote_branch(
         :owner => @git_login,
@@ -421,14 +422,14 @@ class Gitcycle
 
     branch = pull
 
-    if branch && !collab?(branch)
+    if branch && !branch['collab']
       force = branch['labels'] && branch['labels'].include?('Pass')
       branch = create_pull_request(branch, force)
     end
 
     if branch == false
       puts "Branch not found.\n".red
-    elsif collab?(branch)
+    elsif branch['collab']
       remote, branch = branch['home'], branch['source']
       puts "\nPushing branch '#{remote}/#{branch}'.\n".green
       run("git push #{remote} #{branch} -q")
@@ -576,18 +577,6 @@ class Gitcycle
 
     puts "Pushing 'origin/#{target}'.\n".green
     run("git push origin #{target} -q")
-  end
-
-  def collab?(branch)
-    return false unless branch
-    owner =
-      if branch['repo'].is_a?(::Hash)
-        branch['repo']['owner']
-      else
-        branch['repo'].split(':')[0]
-      end
-    branch['home'] != branch['user'] &&
-    branch['home'] != owner
   end
 
   def command_not_recognized
