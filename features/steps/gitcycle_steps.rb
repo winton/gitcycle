@@ -52,11 +52,11 @@ def config(reload=false)
 end
 
 def gsub_variables(str)
-  if $ticket
-    str = str.gsub('ticket.id', $ticket.attributes['id'])
-  end
   if $tickets
     str = str.gsub('last_ticket.id', $tickets.last.attributes['id'])
+  end
+  if $ticket
+    str = str.gsub('ticket.id', $ticket.attributes['id'])
   end
   if $github_url
     issue_id = $github_url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
@@ -151,9 +151,6 @@ def run_gitcycle(cmd)
     str = str.gsub(/\e\[\d{1,2}m/, '')
     @output << "#{str}\n"
     puts str
-  end
-  if @scenario_title.include?('Collaborator')
-    @gitcycle.stub(:collab?).and_return(true)
   end
   if cmd
     @gitcycle.start(Shellwords.split(cmd))
@@ -303,12 +300,7 @@ end
 
 Then /^redis entries valid$/ do
   collab = @scenario_title.include?('Collaborator')
-  before =
-    if collab
-      "br-some_branch-"
-    else
-      "master-"
-    end
+  before = collab ? "" : "master-"
   after = 
     if @scenario_title.include?('Custom branch name')
       "-rename"

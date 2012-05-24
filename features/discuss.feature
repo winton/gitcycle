@@ -22,6 +22,7 @@ Scenario: (Discuss) No parameters and something committed
     And I give default input
     And gitcycle runs
     And I commit something
+    And I wait for 5 seconds
     And I execute gitcycle with "discuss"
     And gitcycle runs
   Then output includes

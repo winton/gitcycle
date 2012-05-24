@@ -117,13 +117,13 @@ class Gitcycle
   end
 
   def checkout(*args)
-    if args.length > 2 || options?(args)
+    if args.length != 1 || options?(args)
       exec_git(:checkout, args)
     end
 
     require_git && require_config
 
-    if args.length == 1 && args[0] =~ /^https?:\/\//
+    if args[0] =~ /^https?:\/\//
       puts "\nRetrieving branch information from gitcycle.\n".green
       branch = get('branch', 'branch[lighthouse_url]' => args[0], 'create' => 0)
       if branch
@@ -133,7 +133,7 @@ class Gitcycle
         puts "\nDid you mean: gitc branch #{args[0]}\n".yellow
       end
     else
-      remote, branch = args
+      remote, branch = args[0].split('/')
       remote, branch = nil, remote if branch.nil?
 
       unless branches(:match => branch)
@@ -158,6 +158,8 @@ class Gitcycle
           get('branch',
             'branch[home]' => remote,
             'branch[name]' => branch,
+            'branch[source]' => branch,
+            'branch[collab]' => 1,
             'create' => 1
           )
         end
@@ -253,7 +255,7 @@ class Gitcycle
       merge_remote_branch(
         :owner => branch['home'],
         :repo => branch['repo']['name'],
-        :branch => branch['name']
+        :branch => branch['source']
       )
     elsif branch
       # Merge from upstream source branch
@@ -291,11 +293,15 @@ class Gitcycle
 
     require_git && require_config
 
-    pull
-    branch = branches(:current => true)
+    branch = pull
 
-    puts "\nPushing branch 'origin/#{branch}'.\n".green
-    run("git push origin #{branch} -q")
+    if branch['collab']
+      puts "\nPushing branch '#{branch['home']}/#{branch['name']}'.\n".green
+      run("git push #{branch['home']} #{branch['name']} -q")
+    else
+      puts "\nPushing branch 'origin/#{branch}'.\n".green
+      run("git push origin #{branch} -q")
+    end
   end
 
   def qa(*issues)

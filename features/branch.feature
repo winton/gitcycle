@@ -85,12 +85,12 @@ Scenario: Collaborator
     Your work will eventually merge into 'master'. Is this correct? (y/n)
     What branch would you like to eventually merge into?
     Retrieving branch information from gitcycle.
-    Would you like to name your branch 'config.owner-some_branch-ticket.id'? (y/n)
+    Would you like to name your branch 'ticket.id'? (y/n)
     Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
-    Checking out remote branch 'config.owner-some_branch-ticket.id' from 'config.owner/config.repo/some_branch'.
+    Checking out remote branch 'ticket.id' from 'config.owner/config.repo/some_branch'.
     Fetching remote 'origin'.
-    Pushing 'origin/config.owner-some_branch-ticket.id'.
+    Pushing 'origin/ticket.id'.
     Sending branch information to gitcycle.
     """
     And redis entries valid

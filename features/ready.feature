@@ -81,5 +81,6 @@ Scenario: Collaborator
     Retrieving branch information from gitcycle.
     Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
+    Merging remote branch 'some_branch' from 'config.owner/gitcycle_test'.
     Pushing branch 'config.owner/some_branch'.
     """
