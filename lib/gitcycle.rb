@@ -299,7 +299,7 @@ class Gitcycle
       puts "\nPushing branch '#{branch['home']}/#{branch['name']}'.\n".green
       run("git push #{branch['home']} #{branch['name']} -q")
     else
-      puts "\nPushing branch 'origin/#{branch}'.\n".green
+      puts "\nPushing branch 'origin/#{branch['name']}'.\n".green
       run("git push origin #{branch} -q")
     end
   end
