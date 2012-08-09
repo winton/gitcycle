@@ -300,7 +300,7 @@ class Gitcycle
       run("git push #{branch['home']} #{branch['name']} -q")
     else
       puts "\nPushing branch 'origin/#{branch['name']}'.\n".green
-      run("git push origin #{branch} -q")
+      run("git push origin #{branch['name']} -q")
     end
   end
 
