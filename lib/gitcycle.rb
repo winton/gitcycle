@@ -138,20 +138,34 @@ class Gitcycle
 
       unless branches(:match => branch)
         collab = branch && remote
+        og_remote = nil
 
-        unless collab
-          puts "\nRetrieving repo information from gitcycle.\n".green
-          repo = get('repo')
-          remote = repo['owner']
-        end
+        puts "\nRetrieving repo information from gitcycle.\n".green
+        repo = get('repo')
+        remote = repo['owner'] unless collab
         
-        add_remote_and_fetch(
+        output = add_remote_and_fetch(
           :owner => remote,
           :repo => @git_repo
         )
+
+        if output.include?('ERROR')
+          og_remote = remote
+          remote = repo["owner"]
+
+          add_remote_and_fetch(
+            :owner => remote,
+            :repo => @git_repo
+          )
+        end
         
         puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
-        run("git branch --no-track #{branch} #{remote}/#{branch}")
+        output = run("git branch --no-track #{branch} #{remote}/#{branch}")
+
+        if output.include?("fatal")
+          puts "Could not find branch #{"'#{og_remote}/#{branch}' or " if og_remote}'#{remote}/#{branch}'.\n".red
+          exit
+        end
 
         if collab
           puts "Sending branch information to gitcycle.".green
@@ -841,7 +855,7 @@ class Gitcycle
     if ENV['RUN'] == '0'
       puts cmd
     else
-      `#{cmd}`
+      `#{cmd} 2>&1`
     end
   end
 

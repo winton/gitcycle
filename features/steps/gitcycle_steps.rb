@@ -30,6 +30,14 @@ Before do |scenario|
   $input = []
   $remotes = nil
   $ticket = nil
+
+  File.open("#{BASE}/features/fixtures/gitcycle.yml", 'w') do |f|
+    yaml = {
+      "#{config['user']}/#{config['repo']}" => [ config['user'], config['token_dev'] ],
+      "#{config['owner']}/#{config['repo']}" => [ config['user'], config['token_qa'] ],
+    }
+    f.write(YAML.dump(yaml))
+  end
 end
 
 def branches(options={})
@@ -332,9 +340,11 @@ Then /^redis entries valid$/ do
   }
   should['collab'] = '1' if collab
   if @scenario_title.include?("(Discuss)") && @scenario_title.include?("something committed")
-    should['labels'] = 'Branch - master'
+    should['labels'] = [ "Discuss" ]
     should['issue_url'] = $github_url
+    should['state'] = 'open'
   end
+
   branch.should == should
 end
 
