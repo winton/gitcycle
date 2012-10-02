@@ -135,9 +135,9 @@ class Gitcycle
     else
       remote, branch = args[0].split('/')
       remote, branch = nil, remote if branch.nil?
+      collab = branch && remote
 
       unless branches(:match => branch)
-        collab = branch && remote
         og_remote = nil
 
         puts "\nRetrieving repo information from gitcycle.\n".green
@@ -166,17 +166,17 @@ class Gitcycle
           puts "Could not find branch #{"'#{og_remote}/#{branch}' or " if og_remote}'#{remote}/#{branch}'.\n".red
           exit
         end
+      end
 
-        if collab
-          puts "Sending branch information to gitcycle.".green
-          get('branch',
-            'branch[home]' => remote,
-            'branch[name]' => branch,
-            'branch[source]' => branch,
-            'branch[collab]' => 1,
-            'create' => 1
-          )
-        end
+      if collab
+        puts "Sending branch information to gitcycle.".green
+        get('branch',
+          'branch[home]' => remote,
+          'branch[name]' => branch,
+          'branch[source]' => branch,
+          'branch[collab]' => 1,
+          'create' => 1
+        )
       end
 
       puts "Checking out '#{branch}'.\n".green

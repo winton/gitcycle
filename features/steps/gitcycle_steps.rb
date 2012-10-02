@@ -340,7 +340,7 @@ Then /^redis entries valid$/ do
   }
   should['collab'] = '1' if collab
   if @scenario_title.include?("(Discuss)") && @scenario_title.include?("something committed")
-    should['labels'] = [ "Discuss" ]
+    should['labels'] = "Branch - master"
     should['issue_url'] = $github_url
     should['state'] = 'open'
   end
