@@ -187,6 +187,7 @@ class Gitcycle
 
   def commit(*args)
     msg = nil
+    no_add = args.delete("--no-add")
 
     if args.empty?
       require_git && require_config
@@ -205,13 +206,19 @@ class Gitcycle
       end
     end
 
-    cmd = "git add . && git add . -u && git commit -a"
+    if no_add
+      cmd = "git commit"
+    else
+      cmd = "git add . && git add . -u && git commit -a"
+    end
 
-    if msg
-      run(cmd + "m #{msg.dump}")
+    if File.exists?("#{Dir.pwd}/.git/MERGE_HEAD")
+      Kernel.exec(cmd)
+    elsif msg
+      run(cmd + " -m #{msg.dump}")
       Kernel.exec("git commit --amend")
     elsif args.empty?
-      run(cmd)
+      Kernel.exec(cmd)
     else
       exec_git(:commit, args)
     end
