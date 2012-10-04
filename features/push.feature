@@ -15,7 +15,6 @@ Scenario: Collaborator
   Then output includes
     """
     Retrieving branch information from gitcycle.
-    Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
     Merging remote branch 'master-ticket.id' from 'config.owner/config.repo'.
     Pushing branch 'config.owner/master-ticket.id'.

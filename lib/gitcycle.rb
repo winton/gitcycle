@@ -536,9 +536,10 @@ class Gitcycle
     unless $remotes[owner]
       $remotes[owner] = true
       
-      puts "Adding remote repo '#{owner}/#{repo}'.\n".green
-      run("git remote rm #{owner}") if remotes(:match => owner)
-      run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
+      unless remotes(:match => owner)
+        puts "Adding remote repo '#{owner}/#{repo}'.\n".green
+        run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
+      end
 
       puts "Fetching remote '#{owner}'.\n".green
       run("git fetch -q #{owner}")

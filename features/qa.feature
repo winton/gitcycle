@@ -62,7 +62,6 @@ Scenario: QA issue pass w/ issue number
     Pushing branch 'qa_master_config.user'.
     Retrieving branch information from gitcycle.
     Checking out branch 'master'.
-    Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
     Merging remote branch 'qa_master_config.user' from 'config.owner/config.repo'.
     Pushing branch 'master'.
@@ -78,7 +77,6 @@ Scenario: QA issue pass
     """
     Retrieving branch information from gitcycle.
     Checking out branch 'master'.
-    Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
     Merging remote branch 'qa_master_config.user' from 'config.owner/config.repo'.
     Pushing branch 'master'.

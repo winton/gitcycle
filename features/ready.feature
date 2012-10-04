@@ -12,7 +12,6 @@ Scenario: Ready issue
   Then output includes
     """
     Retrieving branch information from gitcycle.
-    Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
     Merging remote branch 'master' from 'config.owner/config.repo'.
     Adding remote repo 'config.user/config.repo'.
@@ -48,10 +47,8 @@ Scenario: Reopen pull request
   Then output includes
     """
     Retrieving branch information from gitcycle.
-    Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
     Merging remote branch 'master' from 'config.owner/config.repo'.
-    Adding remote repo 'config.user/config.repo'.
     Fetching remote 'config.user'.
     Merging remote branch 'master-ticket.id' from 'config.user/config.repo'.
     Creating GitHub pull request.
@@ -79,7 +76,6 @@ Scenario: Collaborator
   Then output includes
     """
     Retrieving branch information from gitcycle.
-    Adding remote repo 'config.owner/config.repo'.
     Fetching remote 'config.owner'.
     Merging remote branch 'some_branch' from 'config.owner/gitcycle_test'.
     Pushing branch 'config.owner/some_branch'.
