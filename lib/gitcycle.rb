@@ -72,10 +72,6 @@ class Gitcycle
     end
 
     source = params['branch[source]']
-    if source.include?('/')
-      params['branch[home]'], params['branch[source]'] = source.split('/')
-      params['branch[collab]'] = 1
-    end
 
     puts "\nRetrieving branch information from gitcycle.\n".green
     branch = get('branch', params)
@@ -91,7 +87,7 @@ class Gitcycle
       end
 
       checkout_remote_branch(
-        :owner => branch['collab'] ? branch['home'] : owner,
+        :owner => owner,
         :repo => repo,
         :branch => branch['source'],
         :target => name
@@ -145,11 +141,12 @@ class Gitcycle
         remote = repo['owner'] unless collab
         
         output = add_remote_and_fetch(
+          :catch => false,
           :owner => remote,
           :repo => @git_repo
         )
 
-        if output.include?('ERROR')
+        if errored?(output)
           og_remote = remote
           remote = repo["owner"]
 
@@ -160,9 +157,9 @@ class Gitcycle
         end
         
         puts "Creating branch '#{branch}' from '#{remote}/#{branch}'.\n".green
-        output = run("git branch --no-track #{branch} #{remote}/#{branch}")
+        output = run("git branch --no-track #{branch} #{remote}/#{branch}", :catch => false)
 
-        if output.include?("fatal")
+        if errored?(output)
           puts "Could not find branch #{"'#{og_remote}/#{branch}' or " if og_remote}'#{remote}/#{branch}'.\n".red
           exit
         end
@@ -542,7 +539,7 @@ class Gitcycle
       end
 
       puts "Fetching remote '#{owner}'.\n".green
-      run("git fetch -q #{owner}")
+      run("git fetch -q #{owner}", :catch => options[:catch])
     end
   end
 
@@ -581,12 +578,12 @@ class Gitcycle
 
     if branches(:match => target)
       if yes?("You already have a branch called '#{target}'. Overwrite?")
-        run_safe("git push origin :#{target} -q")
-        run_safe("git checkout master -q")
-        run_safe("git branch -D #{target}")
+        run("git push origin :#{target} -q")
+        run("git checkout master -q")
+        run("git branch -D #{target}")
       else
-        run_safe("git checkout #{target} -q")
-        run_safe("git pull origin #{target} -q")
+        run("git checkout #{target} -q")
+        run("git pull origin #{target} -q")
         return
       end
     end
@@ -714,6 +711,10 @@ class Gitcycle
     end
   end
 
+  def errored?(output)
+    output.include?("fatal: ") || output.include?("ERROR: ") || $?.exitstatus != 0
+  end
+
   def exec_git(command, args)  
     args.unshift("git", command)
     Kernel.exec(*args.collect(&:to_s))
@@ -829,6 +830,11 @@ class Gitcycle
       b
     end
   end
+  
+  def q(question, extra='')
+    puts "#{question.yellow}#{extra}"
+    $input ? $input.shift : $stdin.gets.strip
+  end
 
   def require_config
     unless @login && @token
@@ -837,6 +843,7 @@ class Gitcycle
       puts "Have you set up this repository at http://gitcycle.com?\n".yellow
       exit
     end
+    true
   end
 
   def require_git
@@ -845,34 +852,30 @@ class Gitcycle
       puts "Are you sure you are in a git repository?\n".yellow
       exit
     end
+    true
+  end
+
+  def run(cmd, options={})
+    if ENV['RUN'] == '0'
+      puts cmd
+    else
+      output = `#{cmd} 2>&1`
+    end
+    if options[:catch] != false && errored?(output)
+      puts "#{output}\n\n"
+      puts "Gitcycle encountered an error when running the last command:".red
+      puts "  #{cmd}\n"
+      puts "Please copy this session's output and send it to gitcycle@bleacherreport.com.\n".yellow
+      exit
+    else
+      output
+    end
   end
 
   def save_config
     FileUtils.mkdir_p(File.dirname(@config_path))
     File.open(@config_path, 'w') do |f|
       f.write(YAML.dump(@config))
-    end
-  end
-
-  def q(question, extra='')
-    puts "#{question.yellow}#{extra}"
-    $input ? $input.shift : $stdin.gets.strip
-  end
-
-  def run(cmd)
-    if ENV['RUN'] == '0'
-      puts cmd
-    else
-      `#{cmd} 2>&1`
-    end
-  end
-
-  def run_safe(cmd)
-    run(cmd)
-    if $? != 0
-      puts "The last command was supposed to run without error, but it didn't :(\n".red
-      puts "Please copy this session's output and send it to gitcycle@bleacherreport.com.\n".yellow
-      exit
     end
   end
 
