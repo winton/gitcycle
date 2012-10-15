@@ -35,11 +35,6 @@ Type `gitc branch` + your ticket URL to create a new branch:
 
 	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
 
-To collaborate with another user, use a full path when prompted:
-
-	Q: What branch would you like to eventually merge into?
-	A: user/branch
-
 Pull
 ----
 
@@ -137,17 +132,19 @@ See who is QA'ing what:
 Checkout
 --------
 
+Check out an upstream or local branch:
+
+	gitc checkout [BRANCH]
+
 ### From Ticket
 
 Checkout a branch from a ticket URL:
 
 	gitc checkout [TICKET URL]
 
-### Upstream Branch
+### From User's Fork
 
-Gitcycle automatically knows if you are checking out an upstream branch:
-
-	gitc checkout [BRANCH]
+	gitc checkout user/branch
 
 Todo
 ----

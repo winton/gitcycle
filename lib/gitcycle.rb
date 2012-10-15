@@ -45,7 +45,7 @@ class Gitcycle
 
     exec_git(:branch, args) unless url || title
 
-    require_git && require_configs
+    require_git && require_config
 
     params = {
       'branch[source]' => branches(:current => true)
