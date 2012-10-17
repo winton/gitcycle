@@ -316,9 +316,13 @@ class Gitcycle
     if branch['collab']
       puts "\nPushing branch '#{branch['home']}/#{branch['name']}'.\n".green
       run("git push #{branch['home']} #{branch['name']} -q")
-    else
+    elsif branch
       puts "\nPushing branch 'origin/#{branch['name']}'.\n".green
       run("git push origin #{branch['name']} -q")
+    else
+      current_branch = branches(:current => true)
+      puts "\nPushing branch 'origin/#{current_branch}'.\n".green
+      run("git push origin #{current_branch} -q")
     end
   end
 
@@ -451,7 +455,7 @@ class Gitcycle
       # Recreate pull request if force == true
       force   = branch['labels'] && branch['labels'].include?('Pass')
       force ||= branch['state']  && branch['state'] == 'closed'
-      
+
       branch  = create_pull_request(branch, force)
     end
 
