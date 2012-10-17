@@ -448,8 +448,11 @@ class Gitcycle
     branch = pull
 
     if branch && !branch['collab']
-      force = branch['labels'] && branch['labels'].include?('Pass')
-      branch = create_pull_request(branch, force)
+      # Recreate pull request if force == true
+      force   = branch['labels'] && branch['labels'].include?('Pass')
+      force ||= branch['state']  && branch['state'] == 'closed'
+      
+      branch  = create_pull_request(branch, force)
     end
 
     if branch == false
