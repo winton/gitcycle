@@ -364,7 +364,6 @@ class Gitcycle
       elsif branch =~ /^qa_/
         puts "\nRetrieving branch information from gitcycle.\n".green
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
-        qa_branch_name = "qa_#{qa_branch['source']}_#{qa_branch['user']}"
 
         if pass_fail == 'pass'
           checkout_or_track(:name => qa_branch['source'], :remote => 'origin')
@@ -380,28 +379,10 @@ class Gitcycle
 
         if pass_fail == 'pass' && issues.empty?
           owner, repo = qa_branch['repo'].split(':')
-
-          qa_branch['branches'].each do |b|
-            repo = b['repo'].split(':')[1]
-
-            add_remote_and_fetch(
-              :owner => b['home'],
-              :repo => repo
-            )
-
-            output = run("git log #{qa_branch_name}..#{b['home']}/#{repo}")
-
-            unless output.strip.empty?
-              puts "\nUn-merged changes detected in '#{repo}/#{b['home']}':".red
-              puts "\n#{output}"
-              puts "\nTo merge the change: git merge #{repo}/#{b['home']}".yellow
-            end
-          end
-          
           merge_remote_branch(
             :owner => owner,
             :repo => repo,
-            :branch => qa_branch_name,
+            :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
             :type => :from_qa
           )
         end
