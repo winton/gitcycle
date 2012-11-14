@@ -212,7 +212,7 @@ class Gitcycle
     if File.exists?("#{Dir.pwd}/.git/MERGE_HEAD")
       Kernel.exec(cmd)
     elsif msg
-      run(cmd + " -m #{msg.dump}")
+      run(cmd + " -m #{msg.dump.gsub('`', "'")}")
       Kernel.exec("git commit --amend")
     elsif args.empty?
       Kernel.exec(cmd)
