@@ -32,10 +32,8 @@ Before do |scenario|
   $ticket = nil
 
   File.open("#{BASE}/features/fixtures/gitcycle.yml", 'w') do |f|
-    yaml = {
-      "#{config['user']}/#{config['repo']}" => [ config['user'], config['token_dev'] ],
-      "#{config['owner']}/#{config['repo']}" => [ config['user'], config['token_qa'] ],
-    }
+    yaml = { 'auth' => {} }
+    yaml['auth'][config['user']] = config['token']
     f.write(YAML.dump(yaml))
   end
 end
@@ -74,6 +72,7 @@ def gsub_variables(str)
   str = str.gsub('config.owner', config['owner'])
   str = str.gsub('config.repo', config['repo'])
   str = str.gsub('config.user', config['user'])
+  str = str.gsub('config.lighthouse_token', config['lighthouse']['token'])
   str
 end
 
@@ -95,7 +94,9 @@ def repos(reload=false)
     system [
       "rm -rf #{fixtures}/owner_cache",
       "rm -rf #{fixtures}/user_cache",
+      "rm -rf #{fixtures}/non_repo",
       "mkdir -p #{fixtures}/owner_cache",
+      "mkdir -p #{fixtures}/non_repo",
       "cd #{fixtures}/owner_cache",
       "git init . -q",
       "git remote add origin git@github.com:#{config['owner']}/#{config['repo']}.git",
@@ -197,14 +198,7 @@ When /^I execute gitcycle setup$/ do
   $execute << [
     "setup",
     config['user'],
-    config['repo'],
-    config['token_dev']
-  ].join(' ')
-  $execute << [
-    "setup",
-    config['user'],
-    "#{config['owner']}/#{config['repo']}",
-    config['token_qa']
+    config['token']
   ].join(' ')
 end
 
@@ -232,6 +226,13 @@ When /^I cd to the (.*) repo$/ do |user|
   Dir.chdir($repos[(ENV['REPO'] || user).to_sym])
 end
 
+When /^I cd to a non-repo$/ do
+  non_repo = "#{BASE}/features/fixtures/non_repo"
+  `rm -rf #{non_repo}`
+  `mkdir -p #{non_repo}`
+  Dir.chdir("#{BASE}/features/fixtures/non_repo")
+end
+
 When /^I enter "([^\"]*)"$/ do |input|
   input = gsub_variables(input)
   type(input)
@@ -256,7 +257,12 @@ When /^I push (.+)$/ do |branch|
 end
 
 When /^gitcycle runs$/ do
-  run_gitcycle($execute.shift) until $execute.empty?
+  @exited = false
+  begin
+    run_gitcycle($execute.shift) until $execute.empty?
+  rescue SystemExit => e
+    @exited = true
+  end
 end
 
 When /^I resolve the conflict/ do
@@ -269,6 +275,10 @@ When /^I wait for (.+) seconds/ do |seconds|
   sleep seconds.to_i
 end
 
+When /^I run "(.+)"$/ do |cmd|
+  `#{cmd}`
+end
+
 Then /^gitcycle runs with exit$/ do
   $execute.each do |cmd|
     lambda { run_gitcycle(cmd) }.should raise_error SystemExit
@@ -277,12 +287,7 @@ end
 
 Then /^gitcycle\.yml should be valid$/ do
   gitcycle = YAML.load(File.read(GITCYCLE))
-
-  repo = "#{config['user']}/#{config['repo']}"
-  gitcycle[repo].should == [ config['user'], config['token_dev'] ]
-  
-  repo = "#{config['owner']}/#{config['repo']}"
-  gitcycle[repo].should == [ config['user'], config['token_qa'] ]
+  gitcycle['auth'][config['user']].should == config['token']
 end
 
 Then /^output includes \"([^\"]*)"$/ do |expected|
@@ -348,7 +353,7 @@ Then /^redis entries valid$/ do
   branch.should == should
 end
 
-Then /^current branch is \"([^\"]*)"$/ do |branch|
+Then /^current branch is "([^\"]*)"$/ do |branch|
   branches(:current => true).should == gsub_variables(branch)
 end
 
@@ -362,4 +367,12 @@ end
 
 Then /^URL is not the same as the last$/ do
   $last_url.should_not == $url
+end
+
+Then /^gitcycle exits$/ do
+  @exited.should == true
+end
+
+Then /^open "(.*?)" in browser$/ do |url|
+  $url.should == url
 end
