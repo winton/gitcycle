@@ -8,7 +8,7 @@ require 'yajl'
 BASE = File.expand_path '../../../', __FILE__
 BIN = "#{BASE}/bin/gitc"
 
-ENV['CONFIG'] = GITCYCLE = "#{BASE}/features/fixtures/gitcycle.yml"
+ENV['CONFIG'] = GITCYCLE = "#{BASE}/features/config.yml"
 ENV['ENV'] = 'development'
 
 $:.unshift File.expand_path(__FILE__, "../../../lib")
@@ -31,7 +31,7 @@ Before do |scenario|
   $remotes = nil
   $ticket = nil
 
-  File.open("#{BASE}/features/fixtures/gitcycle.yml", 'w') do |f|
+  File.open("#{BASE}/features/config.yml", 'w') do |f|
     yaml = { 'auth' => {} }
     yaml['auth'][config['user']] = config['token']
     f.write(YAML.dump(yaml))
