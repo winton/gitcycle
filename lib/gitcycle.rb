@@ -800,9 +800,21 @@ class Gitcycle
     end
   end
 
+  def git_config_path(path)
+    config = "#{path}/.git/config"
+    if File.exists?(config)
+      return config
+    elsif path == '/'
+      return nil
+    else
+      path = File.expand_path(path + '/..')
+      git_config_path(path)
+    end
+  end
+
   def load_git
-    path = "#{Dir.pwd}/.git/config"
-    if File.exists?(path)
+    path = git_config_path(Dir.pwd)
+    if path
       @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
       @git_repo = @git_url.match(/\/(.+)\./)[1]
       @git_login = @git_url.match(/:(.+)\//)[1]
