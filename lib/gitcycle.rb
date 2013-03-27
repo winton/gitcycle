@@ -816,7 +816,7 @@ class Gitcycle
     path = git_config_path(Dir.pwd)
     if path
       @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
-      @git_repo = @git_url.match(/\/(.+)\./)[1]
+      @git_repo = @git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
       @git_login = @git_url.match(/:(.+)\//)[1]
       @login, @token = @config["#{@git_login}/#{@git_repo}"] rescue [ nil, nil ]
     end
