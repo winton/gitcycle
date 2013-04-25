@@ -92,22 +92,22 @@ class Gitcycle
         :branch => branch['source'],
         :target => name
       )
+
+      puts "Sending branch information to gitcycle.".green
+      get('branch',
+          'branch[home]' => branch['home'],
+          'branch[name]' => branch['name'],
+          'branch[rename]' => name != branch['name'] ? name : nil,
+          'branch[source]' => branch['source']
+      )
     rescue SystemExit, Interrupt
       puts "\nDeleting branch from gitcycle.\n".green
-      branch = get('branch',
+      get('branch',
         'branch[name]' => branch['name'],
         'create' => 0,
         'reset' => 1
       )
     end
-
-    puts "Sending branch information to gitcycle.".green
-    get('branch',
-      'branch[home]' => branch['home'],
-      'branch[name]' => branch['name'],
-      'branch[rename]' => name != branch['name'] ? name : nil,
-      'branch[source]' => branch['source']
-    )
 
     puts "\n"
   end
