@@ -504,7 +504,7 @@ class Gitcycle
     end
   end
 
-  def show(*issues)
+  def open(*issues)
     require_git && require_config
 
     if issues.empty?
