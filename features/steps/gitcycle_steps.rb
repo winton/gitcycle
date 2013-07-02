@@ -18,6 +18,7 @@ $redis = Redis.new
 
 Before do |scenario|
   Launchy.stub :open do |url|
+    $last_url = $url
     if url =~ /https:\/\/github.com\/.+\/issues\/\d+/
       $github_url = url
     end
@@ -29,6 +30,14 @@ Before do |scenario|
   $input = []
   $remotes = nil
   $ticket = nil
+
+  File.open("#{BASE}/features/fixtures/gitcycle.yml", 'w') do |f|
+    yaml = {
+      "#{config['user']}/#{config['repo']}" => [ config['user'], config['token_dev'] ],
+      "#{config['owner']}/#{config['repo']}" => [ config['user'], config['token_qa'] ],
+    }
+    f.write(YAML.dump(yaml))
+  end
 end
 
 def branches(options={})
@@ -51,11 +60,11 @@ def config(reload=false)
 end
 
 def gsub_variables(str)
-  if $ticket
-    str = str.gsub('ticket.id', $ticket.attributes['id'])
-  end
   if $tickets
     str = str.gsub('last_ticket.id', $tickets.last.attributes['id'])
+  end
+  if $ticket
+    str = str.gsub('ticket.id', $ticket.attributes['id'])
   end
   if $github_url
     issue_id = $github_url.match(/https:\/\/github.com\/.+\/issues\/(\d+)/)[1]
@@ -150,9 +159,6 @@ def run_gitcycle(cmd)
     str = str.gsub(/\e\[\d{1,2}m/, '')
     @output << "#{str}\n"
     puts str
-  end
-  if @scenario_title.include?('Collaborator')
-    @gitcycle.stub(:collab?).and_return(true)
   end
   if cmd
     @gitcycle.start(Shellwords.split(cmd))
@@ -253,6 +259,16 @@ When /^gitcycle runs$/ do
   run_gitcycle($execute.shift) until $execute.empty?
 end
 
+When /^I resolve the conflict/ do
+  $commit_msg = "#{@scenario_title} - #{rand}"
+  File.open('README', 'w') {|f| f.write($commit_msg) }
+end
+
+When /^I wait for (.+) seconds/ do |seconds|
+  $stdout.puts "Waiting #{seconds} seconds..."
+  sleep seconds.to_i
+end
+
 Then /^gitcycle runs with exit$/ do
   $execute.each do |cmd|
     lambda { run_gitcycle(cmd) }.should raise_error SystemExit
@@ -292,12 +308,7 @@ end
 
 Then /^redis entries valid$/ do
   collab = @scenario_title.include?('Collaborator')
-  before =
-    if collab
-      "br-some_branch-"
-    else
-      "master-"
-    end
+  before = collab ? "" : "master-"
   after = 
     if @scenario_title.include?('Custom branch name')
       "-rename"
@@ -327,10 +338,13 @@ Then /^redis entries valid$/ do
     'user' => config['user'],
     'source' => collab ? 'some_branch' : 'master'
   }
+  should['collab'] = '1' if collab
   if @scenario_title.include?("(Discuss)") && @scenario_title.include?("something committed")
-    should['labels'] = 'Branch - master'
+    should['labels'] = "Branch - master"
     should['issue_url'] = $github_url
+    should['state'] = 'open'
   end
+
   branch.should == should
 end
 
@@ -344,4 +358,8 @@ end
 
 Then /^URL is a valid issue$/ do
   $github_url.should =~ /https:\/\/github.com\/.+\/issues\/\d+/
+end
+
+Then /^URL is not the same as the last$/ do
+  $last_url.should_not == $url
 end
