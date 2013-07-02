@@ -135,11 +135,11 @@ class Gitcycle
         puts "\nNo matches for ticket ##{args[0]} found.\n".red
       elsif results_num == 1
         branch = run("git branch | grep \"\\-#{args[0]}\\-\" | sed -e 's/^..//' | tr -d '\n'")
-        if branch.strip == run("git rev-parse --abbrev-ref HEAD").strip
-          puts "Already on branch '#{branch}'".yellow
+        if branch.strip == branches(:current => true).strip
+          puts "Already on Github branch for LH ticket ##{args[0]} (#{branch})".yellow
         else
-          puts "\nSwitching to branch #{branch}.\n".green
-          run("git branch | grep -m 1 \"\\-#{args[0]}\\-\" | sed -e 's/^..//' | xargs -t git checkout")
+          puts "\nSwitching to branch '#{branch}'\n".green
+          run("git branch | grep \"\\-#{args[0]}\\-\" | xargs -t git checkout")
         end
       else
         puts "\nFound #{results_num} matches with that LH ticket number:\n".yellow
