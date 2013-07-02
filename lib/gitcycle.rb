@@ -128,6 +128,25 @@ class Gitcycle
         puts "\nBranch not found!\n".red
         puts "\nDid you mean: gitc branch #{args[0]}\n".yellow
       end
+    elsif args[0] =~ /^\d*$/
+      puts "\nLooking for a branch for LH ticket ##{args[0]}.\n".green
+      results_num = run("git branch | grep \"\\-#{args[0]}\\-\"", :catch => false).scan(/\n/).count
+      if results_num == 0
+        puts "\nNo matches for ticket ##{args[0]} found.\n".red
+      elsif results_num == 1
+        branch = run("git branch | grep \"\\-#{args[0]}\\-\" | sed -e 's/^..//' | tr -d '\n'")
+        if branch.strip == run("git rev-parse --abbrev-ref HEAD").strip
+          puts "Already on branch '#{branch}'".yellow
+        else
+          puts "\nSwitching to branch #{branch}.\n".green
+          run("git branch | grep -m 1 \"\\-#{args[0]}\\-\" | sed -e 's/^..//' | xargs -t git checkout")
+        end
+      else
+        puts "\nFound #{results_num} matches with that LH ticket number:\n".yellow
+        a = run("git branch | grep \"\\-#{args[0]}\\-\" | sed -e 's/^.//'")
+        puts a
+        puts "\nDid not switch branches. Please check your ticket number.\n".red
+      end
     else
       remote, branch = args[0].split('/')
       remote, branch = nil, remote if branch.nil?
