@@ -129,6 +129,24 @@ class Gitcycle
         puts "\nBranch not found!\n".red
         puts "\nDid you mean: gitc branch #{args[0]}\n".yellow
       end
+    elsif args[0] =~ /^\d*$/
+      puts "\nLooking for a branch for LH ticket ##{args[0]}.\n".green
+      results = branches(:array => true).select {|b| b.include?("-#{args[0]}-") }
+      if results.size == 0
+        puts "\nNo matches for ticket ##{args[0]} found.\n".red
+      elsif results.size == 1
+        branch = results.first
+        if branch.strip == branches(:current => true).strip
+          puts "Already on Github branch for LH ticket ##{args[0]} (#{branch})".yellow
+        else
+          puts "\nSwitching to branch '#{branch}'\n".green
+          run("git checkout #{branch}")
+        end
+      else
+        puts "\nFound #{results.size} matches with that LH ticket number:\n".yellow
+        puts results
+        puts "\nDid not switch branches. Please check your ticket number.\n".red
+      end
     else
       remote, branch = args[0].split('/')
       remote, branch = nil, remote if branch.nil?
@@ -585,6 +603,8 @@ class Gitcycle
       b.match(/\*\s+(.+)/)[1]
     elsif options[:match]
       b.match(/([\s]+|origin\/)(#{options[:match]})$/)[2] rescue nil
+    elsif options[:array]
+      b.split(/\n/).map{|b| b[2..-1]}
     else
       b
     end
