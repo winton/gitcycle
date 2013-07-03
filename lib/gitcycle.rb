@@ -130,21 +130,20 @@ class Gitcycle
       end
     elsif args[0] =~ /^\d*$/
       puts "\nLooking for a branch for LH ticket ##{args[0]}.\n".green
-      results_num = run("git branch | grep \"\\-#{args[0]}\\-\"", :catch => false).scan(/\n/).count
-      if results_num == 0
+      results = branches(:array => true).select {|b| b.include?("-#{args[0]}-") }
+      if results.size == 0
         puts "\nNo matches for ticket ##{args[0]} found.\n".red
-      elsif results_num == 1
-        branch = run("git branch | grep \"\\-#{args[0]}\\-\" | sed -e 's/^..//' | tr -d '\n'")
+      elsif results.size == 1
+        branch = results.first
         if branch.strip == branches(:current => true).strip
           puts "Already on Github branch for LH ticket ##{args[0]} (#{branch})".yellow
         else
           puts "\nSwitching to branch '#{branch}'\n".green
-          run("git branch | grep \"\\-#{args[0]}\\-\" | xargs -t git checkout")
+          run("git checkout #{branch}")
         end
       else
-        puts "\nFound #{results_num} matches with that LH ticket number:\n".yellow
-        a = run("git branch | grep \"\\-#{args[0]}\\-\" | sed -e 's/^.//'")
-        puts a
+        puts "\nFound #{results.size} matches with that LH ticket number:\n".yellow
+        puts results
         puts "\nDid not switch branches. Please check your ticket number.\n".red
       end
     else
@@ -575,6 +574,8 @@ class Gitcycle
       b.match(/\*\s+(.+)/)[1]
     elsif options[:match]
       b.match(/([\s]+|origin\/)(#{options[:match]})$/)[2] rescue nil
+    elsif options[:array]
+      b.split(/\n/).map{|b| b[2..-1]}
     else
       b
     end
