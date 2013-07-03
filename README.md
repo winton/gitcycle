@@ -76,6 +76,13 @@ When the branch is ready for code review:
 
 This will label the pull request as "Pending Review".
 
+Open
+----
+
+If you want to view the pull request without updating the ticket:
+
+	gitc open
+
 Code Review
 -----------
 
@@ -141,6 +148,12 @@ Check out an upstream or local branch:
 Checkout a branch from a ticket URL:
 
 	gitc checkout [TICKET URL]
+
+### From Ticket Number
+
+Checkout a branch from a ticket #:
+
+	gitc checkout [TICKET NUMBER]
 
 ### From User's Fork
 
