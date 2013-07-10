@@ -1,9 +1,10 @@
 require 'rubygems'
 
 require 'fileutils'
-require 'open-uri'
 require 'uri'
 require 'yaml'
+require 'httpclient'
+require 'httpi'
 
 gem 'launchy', '= 2.0.5'
 require 'launchy'
@@ -19,13 +20,14 @@ class Gitcycle
 
   API =
     if ENV['ENV'] == 'development'
-      "http://127.0.0.1:8080/api"
+      "http://127.0.0.1:3000/api"
     else
       "http://gitcycle.bleacherreport.com/api"
     end
   
-  def initialize(args=nil)
+  def initialize(args=nil, options={})
     $remotes = {}
+    @options = options
 
     if ENV['CONFIG']
       @config_path = File.expand_path(ENV['CONFIG'])
@@ -90,22 +92,22 @@ class Gitcycle
         :branch => branch['source'],
         :target => name
       )
+
+      puts "Sending branch information to gitcycle.".green
+      get('branch',
+          'branch[home]' => branch['home'],
+          'branch[name]' => branch['name'],
+          'branch[rename]' => name != branch['name'] ? name : nil,
+          'branch[source]' => branch['source']
+      )
     rescue SystemExit, Interrupt
       puts "\nDeleting branch from gitcycle.\n".green
-      branch = get('branch',
+      get('branch',
         'branch[name]' => branch['name'],
         'create' => 0,
         'reset' => 1
       )
     end
-
-    puts "Sending branch information to gitcycle.".green
-    get('branch',
-      'branch[home]' => branch['home'],
-      'branch[name]' => branch['name'],
-      'branch[rename]' => name != branch['name'] ? name : nil,
-      'branch[source]' => branch['source']
-    )
 
     puts "\n"
   end
@@ -125,6 +127,24 @@ class Gitcycle
       else
         puts "\nBranch not found!\n".red
         puts "\nDid you mean: gitc branch #{args[0]}\n".yellow
+      end
+    elsif args[0] =~ /^\d*$/
+      puts "\nLooking for a branch for LH ticket ##{args[0]}.\n".green
+      results = branches(:array => true).select {|b| b.include?("-#{args[0]}-") }
+      if results.size == 0
+        puts "\nNo matches for ticket ##{args[0]} found.\n".red
+      elsif results.size == 1
+        branch = results.first
+        if branch.strip == branches(:current => true).strip
+          puts "Already on Github branch for LH ticket ##{args[0]} (#{branch})".yellow
+        else
+          puts "\nSwitching to branch '#{branch}'\n".green
+          run("git checkout #{branch}")
+        end
+      else
+        puts "\nFound #{results.size} matches with that LH ticket number:\n".yellow
+        puts results
+        puts "\nDid not switch branches. Please check your ticket number.\n".red
       end
     else
       remote, branch = args[0].split('/')
@@ -249,6 +269,19 @@ class Gitcycle
           Launchy.open(branch['issue_url'])
         end
       end
+    end
+  end
+
+  def load_config
+    load_git
+
+    if File.exists?(@config_path)
+      @config = YAML.load(File.read(@config_path))
+
+      @login = @config['repos']["#{@git_login}/#{@git_repo}"] rescue nil
+      @token = @config['auth'][@login] rescue nil
+    else
+      @config = {}
     end
   end
 
@@ -507,10 +540,38 @@ class Gitcycle
     end
   end
 
+  def open(*issues)
+    require_git && require_config
+
+    if issues.empty?
+      branch = create_pull_request
+
+      if branch == false
+        puts "Branch not found.\n".red
+      elsif branch['issue_url']
+        puts "\nOpening the pull request in GitHub\n".green
+
+        puts "Opening issue: #{branch['issue_url']}\n".green
+        Launchy.open(branch['issue_url'])
+      else
+        puts "You must push code before opening a pull request.\n".red
+      end
+    else
+      puts "\nRetrieving branch information from gitcycle.\n".green
+
+      get('branch', 'issues' => issues, 'scope' => 'repo').each do |branch|
+        if branch['issue_url']
+          puts "Opening issue: #{branch['issue_url']}\n".green
+          Launchy.open(branch['issue_url'])
+        end
+      end
+    end
+  end
+
   def setup(login, token)
     @config['auth'] ||= {}
     @config['auth'][login] = token
-    
+
     save_config
   end
 
@@ -559,6 +620,8 @@ class Gitcycle
       b.match(/\*\s+(.+)/)[1] rescue nil
     elsif options[:match]
       b.match(/([\s]+|origin\/)(#{options[:match]})$/)[2] rescue nil
+    elsif options[:array]
+      b.split(/\n/).map{|b| b[2..-1]}
     else
       b
     end
@@ -762,8 +825,11 @@ class Gitcycle
       :login => @login,
       :owner => @git_login,
       :repo  => @git_repo,
-      :token => @token
+      :token => @token,
+      :uid   => (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
     )
+
+    puts "\nTransaction ID: #{hash[:uid]}".green
 
     params = ''
     hash[:session] = 0
@@ -778,8 +844,10 @@ class Gitcycle
 
     begin
       $stdout.puts "#{API}/#{path}.json?#{params}"
-      json = open("#{API}/#{path}.json?#{params}").read
-    rescue Exception
+      req = HTTPI::Request.new "#{API}/#{path}.json?#{params}"
+      json = HTTPI.get(req).body
+    rescue Exception => error
+      puts error.to_s
       puts "\nCould not connect to Gitcycle.".red
       puts "\nPlease verify your Internet connection and try again later.\n".yellow
       exit
@@ -798,24 +866,24 @@ class Gitcycle
     end
   end
 
-  def load_config
-    load_git
-
-    if File.exists?(@config_path)
-      @config = YAML.load(File.read(@config_path))
-
-      @login = @config['repos']["#{@git_login}/#{@git_repo}"] rescue nil
-      @token = @config['auth'][@login] rescue nil
-    else
-      @config = {}
+  def git_config_path(path)
+    config = "#{path}/.git/config"
+    $stdout.puts config
+    if File.exists?(config)
+      return config
+    elsif path == '/'
+      return nil
+    elsif @options[:recurse_directories] != false
+      path = File.expand_path(path + '/..')
+      git_config_path(path)
     end
   end
 
   def load_git
-    path = "#{Dir.pwd}/.git/config"
-    if File.exists?(path)
+    path = git_config_path(Dir.pwd)
+    if path && File.exists?(path)
       @git_url   = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1] rescue nil
-      @git_repo  = @git_url.match(/\/(.+)\./)[1] rescue nil
+      @git_repo  = @git_url.match(/\/(.+)/)[1].sub(/.git$/,'') rescue nil
       @git_login = @git_url.match(/:(.+)\//)[1] rescue nil
     end
   end

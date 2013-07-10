@@ -155,7 +155,7 @@ end
 
 def run_gitcycle(cmd)
   @output = ''
-  @gitcycle = Gitcycle.new
+  @gitcycle = Gitcycle.new(nil, :recurse_directories => false)
   @gitcycle.stub(:puts) do |str|
     str = str.gsub(/\e\[\d{1,2}m/, '')
     @output << "#{str}\n"
