@@ -824,6 +824,7 @@ class Gitcycle
     params.chop! # trailing &
 
     begin
+      HTTPI.log = false
       req = HTTPI::Request.new "#{API}/#{path}.json?#{params}"
       json = HTTPI.get(req).body
     rescue Exception => error
