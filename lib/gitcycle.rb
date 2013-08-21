@@ -24,7 +24,18 @@ class Gitcycle
     else
       "http://gitcycle.bleacherreport.com/api"
     end
-  
+
+  ERROR = {
+    :unrecognized_url => 1,
+    :could_not_find_branch => 2,
+    :told_not_to_merge => 3,
+    :cannot_qa => 4,
+    :conflict_when_merging => 5,
+    :something_went_wrong => 6,
+    :git_origin_not_found => 7,
+    :last_command_errored => 8,
+  }
+
   def initialize(args=nil)
     $remotes = {}
 
@@ -58,7 +69,7 @@ class Gitcycle
       params.merge!('branch[issue_url]' => url)
     elsif url
       puts "Gitcycle only supports Lighthouse or Github Issue URLs.".red
-      exit
+      exit ERROR[:unrecognized_url]
     elsif title
       params.merge!(
         'branch[name]' => title,
@@ -180,7 +191,7 @@ class Gitcycle
 
         if errored?(output)
           puts "Could not find branch #{"'#{og_remote}/#{branch}' or " if og_remote}'#{remote}/#{branch}'.\n".red
-          exit
+          exit ERROR[:could_not_find_branch]
         end
       end
 
@@ -378,7 +389,7 @@ class Gitcycle
           $remotes = {}
           qa('pass')
         else
-          exit
+          exit ERROR[:told_not_to_merge]
         end
       elsif branch =~ /^qa_/
         puts "\nRetrieving branch information from gitcycle.\n".green
@@ -718,7 +729,7 @@ class Gitcycle
         qa_branch['branches'][range].each do |branch|
           if source != branch['source']
             puts "You can only QA issues based on '#{source}'\n".red
-            exit
+            exit ERROR[:cannot_qa]
           end
         end
 
@@ -794,7 +805,7 @@ class Gitcycle
         get('qa_branch', 'issues' => issues, "conflict_#{type}" => issue)
 
         puts "Type 'gitc qa resolved' when finished resolving.\n".yellow
-        exit
+        exit ERROR[:conflict_when_merging]
       end
     elsif type # from_qa or to_qa
       branch = branches(:current => true)
@@ -841,7 +852,7 @@ class Gitcycle
       puts "\nSomething went wrong :(".red
       puts "\nEmail error code #{error} to wwelsh@bleacherreport.com.".yellow
       puts "\nInclude a gist of your terminal output if possible.\n".yellow
-      exit
+      exit ERROR[:something_went_wrong]
     else
       Yajl::Parser.parse(json)
     end
@@ -924,7 +935,7 @@ class Gitcycle
     unless @git_url && @git_repo && @git_login
       puts "\norigin entry within '.git/config' not found!".red
       puts "Are you sure you are in a git repository?\n".yellow
-      exit
+      exit ERROR[:git_origin_not_found]
     end
     true
   end
@@ -940,7 +951,7 @@ class Gitcycle
       puts "Gitcycle encountered an error when running the last command:".red
       puts "  #{cmd}\n"
       puts "Please copy this session's output and send it to gitcycle@bleacherreport.com.\n".yellow
-      exit
+      exit ERROR[:last_command_errored]
     else
       output
     end
