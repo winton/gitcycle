@@ -250,7 +250,7 @@ class Gitcycle
       :uid   => (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
     )
 
-    puts "\nTransaction ID: #{hash[:uid]}".green
+    puts "Transaction ID: #{hash[:uid]}".green
 
     params = ''
     hash[:session] = 0

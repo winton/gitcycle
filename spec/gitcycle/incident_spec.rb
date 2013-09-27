@@ -2,6 +2,11 @@ require File.expand_path("../../spec_helper", __FILE__)
 
 describe Gitcycle::Incident do
   it "should run" do
-    gitcycle_instance.incident
+    gitcycle = gitcycle_instance
+    gitcycle.stub(:q) { |x|
+      puts x
+      ""
+    }
+    gitcycle.incident
   end
 end
