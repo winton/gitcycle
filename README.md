@@ -1,7 +1,7 @@
 Gitcycle
 ========
 
-Tame your development cycle.
+Development cycle automation.
 
 About
 -----
