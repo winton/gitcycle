@@ -7,33 +7,42 @@ class Gitcycle
       statuspage = get('statuspage')
       incidents  = statuspage['incidents']
       
-      incident_statuses = %w(investigating identified monitoring resolved)
-      incident_colors   = %w(red           yellow     yellow     green)
+      incident_statuses  = %w(investigating identified monitoring resolved)
+      incident_colors    = %w(red           yellow     yellow     green)
+      
+      component_statuses = %w(operational degraded_performance partial_outage major_outage)
+      component_colors   = %w(green       yellow               yellow         red)
 
       puts_statuses(incidents, incident_statuses, incident_colors)
 
       incident = q "\n#{"Incident #?".yellow} (press enter for new incident)"
 
       if incident.strip == ""
-        incident = q "\n#{"New incident name?".yellow} (required)"
+        incident   = q "#{"New incident name?".yellow} (required)"
+        components = statuspage['components']
+        
+        puts_statuses(components, component_statuses, component_colors)
+
+        component = q "\n#{"Service #?".yellow} (required)"
       else
         incident = incident[incident.to_i]
       end
 
-      components         = statuspage['components']
-      component_statuses = %w(operational degraded_performance partial_outage major_outage)
-      component_colors   = %w(green       yellow               yellow         red)
-      
-      puts_statuses(components, component_statuses, component_colors)
+      unless incident
+        puts "Incident not found."
+        exit
+      end
 
-      component = q "\n#{"Service #?".yellow} (required)"
-      puts_names(component_statuses)
+      puts_names(component_statuses, component_colors)
 
       component_status = q "\n#{"Service status #?".yellow} (required)"
-      puts_names(incident_statuses)
+      puts_names(incident_statuses, incident_colors)
 
       incident_status = q "\n#{"Incident status #?".yellow} (required)"
       incident_body   = q "\n#{"Describe the incident".yellow} (enter for none)"
+
+      puts "\nSuccess!\n".green
+      Launchy.open("http://br.statuspage.io")
     end
 
     private
@@ -46,11 +55,11 @@ class Gitcycle
       array.map { |a| a['name'].length }.max
     end
 
-    def puts_names(array)
+    def puts_names(array, colors)
       puts ""
 
       array.each_with_index do |a, i|
-        puts "[#{i}] #{format_name(a)}"
+        puts "[#{i}] #{format_name(a).send(colors[i])}"
       end
     end
 
