@@ -19,6 +19,7 @@ require "gitcycle/branch"
 require "gitcycle/checkout"
 require "gitcycle/commit"
 require "gitcycle/discuss"
+require "gitcycle/incident"
 require "gitcycle/open"
 require "gitcycle/pull"
 require "gitcycle/push"
@@ -31,7 +32,7 @@ class Gitcycle
 
   API =
     if ENV['ENV'] == 'development'
-      "http://127.0.0.1:8080/api"
+      "http://127.0.0.1:3000/api"
     else
       "http://gitcycle.bleacherreport.com/api"
     end
@@ -51,9 +52,14 @@ class Gitcycle
   include Checkout
   include Commit
   include Discuss
+  include Incident
+  include Open
   include Pull
   include Push
   include QA
+  include Ready
+  include Review
+  include Setup
 
   def initialize(args=nil)
     $remotes = {}
