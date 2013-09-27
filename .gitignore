@@ -6,4 +6,5 @@ features/config/config.yml
 features/fixtures
 Gemfile.lock
 pkg
+spec/config/gitcycle.yml
 tmp

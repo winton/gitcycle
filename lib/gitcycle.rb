@@ -31,7 +31,7 @@ require "gitcycle/setup"
 class Gitcycle
 
   API =
-    if ENV['ENV'] == 'development'
+    if ENV['ENV'] == 'test'
       "http://127.0.0.1:3000/api"
     else
       "http://gitcycle.bleacherreport.com/api"

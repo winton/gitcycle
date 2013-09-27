@@ -1,7 +1,7 @@
-require File.expand_path("../../lib/gitcycle", __FILE__)
+require 'spec_helper'
 
 describe Gitcycle do
   it "should initialize" do
-    Gitcycle.new
+    gitcycle_instance
   end
 end
