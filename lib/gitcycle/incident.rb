@@ -31,6 +31,18 @@ class Gitcycle
         exit
       end
 
+      puts_names(incident_statuses, incident_colors)
+
+      incident_status = q "\n#{"Incident status #?".yellow} (required)"
+      incident_body   = q "\n#{"Describe the incident".yellow} (enter for none)"
+
+      incident_status  = incident_statuses[incident_status.to_i]
+
+      unless incident_status
+        puts "Incident status not found."
+        exit
+      end
+
       puts_statuses(components, component_statuses, component_colors)
 
       component = q "\n#{"Service #?".yellow} (required)"
@@ -44,21 +56,10 @@ class Gitcycle
       puts_names(component_statuses, component_colors)
 
       component_status = q "\n#{"Service status #?".yellow} (required)"
-      puts_names(incident_statuses, incident_colors)
-
-      incident_status = q "\n#{"Incident status #?".yellow} (required)"
-      incident_body   = q "\n#{"Describe the incident".yellow} (enter for none)"
-
       component_status = component_statuses[component_status.to_i]
-      incident_status  = incident_statuses[incident_status.to_i]
 
       unless component_status
         puts "Component status not found."
-        exit
-      end
-
-      unless incident_status
-        puts "Incident status not found."
         exit
       end
 
