@@ -5,7 +5,9 @@ class Gitcycle
       puts "\nRetrieving statuspage.io information from gitcycle.\n".green
       
       statuspage = get('statuspage')
+      components = statuspage['components']
       incidents  = statuspage['incidents']
+      page       = statuspage['page']
       
       incident_statuses  = %w(investigating identified monitoring resolved)
       incident_colors    = %w(red           yellow     yellow     green)
@@ -28,8 +30,6 @@ class Gitcycle
         puts "Incident not found."
         exit
       end
-
-      components = statuspage['components']
 
       puts_statuses(components, component_statuses, component_colors)
 
@@ -77,7 +77,7 @@ class Gitcycle
       puts "\nSuccess!\n".green
 
       sleep 0.5
-      Launchy.open("http://br.statuspage.io")
+      Launchy.open("http://#{page['subdomain']}.statuspage.io")
     end
 
     private
