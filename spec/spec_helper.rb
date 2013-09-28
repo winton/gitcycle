@@ -1,3 +1,5 @@
+ENV['ENV'] = 'test'
+
 $root = File.expand_path('../../', __FILE__)
 require "#{$root}/lib/gitcycle"
 
@@ -6,7 +8,7 @@ def gitcycle_instance
   account  = load_account_yaml
 
   gitcycle.instance_eval do
-    @login = account['name']
+    @login = account['login']
     @token = account['token']
   end
 

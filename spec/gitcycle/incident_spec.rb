@@ -6,7 +6,7 @@ describe Gitcycle::Incident do
     Launchy.stub(:open)
     gitcycle.stub(:q) { |x|
       puts x
-      ""
+      "0"
     }
     gitcycle.incident
   end

@@ -18,18 +18,26 @@ class Gitcycle
       incident = q "\n#{"Incident #?".yellow} (press enter for new incident)"
 
       if incident.strip == ""
-        incident   = q "#{"New incident name?".yellow} (required)"
-        components = statuspage['components']
-        
-        puts_statuses(components, component_statuses, component_colors)
-
-        component = q "\n#{"Service #?".yellow} (required)"
+        incident     = {}
+        new_incident = q "#{"New incident name?".yellow} (required)"
       else
-        incident = incident[incident.to_i]
+        incident = incidents[incident.to_i]
       end
 
-      unless incident
+      unless incident['id'] || new_incident
         puts "Incident not found."
+        exit
+      end
+
+      components = statuspage['components']
+
+      puts_statuses(components, component_statuses, component_colors)
+
+      component = q "\n#{"Service #?".yellow} (required)"
+      component = components[component.to_i]
+
+      unless component
+        puts "Service not found."
         exit
       end
 
@@ -40,6 +48,31 @@ class Gitcycle
 
       incident_status = q "\n#{"Incident status #?".yellow} (required)"
       incident_body   = q "\n#{"Describe the incident".yellow} (enter for none)"
+
+      component_status = component_statuses[component_status.to_i]
+      incident_status  = incident_statuses[incident_status.to_i]
+
+      unless component_status
+        puts "Component status not found."
+        exit
+      end
+
+      unless incident_status
+        puts "Incident status not found."
+        exit
+      end
+
+      params = {
+        :new_incident     => new_incident,
+        :incident         => incident['id'],
+        :component        => component['id'],
+        :component_status => component_status,
+        :incident_status  => incident_status,
+        :incident_body    => incident_body
+      }
+
+      puts "\nUpdating statuspage.io...".green
+      get('statuspage/update', params)
 
       puts "\nSuccess!\n".green
       Launchy.open("http://br.statuspage.io")

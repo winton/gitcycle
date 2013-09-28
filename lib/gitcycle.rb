@@ -250,6 +250,8 @@ class Gitcycle
       :uid   => (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
     )
 
+    hash[:test] = 1 if ENV['ENV'] == 'test'
+
     puts "Transaction ID: #{hash[:uid]}".green
 
     params = ''
