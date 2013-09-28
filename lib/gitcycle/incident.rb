@@ -75,6 +75,8 @@ class Gitcycle
       get('statuspage/update', params)
 
       puts "\nSuccess!\n".green
+
+      sleep 0.5
       Launchy.open("http://br.statuspage.io")
     end
 
