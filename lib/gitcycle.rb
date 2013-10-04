@@ -15,6 +15,7 @@ require 'yajl'
 $:.unshift File.dirname(__FILE__)
 
 require "ext/string"
+require "gitcycle/assist"
 require "gitcycle/branch"
 require "gitcycle/checkout"
 require "gitcycle/commit"
@@ -48,6 +49,7 @@ class Gitcycle
     :last_command_errored => 8,
   }
 
+  include Assist
   include Branch
   include Checkout
   include Commit
