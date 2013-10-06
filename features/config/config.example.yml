@@ -1,9 +1,0 @@
-lighthouse:
-  account: # lighthouse subdomain
-  project: # lighthouse project id integer
-  token: # lighthouse api token hash
-owner: # user of parent repo
-repo: # repo name
-token_dev: # gitcycle api token (dev)
-token_qa: # gitcycle api token (qa)
-user: # user of forked repo

@@ -1,14 +1,31 @@
-class Gitcycle
-  module Assist
+class Gitcycle < Thor
 
-    def assist(*args)
-      if args.first == 'me'
-      elsif args.first == 'complete'
-      elsif args.first == 'cancel'
-      else
-        user      = args[0]
-        assign_to = args[1]
-      end
+  desc "assist", "list assistance requests"
+  def assist
+  end
+
+  class Subcommands < Thor
+
+    desc "assign <request #> <user>", "assign assistance request to user"
+    def assign
+    end
+
+    desc "cancel", "give up any assistance requests you have taken responsibility for"
+    def cancel
+    end
+
+    desc "complete", "complete any assistance requests you have taken responsibility for"
+    def complete
+    end
+
+    desc "me", "ask for assistance"
+    def me
+    end
+
+    desc "take <request #>", "take responsibility for assistance request"
+    def take
     end
   end
+
+  subcommand "assist", Subcommands
 end

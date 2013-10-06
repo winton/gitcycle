@@ -1,9 +1,6 @@
-.DS_Store
 *.gem
 .bundle
 coverage
-features/config/config.yml
-features/fixtures
 Gemfile.lock
 pkg
 spec/config/gitcycle.yml

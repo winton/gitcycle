@@ -1,44 +1,44 @@
-class Gitcycle
-  module Commit
+class Gitcycle < Thor
 
-    def commit(*args)
-      msg = nil
-      no_add = args.delete("--no-add")
+  desc "commit", "commit with ticket information in message"
+  option :'no-add', :type => :boolean
 
-      if args.empty?
-        require_git && require_config
+  def commit
+    msg = nil
 
-        puts "\nRetrieving branch information from gitcycle.\n".green
-        branch = get('branch',
-          'branch[name]' => branches(:current => true),
-          'create' => 0
-        )
+    require_git && require_config
 
-        id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
+    puts "\nRetrieving branch information from gitcycle.\n".green
+    branch = get('branch',
+      'branch[name]' => branches(:current => true),
+      'create' => 0
+    )
 
-        if branch && id
-          msg = "[##{id}]"
-          msg += " #{branch["title"]}" if branch["title"]
-        end
-      end
+    id = branch["lighthouse_url"].match(/tickets\/(\d+)/)[1] rescue nil
 
-      if no_add
-        cmd = "git commit"
-      else
-        cmd = "git add . && git add . -u && git commit -a"
-      end
-
-      if File.exists?("#{Dir.pwd}/.git/MERGE_HEAD")
-        Kernel.exec(cmd)
-      elsif msg
-        run(cmd + " -m #{msg.dump.gsub('`', "'")}")
-        Kernel.exec("git commit --amend")
-      elsif args.empty?
-        Kernel.exec(cmd)
-      else
-        exec_git(:commit, args)
-      end
+    if branch && id
+      msg = "[##{id}]"
+      msg += " #{branch["title"]}" if branch["title"]
     end
-    alias :ci :commit
+
+    if options[:no_add]
+      cmd = "git commit"
+    else
+      cmd = "git add . && git add . -u && git commit -a"
+    end
+
+    if File.exists?("#{Dir.pwd}/.git/MERGE_HEAD")
+      Kernel.exec(cmd)
+    elsif msg
+      run(cmd + " -m #{msg.dump.gsub('`', "'")}")
+      Kernel.exec("git commit --amend")
+    elsif args.empty?
+      Kernel.exec(cmd)
+    else
+      exec_git(:commit, args)
+    end
   end
+
+  desc "co", "alias for commit"
+  alias :ci :commit
 end
