@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "develop <lighthouse url>", "begin working on a feature branch"
+  desc "develop <lighthouse url>", "Begin working on a feature branch"
   def branch(*args)
     url = args.detect { |arg| arg =~ /^https?:\/\// }
     title = args.detect { |arg| arg =~ /\s/ }

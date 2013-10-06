@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "ready", "create a pull request for current feature branch and mark ticket as pending review"
+  desc "ready", "Create a pull request for current feature branch and mark ticket as pending review"
   def ready
     require_git && require_config
 

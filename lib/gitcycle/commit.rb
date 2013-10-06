@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "commit", "commit with ticket information in message"
+  desc "commit", "Commit with ticket information in message"
   option :'no-add', :type => :boolean
 
   def commit
@@ -39,6 +39,6 @@ class Gitcycle < Thor
     end
   end
 
-  desc "co", "alias for commit"
+  desc "co", "Alias for commit"
   alias :ci :commit
 end

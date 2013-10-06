@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "qa <github issue #>...", "create a single qa branch from multiple feature branches"
+  desc "qa <github issue #>...", "Create a single qa branch from multiple feature branches"
   def qa(*issues)
     require_git && require_config
 

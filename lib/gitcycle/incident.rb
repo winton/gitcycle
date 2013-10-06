@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "incident", "create or update an incident on statusboard.io"
+  desc "incident", "Create or update an incident on statusboard.io"
   def incident(*args)
     puts "\nRetrieving statuspage.io information from gitcycle.\n".green
     

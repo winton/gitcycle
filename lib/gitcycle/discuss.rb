@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "discuss", "create a pull request from current feature branch"
+  desc "discuss", "Create a pull request from current feature branch"
   def discuss(*issues)
     require_git && require_config
 

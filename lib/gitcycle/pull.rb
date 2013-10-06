@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "pull", "pull feature branch along with its upstream source"
+  desc "pull", "Pull feature branch along with its upstream source"
   def pull(*args)
     exec_git(:pull, args) if args.length > 0
 

@@ -7,9 +7,12 @@ require "time"
 require "yajl/json_gem"
 require "yaml"
 
+gem "system_timer", :platforms => [ :ruby_18 ]
+
 $:.unshift File.dirname(__FILE__)
 
 require "gitcycle/api"
+require "gitcycle/subcommands/assist"
 require "gitcycle/assist"
 require "gitcycle/commit"
 require "gitcycle/develop"

@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "review <pass|fail> <github issue #>...", "finish reviewing an issue by passing or failing"
+  desc "review <pass|fail> <github issue #>...", "Finish reviewing an issue by passing or failing"
   def review(pass_fail, *issues)
     require_git && require_config
 
