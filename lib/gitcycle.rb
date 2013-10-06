@@ -5,6 +5,7 @@ require "rainbow"
 require "thor"
 require "time"
 require "yajl/json_gem"
+require "yaml"
 
 $:.unshift File.dirname(__FILE__)
 
@@ -34,7 +35,7 @@ class Gitcycle < Thor
     :last_command_errored  => 8
   }
 
-  def initialize
+  def initialize(args=nil, opts=nil, config=nil)
     $remotes = {}
 
     if ENV['CONFIG']
@@ -45,6 +46,10 @@ class Gitcycle < Thor
 
     load_config
     load_git
+
+    unless ENV['ENV'] == 'test'
+      super(args, opts, config)
+    end
   end
 
   no_commands do
