@@ -2,7 +2,7 @@
 
 # describe Gitcycle::Incident do
 #   it "should run" do
-#     gitcycle = gitcycle_instance
+#     gitcycle = Gitcycle.new
 #     Launchy.stub(:open)
 #     gitcycle.stub(:q) { |x|
 #       puts x

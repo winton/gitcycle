@@ -3,14 +3,15 @@ require "excon"
 require "faraday"
 require "rainbow"
 require "thor"
-require "yajl"
+require "time"
+require "yajl/json_gem"
 
 $:.unshift File.dirname(__FILE__)
 
 require "gitcycle/api"
 require "gitcycle/assist"
-require "gitcycle/branch"
 require "gitcycle/commit"
+require "gitcycle/develop"
 require "gitcycle/discuss"
 require "gitcycle/incident"
 require "gitcycle/open"
