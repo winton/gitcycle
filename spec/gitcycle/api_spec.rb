@@ -8,7 +8,7 @@ describe Gitcycle::Api do
 
     let(:user) { api.user }
     
-    it "should retrieve user information" do
+    it "should retrieve user information", :vcr do
       %w(gravatar login name).each do |key|
         user[key.to_sym].should be_a String
       end
