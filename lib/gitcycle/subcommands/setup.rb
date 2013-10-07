@@ -1,17 +1,24 @@
 class Gitcycle < Thor
   module Subcommands
-    class Setup < Thor
-
-      desc "url URL", "Set up your gitcycle URL"
-      def url(url)
-        @config['url'] = url
-        save_config
-      end
+    class Setup < Subcommand
 
       desc "token TOKEN", "Set up your gitcycle TOKEN"
       def token(token)
-        @config['token'] = token
-        save_config
+        Config.token = token
+        write
+      end
+
+      desc "url URL", "Set up your gitcycle URL"
+      def url(url)
+        Config.url = url
+        write
+      end
+
+      no_commands do
+        def write
+          Config.write
+          puts "Configuration saved.".space(true).green
+        end
       end
     end
   end

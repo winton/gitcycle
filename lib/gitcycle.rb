@@ -13,7 +13,9 @@ gem "system_timer", :platforms => [ :ruby_18 ]
 $:.unshift File.dirname(__FILE__)
 
 require "ext/string"
+require "gitcycle/config"
 require "gitcycle/api"
+require "gitcycle/subcommand"
 require "gitcycle/subcommands/assist"
 require "gitcycle/assist"
 require "gitcycle/commit"

@@ -1,6 +1,6 @@
 class Gitcycle < Thor
   module Subcommands
-    class Assist < Thor
+    class Assist < Subcommand
 
       desc "assign REQUEST# USER", "Assign assistance request to user"
       def assign

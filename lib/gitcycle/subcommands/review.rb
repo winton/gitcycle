@@ -1,6 +1,6 @@
 class Gitcycle < Thor
   module Subcommands
-    class Review < Thor
+    class Review < Subcommand
 
       desc "pass GITHUBISSUE#...", "Pass one or more github issues"
       def pass(*issues)
