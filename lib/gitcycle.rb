@@ -45,15 +45,15 @@ class Gitcycle < Thor
   }
 
   def initialize(args=nil, opts=nil, config=nil)
-    $remotes = {}
-
     if ENV['CONFIG']
-      @config_path = File.expand_path(ENV['CONFIG'])
+      Config.config_path = File.expand_path(ENV['CONFIG'])
     else
-      @config_path = File.expand_path("~/.gitcycle.yml")
+      Config.config_path = File.expand_path("~/.gitcycle.yml")
     end
 
-    load_config
+    Config.read
+    Config.fetches = []
+    
     load_git
 
     unless ENV['ENV'] == 'test'
@@ -66,15 +66,19 @@ class Gitcycle < Thor
       owner = options[:owner]
       repo = options[:repo]
 
-      unless $remotes[owner]
-        $remotes[owner] = true
+      unless Config.remotes.include?(owner)
+        Config.remotes.push(owner)
         
         unless remotes(:match => owner)
           puts "Adding remote repo '#{owner}/#{repo}'.\n".green
           run("git remote add #{owner} git@github.com:#{owner}/#{repo}.git")
         end
+      end
 
-        puts "Fetching remote '#{owner}'.\n".green
+      unless Config.fetches.include?(owner)
+        Config.fetches.push(owner)
+
+        puts "Fetching remote '#{owner}'.".space.green
         run("git fetch -q #{owner}", :catch => options[:catch])
       end
     end
@@ -265,20 +269,12 @@ class Gitcycle < Thor
       end
     end
 
-    def load_config
-      if File.exists?(@config_path)
-        @config = YAML.load(File.read(@config_path))
-      else
-        @config = {}
-      end
-    end
-
     def load_git
       path = git_config_path(Dir.pwd)
       if path
-        @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
-        @git_repo = @git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
-        @git_login = @git_url.match(/:(.+)\//)[1]
+        @git_url       = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
+        @git_repo      = @git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
+        @git_login     = @git_url.match(/:(.+)\//)[1]
         @login, @token = @config["#{@git_login}/#{@git_repo}"] rescue [ nil, nil ]
       end
     end
@@ -317,19 +313,23 @@ class Gitcycle < Thor
     end
 
     def require_config
-      unless @login && @token
-        puts "\nGitcycle configuration not found.".red
-        puts "Are you in the right repository?".yellow
-        puts "Have you set up this repository at http://gitcycle.com?\n".yellow
+      unless Config.token
+        puts "Gitcycle token not found (`git cycle setup token`).".space(true).red
         exit
       end
+
+      unless Config.url
+        puts "Gitcycle URL not found (`git cycle setup url`).".space(true).red
+        exit
+      end
+
       true
     end
 
     def require_git
       unless @git_url && @git_repo && @git_login
-        puts "\norigin entry within '.git/config' not found!".red
-        puts "Are you sure you are in a git repository?\n".yellow
+        puts "Could not find origin entry within \".git/config\"!".space.red
+        puts "Are you sure you are in a git repository?".space.yellow
         exit ERROR[:git_origin_not_found]
       end
       true

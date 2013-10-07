@@ -31,7 +31,7 @@ class Gitcycle < Thor
             :source => branch
           )
           `git checkout qa_#{qa_branch['source']}_#{qa_branch['user']} -q`
-          $remotes = {}
+          Config.fetches = []
           qa('pass')
         else
           exit ERROR[:told_not_to_merge]
