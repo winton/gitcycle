@@ -53,7 +53,7 @@ class Gitcycle < Thor
 
     Config.read
     Config.fetches = []
-    
+
     load_git
 
     unless ENV['ENV'] == 'test'
@@ -179,18 +179,13 @@ class Gitcycle < Thor
       output.include?("fatal: ") || output.include?("ERROR: ") || $?.exitstatus != 0
     end
 
-    def exec_git(command, args)  
-      args.unshift("git", command)
-      Kernel.exec(*args.collect(&:to_s))
-    end
-
     def fix_conflict(options)
-      owner = options[:owner]
-      repo = options[:repo]
+      owner  = options[:owner]
+      repo   = options[:repo]
       branch = options[:branch]
-      issue = options[:issue]
+      issue  = options[:issue]
       issues = options[:issues]
-      type = options[:type]
+      type   = options[:type]
 
       if $? != 0
         puts "Conflict occurred when merging '#{branch}'#{" (issue ##{issue})" if issue}.\n".red
@@ -211,54 +206,9 @@ class Gitcycle < Thor
       end
     end
 
-    def get(path, hash={})
-      hash.merge!(
-        :login => @login,
-        :token => @token,
-        :uid   => (0...20).map{ ('a'..'z').to_a[rand(26)] }.join
-      )
-
-      hash[:test] = 1 if ENV['ENV'] == 'test'
-
-      puts "Transaction ID: #{hash[:uid]}".green
-
-      params = ''
-      hash[:session] = 0
-      hash.each do |k, v|
-        if v && v.is_a?(::Array)
-          params << "#{URI.escape(k.to_s)}=#{URI.escape(v.inspect)}&"
-        elsif v
-          params << "#{URI.escape(k.to_s)}=#{URI.escape(v.to_s)}&"
-        end
-      end
-      params.chop! # trailing &
-
-      begin
-        HTTPI.log = false
-        req = HTTPI::Request.new "#{API}/#{path}.json?#{params}"
-        json = HTTPI.get(req).body
-      rescue Exception => error
-        puts error.to_s
-        puts "\nCould not connect to Gitcycle.".red
-        puts "\nPlease verify your Internet connection and try again later.\n".yellow
-        exit
-      end
-
-      match = json.match(/Gitcycle error reference code (\d+)/)
-      error = match && match[1]
-
-      if error
-        puts "\nSomething went wrong :(".red
-        puts "\nEmail error code #{error} to wwelsh@bleacherreport.com.".yellow
-        puts "\nInclude a gist of your terminal output if possible.\n".yellow
-        exit ERROR[:something_went_wrong]
-      else
-        Yajl::Parser.parse(json)
-      end
-    end
-
     def git_config_path(path)
       config = "#{path}/.git/config"
+
       if File.exists?(config)
         return config
       elsif path == '/'
@@ -271,11 +221,11 @@ class Gitcycle < Thor
 
     def load_git
       path = git_config_path(Dir.pwd)
+
       if path
-        @git_url       = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
-        @git_repo      = @git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
-        @git_login     = @git_url.match(/:(.+)\//)[1]
-        @login, @token = @config["#{@git_login}/#{@git_repo}"] rescue [ nil, nil ]
+        Config.git_url   = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
+        Config.git_repo  = Config.git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
+        Config.git_login = Config.git_url.match(/:(.+)\//)[1]
       end
     end
 
@@ -292,10 +242,6 @@ class Gitcycle < Thor
 
         fix_conflict(options)
       end
-    end
-
-    def options?(args)
-      args.any? { |arg| arg =~ /^-/ }
     end
     
     def q(question, extra='')
@@ -327,7 +273,7 @@ class Gitcycle < Thor
     end
 
     def require_git
-      unless @git_url && @git_repo && @git_login
+      unless Config.git_url && Config.git_repo && Config.git_login
         puts "Could not find origin entry within \".git/config\"!".space.red
         puts "Are you sure you are in a git repository?".space.yellow
         exit ERROR[:git_origin_not_found]
@@ -350,14 +296,6 @@ class Gitcycle < Thor
       else
         output
       end
-    end
-
-    def save_config
-      FileUtils.mkdir_p(File.dirname(@config_path))
-      File.open(@config_path, 'w') do |f|
-        f.write(YAML.dump(@config))
-      end
-      puts "Configuration saved.".space(true).green
     end
 
     def yes?(question)

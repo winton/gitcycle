@@ -14,10 +14,10 @@ class Gitcycle < Thor
         puts "\n"
       end
     elsif issues.first == 'fail' || issues.first == 'pass'
-      branch = branches(:current => true)
+      branch    = branches(:current => true)
       pass_fail = issues.first
-      label = pass_fail.capitalize
-      issues = issues[1..-1]
+      label     = pass_fail.capitalize
+      issues    = issues[1..-1]
 
       if pass_fail == 'pass' && !issues.empty?
         puts "\nWARNING: #{
@@ -27,8 +27,8 @@ class Gitcycle < Thor
         if yes?("Continue?")
           qa_branch = create_qa_branch(
             :instructions => false,
-            :issues => issues,
-            :source => branch
+            :issues       => issues,
+            :source       => branch
           )
           `git checkout qa_#{qa_branch['source']}_#{qa_branch['user']} -q`
           Config.fetches = []
@@ -55,10 +55,10 @@ class Gitcycle < Thor
         if pass_fail == 'pass' && issues.empty?
           owner, repo = qa_branch['repo'].split(':')
           merge_remote_branch(
-            :owner => owner,
-            :repo => repo,
+            :owner  => owner,
+            :repo   => repo,
             :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
-            :type => :from_qa
+            :type   => :from_qa
           )
         end
 
@@ -106,8 +106,8 @@ class Gitcycle < Thor
           )
 
           create_qa_branch(
-            :preserve => true,
-            :range => (branches.index(conflict)+1..-1),
+            :preserve  => true,
+            :range     => (branches.index(conflict)+1..-1),
             :qa_branch => qa_branch
           )
         else
@@ -125,9 +125,9 @@ class Gitcycle < Thor
 
   def create_qa_branch(options)
     instructions = options[:instructions]
-    issues = options[:issues]
-    range = options[:range] || (0..-1)
-    source = options[:source]
+    issues       = options[:issues]
+    range        = options[:range] || (0..-1)
+    source       = options[:source]
 
     if (issues && !issues.empty?) || options[:qa_branch]
       if options[:qa_branch]
@@ -167,8 +167,8 @@ class Gitcycle < Thor
           end
 
           checkout_remote_branch(
-            :owner => @git_login,
-            :repo => @git_repo,
+            :owner  => Config.git_login,
+            :repo   => Config.git_repo,
             :branch => source,
             :target => name
           )
@@ -177,17 +177,17 @@ class Gitcycle < Thor
         end
 
         qa_branch['branches'][range].each do |branch|
-          issue = branch['issue']
+          issue       = branch['issue']
           owner, repo = branch['repo'].split(':')
-          home = branch['home']
+          home        = branch['home']
 
           output = merge_remote_branch(
-            :owner => home,
-            :repo => repo,
+            :owner  => home,
+            :repo   => repo,
             :branch => branch['branch'],
-            :issue => issue,
+            :issue  => issue,
             :issues => qa_branch['branches'].collect { |b| b['issue'] },
-            :type => :to_qa
+            :type   => :to_qa
           )
         end
 

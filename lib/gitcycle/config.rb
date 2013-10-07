@@ -4,6 +4,9 @@ class Gitcycle < Thor
       
       attr_accessor :config
       attr_accessor :config_path
+      attr_accessor :git_login
+      attr_accessor :git_repo
+      attr_accessor :git_url
 
       def method_missing(method, *args, &block)
         raise "Call Config.read first"  unless config
