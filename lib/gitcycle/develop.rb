@@ -2,7 +2,7 @@ class Gitcycle < Thor
 
   desc "develop URL|TITLE", "Create or switch to a feature branch"
   def branch(url_or_title)
-    require_git && require_config
+    require_git and require_config
     
     puts "Retrieving branch information from gitcycle.".space.green
     
@@ -43,7 +43,7 @@ class Gitcycle < Thor
 
     def delete_branch(branch)
       puts "Deleting branch from gitcycle.".space(true).green
-      
+
       Api.branch(:delete, :branch => { :id => branch[:id] })
     end
 

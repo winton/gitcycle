@@ -49,7 +49,7 @@ RSpec.configure do |c|
   end
 
   def gitcycle_instance
-    FileUtils.rm Gitcycle::Config.config_path
+    FileUtils.rm_f(Gitcycle::Config.config_path)
     Gitcycle.new
   end
 end

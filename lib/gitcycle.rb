@@ -278,6 +278,7 @@ class Gitcycle < Thor
         puts "Are you sure you are in a git repository?".space.yellow
         exit ERROR[:git_origin_not_found]
       end
+      
       true
     end
 
