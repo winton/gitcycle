@@ -2,6 +2,12 @@ class Gitcycle < Thor
   module Subcommands
     class Setup < Subcommand
 
+      desc "lighthouse TOKEN", "Set up your Lighthouse TOKEN"
+      def lighthouse(token)
+        Config.lighthouse = token
+        write
+      end
+
       desc "token TOKEN", "Set up your gitcycle TOKEN"
       def token(token)
         Config.token = token

@@ -43,4 +43,8 @@ RSpec.configure do |c|
     path = "#{File.dirname(__FILE__)}/config/gitcycle.yml"
     @config ||= YAML.load_file(path)
   end
+
+  def config_fixture
+    @config_fixture ||= YAML.load(File.read(Gitcycle::Config.config_path))
+  end
 end
