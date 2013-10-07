@@ -3,18 +3,24 @@ class String
   # Colors
 
   def blue
-    "\e[34m#{self}\e[0m"
+    color(:blue)
   end
 
   def green
-    "\e[32m#{self}\e[0m"
+    color(:green)
   end
 
   def red
-    "\e[31m#{self}\e[0m"
+    color(:red)
   end
 
   def yellow
-    "\e[33m#{self}\e[0m"
+    color(:yellow)
+  end
+
+  # Spacing
+
+  def space(last=false)
+    "\n#{self}#{"\n" if last}"
   end
 end

@@ -1,6 +1,7 @@
 require "rubygems"
 require "excon"
 require "faraday"
+require "launchy"
 require "rainbow"
 require "thor"
 require "time"
@@ -11,6 +12,7 @@ gem "system_timer", :platforms => [ :ruby_18 ]
 
 $:.unshift File.dirname(__FILE__)
 
+require "ext/string"
 require "gitcycle/api"
 require "gitcycle/subcommands/assist"
 require "gitcycle/assist"
@@ -24,6 +26,7 @@ require "gitcycle/qa"
 require "gitcycle/ready"
 require "gitcycle/subcommands/review"
 require "gitcycle/review"
+require "gitcycle/subcommands/setup"
 require "gitcycle/setup"
 
 class Gitcycle < Thor
@@ -352,6 +355,7 @@ class Gitcycle < Thor
       File.open(@config_path, 'w') do |f|
         f.write(YAML.dump(@config))
       end
+      puts "Configuration saved.".space(true).green
     end
 
     def yes?(question)
