@@ -39,6 +39,6 @@ class Gitcycle < Thor
     end
   end
 
-  desc "co", "Alias for commit"
+  desc "ci", "Alias for commit", :hide => true
   alias :ci :commit
 end

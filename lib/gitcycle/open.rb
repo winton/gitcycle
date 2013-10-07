@@ -1,6 +1,6 @@
 class Gitcycle < Thor
 
-  desc "open <github issue #>...", "Open Github issue for current feature branch"
+  desc "open [GITHUBISSUE#]...", "Open Github issue for current feature branch"
   def open(*issues)
     require_git && require_config
 

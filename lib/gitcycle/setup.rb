@@ -1,7 +1,7 @@
 class Gitcycle < Thor
 
-  desc "setup", "Setup your computer for gitcycle"
-  def setup(login, repo, token)
+  desc "setup [TOKEN]", "Set up your computer for gitcycle"
+  def setup(token=nil)
     repo = "#{login}/#{repo}" unless repo.include?('/')
     @config[repo] = [ login, token ]
     save_config

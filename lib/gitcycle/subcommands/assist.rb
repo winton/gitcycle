@@ -2,7 +2,7 @@ class Gitcycle < Thor
   module Subcommands
     class Assist < Thor
 
-      desc "assign <request #> <user>", "Assign assistance request to user"
+      desc "assign REQUEST# USER", "Assign assistance request to user"
       def assign
       end
 
@@ -22,7 +22,7 @@ class Gitcycle < Thor
       def me
       end
 
-      desc "take <request #>", "Take responsibility for assistance request"
+      desc "take REQUEST#", "Take responsibility for assistance request"
       def take
       end
     end

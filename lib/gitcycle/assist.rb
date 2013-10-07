@@ -1,5 +1,5 @@
 class Gitcycle < Thor
 
-  desc "assist <subcommand>", "Type `git cycle assist` for subcommands"
+  desc "assist SUBCOMMAND", "Type `git cycle assist` to see subcommands"
   subcommand "assist", Subcommands::Assist
 end

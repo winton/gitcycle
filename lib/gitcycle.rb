@@ -22,6 +22,7 @@ require "gitcycle/open"
 require "gitcycle/pull"
 require "gitcycle/qa"
 require "gitcycle/ready"
+require "gitcycle/subcommands/review"
 require "gitcycle/review"
 require "gitcycle/setup"
 
