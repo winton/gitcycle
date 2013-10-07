@@ -1,3 +1,2 @@
-api_url: http://127.0.0.1:3000
-login: winton
+url: http://127.0.0.1:3000
 token: 8546f464

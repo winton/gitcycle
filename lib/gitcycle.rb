@@ -14,6 +14,15 @@ $:.unshift File.dirname(__FILE__)
 
 require "ext/string"
 require "gitcycle/config"
+
+class Gitcycle < Thor
+  class Config
+    self.config_path = ENV['CONFIG'] || "~/.gitcycle.yml"
+    self.config_path = File.expand_path(config_path)
+    read
+  end
+end
+
 require "gitcycle/api"
 require "gitcycle/subcommand"
 require "gitcycle/subcommands/assist"
@@ -45,13 +54,6 @@ class Gitcycle < Thor
   }
 
   def initialize(args=nil, opts=nil, config=nil)
-    if ENV['CONFIG']
-      Config.config_path = File.expand_path(ENV['CONFIG'])
-    else
-      Config.config_path = File.expand_path("~/.gitcycle.yml")
-    end
-
-    Config.read
     Config.fetches = []
 
     load_git
@@ -278,7 +280,7 @@ class Gitcycle < Thor
         puts "Are you sure you are in a git repository?".space.yellow
         exit ERROR[:git_origin_not_found]
       end
-      
+
       true
     end
 

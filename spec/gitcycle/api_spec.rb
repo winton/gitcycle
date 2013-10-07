@@ -2,7 +2,10 @@ require File.expand_path("../../spec_helper", __FILE__)
 
 describe Gitcycle::Api do
 
-  let(:api) { Gitcycle::Api.new(config) }
+  let(:api) do
+    Gitcycle::Config.config = config
+    Gitcycle::Api
+  end
   
   describe "#user" do
 
