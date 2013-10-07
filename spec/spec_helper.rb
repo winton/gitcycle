@@ -47,4 +47,9 @@ RSpec.configure do |c|
   def config_fixture
     @config_fixture ||= YAML.load(File.read(Gitcycle::Config.config_path))
   end
+
+  def gitcycle_instance
+    FileUtils.rm Gitcycle::Config.config_path
+    Gitcycle.new
+  end
 end
