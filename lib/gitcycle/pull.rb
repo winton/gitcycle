@@ -2,10 +2,7 @@ class Gitcycle < Thor
 
   desc "pull", "Pull feature branch along with its upstream source"
   def pull(*args)
-    exec_git(:pull, args) if args.length > 0
-
-    require_git && require_config
-
+    require_git  and require_config
     current_branch = branches(:current => true)
 
     puts "\nRetrieving branch information from gitcycle.\n".green
@@ -17,36 +14,36 @@ class Gitcycle < Thor
 
     if branch && branch['collab']
       # Merge from collab
-      merge_remote_branch(
-        :owner  => owner = branch['home'],
-        :repo   => branch['repo']['name'],
-        :branch => branch['source']
+      Git.merge_remote_branch(
+        owner = branch['home'], 
+        branch['repo']['name'],
+        branch['source']
       )
     elsif branch
       # Merge from upstream source branch
-      merge_remote_branch(
-        :owner  => owner = branch['repo']['owner'],
-        :repo   => branch['repo']['name'],
-        :branch => branch['source']
+      Git.merge_remote_branch(
+        owner = branch['repo']['owner'],
+        branch['repo']['name'],
+        branch['source']
       )
     else
       puts "\nRetrieving repo information from gitcycle.\n".green
       repo = get('repo')
 
       # Merge from upstream branch with same name
-      merge_remote_branch(
-        :owner  => owner = repo['owner'],
-        :repo   => repo['name'],
-        :branch => current_branch
+      Git.merge_remote_branch(
+        owner = repo['owner'],
+        repo['name'],
+        current_branch
       )
     end
 
     unless branch && branch['collab'] || owner == Config.git_login
       # Merge from origin
-      merge_remote_branch(
-        :owner  => Config.git_login,
-        :repo   => Config.git_repo,
-        :branch => current_branch
+      Git.merge_remote_branch(
+        Config.git_login,
+        Config.git_repo,
+        current_branch
       )
     end
 

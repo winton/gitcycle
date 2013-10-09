@@ -41,7 +41,7 @@ class Gitcycle < Thor
         qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
 
         if pass_fail == 'pass'
-          checkout_or_track(:name => qa_branch['source'], :remote => 'origin')
+          Git.checkout_or_track(qa_branch['source'])
         end
 
         if issues.empty? 
@@ -54,12 +54,15 @@ class Gitcycle < Thor
 
         if pass_fail == 'pass' && issues.empty?
           owner, repo = qa_branch['repo'].split(':')
-          merge_remote_branch(
-            :owner  => owner,
-            :repo   => repo,
-            :branch => "qa_#{qa_branch['source']}_#{qa_branch['user']}",
-            :type   => :from_qa
+          Git.merge_remote_branch(
+            owner,
+            repo,
+            "qa_#{qa_branch['source']}_#{qa_branch['user']}"
           )
+
+          branch = branches(:current => true)
+          puts "Pushing branch '#{branch}'.\n".green
+          Git.push(branch)
         end
 
         unless issues.empty?
@@ -166,11 +169,8 @@ class Gitcycle < Thor
             run("git push origin :#{name} -q")
           end
 
-          checkout_remote_branch(
-            :owner  => Config.git_login,
-            :repo   => Config.git_repo,
-            :branch => source,
-            :target => name
+          Git.checkout_remote_branch(Config.git_login, Config.git_repo, source,
+            :branch => name
           )
           
           puts "\n"
@@ -181,14 +181,11 @@ class Gitcycle < Thor
           owner, repo = branch['repo'].split(':')
           home        = branch['home']
 
-          output = merge_remote_branch(
-            :owner  => home,
-            :repo   => repo,
-            :branch => branch['branch'],
-            :issue  => issue,
-            :issues => qa_branch['branches'].collect { |b| b['issue'] },
-            :type   => :to_qa
-          )
+          output = Git.merge_remote_branch(home, repo, branch['branch'])
+
+          branch = branches(:current => true)
+          puts "Pushing branch '#{branch}'.\n".green
+          Git.push(branch)
         end
 
         unless options[:instructions] == false

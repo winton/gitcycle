@@ -27,18 +27,13 @@ class Gitcycle < Thor
     end
 
     def checkout_branch(branch)
-      owner = branch[:repo].forked_from
+      owner = branch[:repo][:owner].login
       repo  = branch[:repo].name
       name  = change_name(branch[:name])
 
       branch[:home] ||= Config.git_login
 
-      checkout_remote_branch(
-        :owner  => owner,
-        :repo   => repo,
-        :branch => branch[:source],
-        :target => name
-      )
+      Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
     end
 
     def delete_branch(branch)

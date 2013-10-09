@@ -4,7 +4,6 @@ class Gitcycle < Thor
 
       def branch(method, params=nil)
         method, params = method_parameters(method, params)
-
       end
 
       def user
@@ -14,7 +13,8 @@ class Gitcycle < Thor
       private
 
       def http
-        @http ||= Faraday.new Gitcycle::Config.url, :ssl => { :verify => false } do |conn|
+        options = { :ssl => { :verify => false } }
+        @http ||= Faraday.new Gitcycle::Config.url, options do |conn|
           conn.adapter :excon
         end
         

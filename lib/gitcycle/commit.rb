@@ -34,8 +34,6 @@ class Gitcycle < Thor
       Kernel.exec("git commit --amend")
     elsif args.empty?
       Kernel.exec(cmd)
-    else
-      exec_git(:commit, args)
     end
   end
 

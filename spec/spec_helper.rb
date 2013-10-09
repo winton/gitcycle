@@ -10,6 +10,7 @@ Dir["#{$root}/spec/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |c|
   
+  c.color_enabled = true
   c.treat_symbols_as_metadata_keys_with_true_values = true
 
   c.around(:each, :vcr) do |example|
