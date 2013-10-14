@@ -3,7 +3,8 @@ require File.expand_path("../../spec_helper", __FILE__)
 describe Gitcycle::Config do
 
   before :all do
-    gitcycle_instance
+    Gitcycle::Config.config_path = config_fixture_path
+    Gitcycle::Config.load
   end
 
   it "should save" do

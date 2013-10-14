@@ -4,16 +4,16 @@ class Gitcycle < Thor
   def branch(url_or_title)
     require_git and require_config
     
-    puts "Retrieving branch information from gitcycle.".space.green
-    
     params = generate_params(url_or_title)
-    branch = Api.branch(:create, :branch => params)
+    branch = Api.branch(:create, params)
+
+    change_target(branch, params)
 
     begin
       checkout_branch(branch)
       update_branch(branch)
     rescue SystemExit, Interrupt
-      delete_branch(branch)
+      Api.branch(:delete, :branch => { :id => branch[:id] })
     end
   end
 
@@ -23,6 +23,17 @@ class Gitcycle < Thor
       unless yes?("Would you like to name your branch '#{name}'?")
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
+      end
+    end
+
+    def change_target(branch, params)
+      question = <<-STR
+        Your work will eventually merge into "#{params['branch[source]']}".
+        Is this correct?
+      STR
+
+      unless yes?(question)
+        params[:source] = q("What branch would you like to eventually merge into?")
       end
     end
 
@@ -36,24 +47,14 @@ class Gitcycle < Thor
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
     end
 
-    def delete_branch(branch)
-      puts "Deleting branch from gitcycle.".space(true).green
-
-      Api.branch(:delete, :branch => { :id => branch[:id] })
-    end
-
     def generate_params(url_or_title)
       url, title = parse_url_or_title(url_or_title)
-      params     = { :source => branches(:current => true) }
+      params     = { :source => Git.branches(:current => true) }
 
       if url
         params.merge!(ticket_provider_params(url))
       elsif title
         params.merge!(:title => title)
-      end
-
-      unless yes?("Your work will eventually merge into '#{params['branch[source]']}'. Is this correct?")
-        params[:source] = q("What branch would you like to eventually merge into?")
       end
 
       params
@@ -79,8 +80,6 @@ class Gitcycle < Thor
     end
 
     def update_branch(branch)
-      puts "Sending branch information to gitcycle.".green
-      
       Api.branch(:update,
         :branch => {
           :id     => branch[:id],

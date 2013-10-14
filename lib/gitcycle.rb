@@ -1,4 +1,7 @@
 require "rubygems"
+
+gem "system_timer", :platforms => [ :ruby_18 ]
+
 require "excon"
 require "faraday"
 require "launchy"
@@ -8,36 +11,28 @@ require "time"
 require "yajl/json_gem"
 require "yaml"
 
-gem "system_timer", :platforms => [ :ruby_18 ]
-
 $:.unshift File.dirname(__FILE__)
 
 require "ext/string"
-require "gitcycle/config"
 
-class Gitcycle < Thor
-  class Config
-    self.config_path = ENV['CONFIG'] || "~/.gitcycle.yml"
-    self.config_path = File.expand_path(config_path)
-    read
-  end
-end
-
-require "gitcycle/api"
 require "gitcycle/subcommand"
 require "gitcycle/subcommands/assist"
+require "gitcycle/subcommands/review"
+require "gitcycle/subcommands/setup"
+
+require "gitcycle/api"
 require "gitcycle/assist"
+require "gitcycle/config"
 require "gitcycle/commit"
 require "gitcycle/develop"
 require "gitcycle/discuss"
+require "gitcycle/git"
 require "gitcycle/incident"
 require "gitcycle/open"
 require "gitcycle/pull"
 require "gitcycle/qa"
 require "gitcycle/ready"
-require "gitcycle/subcommands/review"
 require "gitcycle/review"
-require "gitcycle/subcommands/setup"
 require "gitcycle/setup"
 
 class Gitcycle < Thor
@@ -54,7 +49,9 @@ class Gitcycle < Thor
   }
 
   def initialize(args=nil, opts=nil, config=nil)
+    Config.load
     Config.fetches = []
+
     Git.load
 
     unless ENV['ENV'] == 'test'
@@ -115,6 +112,7 @@ class Gitcycle < Thor
     end
 
     def yes?(question)
+      question = question.gsub(/\s+/, ' ').strip
       q(question, " (#{"y".green}/#{"n".red})").downcase[0..0] == 'y'
     end
   end

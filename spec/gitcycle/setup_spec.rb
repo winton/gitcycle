@@ -2,7 +2,10 @@ require File.expand_path("../../spec_helper", __FILE__)
 
 describe Gitcycle do
   
-  let(:setup) { Gitcycle::Subcommands::Setup.new }
+  let(:setup) do
+    Gitcycle::Config.config_path = config_fixture_path
+    Gitcycle::Subcommands::Setup.new
+  end
 
   %w(lighthouse token url).each do |property|
     describe "setup #{property} #{property.upcase}" do

@@ -6,22 +6,12 @@ ENV['CONFIG'] = "#{$root}/spec/fixtures/gitcycle.yml"
 require "#{$root}/lib/gitcycle"
 
 Gitcycle::Config.config_path = ENV['CONFIG']
+
 Dir["#{$root}/spec/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |c|
   
   c.color_enabled = true
-  c.treat_symbols_as_metadata_keys_with_true_values = true
-
-  c.around(:each, :vcr) do |example|
-    name = example.metadata[:full_description]
-    name = name.downcase
-    name = name.split(/\s+/, 2)
-    name = name.join("/")
-    name = name.gsub(/[^\w\/]+/, "_")
-
-    VCR.use_cassette(name) { example.call }
-  end
 
   c.around(:each, :capture) do |example|
     capture(:stdout) { example.call }
@@ -41,16 +31,18 @@ RSpec.configure do |c|
   end
 
   def config
-    path = "#{File.dirname(__FILE__)}/config/gitcycle.yml"
-    @config ||= YAML.load_file(path)
+    @config ||= YAML.load_file(config_path)
+  end
+
+  def config_path
+    "#{$root}/spec/config/gitcycle.yml"
   end
 
   def config_fixture
-    @config_fixture ||= YAML.load(File.read(Gitcycle::Config.config_path))
+    @config_fixture ||= YAML.load(File.read(config_fixture_path))
   end
 
-  def gitcycle_instance
-    FileUtils.rm_f(Gitcycle::Config.config_path)
-    Gitcycle.new
+  def config_fixture_path
+    ENV['CONFIG']
   end
 end

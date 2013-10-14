@@ -8,6 +8,14 @@ class Gitcycle < Thor
       attr_accessor :git_repo
       attr_accessor :git_url
 
+      def load
+        unless self.config_path
+          self.config_path = ENV['CONFIG'] || "~/.gitcycle.yml"
+          self.config_path = File.expand_path(config_path)
+        end
+        read
+      end
+
       def method_missing(method, *args, &block)
         raise "Call Config.read first"  unless config
         

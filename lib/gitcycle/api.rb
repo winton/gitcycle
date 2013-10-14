@@ -4,6 +4,7 @@ class Gitcycle < Thor
 
       def branch(method, params=nil)
         method, params = method_parameters(method, params)
+        parse http.send(method, "/branch.json", params).body
       end
 
       def user
@@ -14,7 +15,9 @@ class Gitcycle < Thor
 
       def http
         options = { :ssl => { :verify => false } }
+        puts Gitcycle::Config.url
         @http ||= Faraday.new Gitcycle::Config.url, options do |conn|
+          conn.request :url_encoded
           conn.adapter :excon
         end
         
@@ -23,11 +26,16 @@ class Gitcycle < Thor
       end
 
       def method_parameters(method, params)
-        if params.nil?
-          [ :get, params ]
-        else
-          [ method, params ]
+        if method
+          method = :post  if method == :create
+          method = :put   if method == :update
         end
+
+        if params.nil?
+          method, params = :get, params
+        end
+
+        [ method, params ]
       end
 
       def parse(body)
