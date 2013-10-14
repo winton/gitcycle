@@ -1,0 +1,4 @@
+branch:
+  post:
+    lighthouse_url: https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket
+    source: gitcycle_api2
