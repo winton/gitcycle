@@ -78,7 +78,6 @@ class Gitcycle < Thor
 
     def update_branch(branch)
       Api.branch(:update,
-        :id     => branch[:id],
         :home   => branch[:home],
         :name   => branch[:name],
         :source => branch[:source]

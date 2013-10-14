@@ -16,8 +16,7 @@ branch:
           login:      repo:owner:login
   put:
     request:
-      id:     true
       name:   name
       source: source
-      home:   winton
-    response:   *branch_post_response
+      home:   git_login
+    response: *branch_post_response

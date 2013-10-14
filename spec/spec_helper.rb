@@ -1,6 +1,9 @@
 unless ENV['CI']
-  require 'simplecov'
-  SimpleCov.start
+  begin
+    require 'simplecov'
+    SimpleCov.start
+  rescue Exception => e
+  end
 end
 
 ENV['ENV'] = "test"

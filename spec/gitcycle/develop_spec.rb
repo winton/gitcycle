@@ -14,6 +14,7 @@ describe Gitcycle do
       webmock(:branch, :post)
       webmock(:branch, :put)
       stub_const("Gitcycle::Git", GitMock)
+      GitMock.load
       Gitcycle::Git.stub(:branches).and_return("source")
       $stdin.stub!(:gets).and_return("y")
     end
