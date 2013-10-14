@@ -8,13 +8,8 @@ class Gitcycle < Thor
     branch = Api.branch(:create, params)
 
     change_target(branch, params)
-
-    begin
-      checkout_branch(branch)
-      update_branch(branch)
-    rescue SystemExit, Interrupt
-      Api.branch(:delete, :branch => { :id => branch[:id] })
-    end
+    checkout_branch(branch)
+    update_branch(branch)
   end
 
   no_commands do
@@ -24,11 +19,13 @@ class Gitcycle < Thor
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
       end
+
+      name
     end
 
     def change_target(branch, params)
       question = <<-STR
-        Your work will eventually merge into "#{params['branch[source]']}".
+        Your work will eventually merge into "#{branch['source']}".
         Is this correct?
       STR
 

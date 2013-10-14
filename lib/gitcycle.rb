@@ -1,6 +1,9 @@
 require "rubygems"
 
-gem "system_timer", :platforms => [ :ruby_18 ]
+begin
+  gem "system_timer", :platforms => [ :ruby_18 ]
+rescue Gem::LoadError
+end
 
 require "excon"
 require "faraday"

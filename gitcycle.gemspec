@@ -28,7 +28,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency "faraday"
   spec.add_dependency "launchy"
   spec.add_dependency "rainbow"
-  spec.add_dependency "system_timer"
   spec.add_dependency "thor"
   spec.add_dependency "yajl-ruby"
 end

@@ -1,3 +1,8 @@
+unless ENV['CI']
+  require 'simplecov'
+  SimpleCov.start
+end
+
 ENV['ENV'] = "test"
 $root      = File.expand_path('../../', __FILE__)
 

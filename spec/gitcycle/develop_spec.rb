@@ -14,21 +14,41 @@ describe Gitcycle do
       webmock(:branch, :post)
       webmock(:branch, :put)
       stub_const("Gitcycle::Git", GitMock)
-      Gitcycle::Git.stub(:branches).and_return('source')
+      Gitcycle::Git.stub(:branches).and_return("source")
       $stdin.stub!(:gets).and_return("y")
     end
 
-    context "when the user accepts the default branch" do
-      it "calls Git with proper parameters", :capture do
+    context "with a lighthouse ticket" do
+      context "when the user accepts the default branch" do
+        it "runs without assertions", :capture do
+        end
 
-        Gitcycle::Git.should_receive(:branches).
-          with(:current => true)
-        
-        Gitcycle::Git.should_receive(:checkout_remote_branch).
-          with("repo:owner:login", "repo:name", "source", :branch => nil)
-        
-        gitcycle.branch("https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket")
+        it "calls Git with proper parameters", :capture do
+
+          Gitcycle::Git.should_receive(:branches).
+            with(:current => true)
+          
+          Gitcycle::Git.should_receive(:checkout_remote_branch).
+            with("repo:owner:login", "repo:name", "source", :branch => "name")
+          
+          gitcycle.branch("https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket")
+        end
+
+        it "displays proper dialog" do
+        end
       end
+
+      context "when the user changes the name of the branch" do
+      end
+
+      context "when the user changes the target branch" do
+      end
+    end
+
+    context "with a title" do
+    end
+
+    context "with a github issue" do
     end
   end
 end
