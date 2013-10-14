@@ -16,7 +16,7 @@ describe Gitcycle do
       stub_const("Gitcycle::Git", GitMock)
       GitMock.load
       Gitcycle::Git.stub(:branches).and_return("source")
-      $stdin.stub!(:gets).and_return("y")
+      $stdin.stub(:gets).and_return("y")
     end
 
     context "with a lighthouse ticket" do
