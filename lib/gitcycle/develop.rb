@@ -81,12 +81,10 @@ class Gitcycle < Thor
 
     def update_branch(branch)
       Api.branch(:update,
-        :branch => {
-          :id     => branch[:id],
-          :home   => branch[:home],
-          :name   => branch[:name],
-          :source => branch[:source]
-        }
+        :id     => branch[:id],
+        :home   => branch[:home],
+        :name   => branch[:name],
+        :source => branch[:source]
       )
     end
   end
