@@ -35,6 +35,9 @@ describe Gitcycle do
           gitcycle.branch("https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket")
         end
 
+        it "requests and receives parameters that match the json spec" do
+        end
+
         it "displays proper dialog" do
         end
       end
@@ -50,6 +53,9 @@ describe Gitcycle do
     end
 
     context "with a github issue" do
+    end
+
+    context "when offline" do
     end
   end
 end

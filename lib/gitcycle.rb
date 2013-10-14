@@ -5,14 +5,10 @@ begin
 rescue Gem::LoadError
 end
 
-require "excon"
-require "faraday"
 require "launchy"
 require "rainbow"
 require "thor"
 require "time"
-require "yajl/json_gem"
-require "yaml"
 
 $:.unshift File.dirname(__FILE__)
 
