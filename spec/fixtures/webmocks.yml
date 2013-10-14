@@ -1,4 +1,24 @@
 branch:
   post:
-    lighthouse_url: https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket
-    source: gitcycle_api2
+    request:
+      lighthouse_url: https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket
+      source:         source
+    response: &branch_post_response
+      name:           branch_name
+      issue_url:      issue_url
+      lighthouse_url: lighthouse_url
+      name:           name
+      source:         source
+      title:          title
+      repo:           
+        name:         repo:name
+        owner:
+          login:      repo:owner:login
+  put:
+    request:
+      branch:
+        id:     true
+        name:   name
+        source: source
+        home:   winton
+    response:   *branch_post_response

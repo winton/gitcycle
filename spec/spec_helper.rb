@@ -6,6 +6,5 @@ require "#{$root}/lib/gitcycle"
 Dir["#{$root}/spec/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |c|
-  
   c.color_enabled = true
 end

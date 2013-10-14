@@ -11,13 +11,17 @@ RSpec.configure do
   end
 
   def webmock(path, type)
-    body    = webmock_fixture[path.to_s][type.to_s]
-    headers = {
+    fixture  = webmock_fixture[path.to_s][type.to_s]
+    request  = fixture['request']
+    response = fixture['response'].to_json
+    
+    headers  = {
       'Authorization' => "Token token=\"#{Gitcycle::Config.token}\"",
       'Content-Type'  => 'application/x-www-form-urlencoded'
     }
-    stub_request(:post, "http://127.0.0.1:3000/#{path}.json").
-      with(:body => body, :headers => headers).
-      to_return(:status => 200, :body => "{}", :headers => {})
+
+    stub_request(type, "#{Gitcycle::Config.url}/#{path}.json").
+      with(:body => request, :headers => headers).
+      to_return(:status => 200, :body => response, :headers => {})
   end
 end

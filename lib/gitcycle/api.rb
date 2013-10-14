@@ -7,6 +7,10 @@ class Gitcycle < Thor
         parse http.send(method, "/branch.json", params).body
       end
 
+      def branch_schema
+        parse http.get("/branch/new.json").body
+      end
+
       def user
         parse http.get("/user.json").body
       end
@@ -15,7 +19,6 @@ class Gitcycle < Thor
 
       def http
         options = { :ssl => { :verify => false } }
-        puts Gitcycle::Config.url
         @http ||= Faraday.new Gitcycle::Config.url, options do |conn|
           conn.request :url_encoded
           conn.adapter :excon
