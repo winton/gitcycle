@@ -3,7 +3,6 @@ require "faraday"
 require "yajl/json_gem"
 require "yaml"
 
-
 class Gitcycle < Thor
   class Api
     class <<self
@@ -49,7 +48,7 @@ class Gitcycle < Thor
 
       def parse(body)
         hash = JSON.parse(body)
-        hash = symbolize_keys(hash)
+        hash = Util.symbolize_keys(hash)
         parse_timestamps(hash)
       end
 
@@ -58,15 +57,6 @@ class Gitcycle < Thor
           hash[key] = Time.parse(value)  if key.to_s =~ /_at$/
         end
         hash
-      end
-
-      def symbolize_keys(hash)
-        hash.inject({}) do |memo, (key, value)|
-          key       = (key.to_sym rescue key) || key
-          value     = symbolize_keys(value)   if value.is_a?(Hash)
-          memo[key] = value
-          memo
-        end
       end
     end
   end

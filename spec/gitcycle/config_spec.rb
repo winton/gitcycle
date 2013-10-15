@@ -9,10 +9,10 @@ describe Gitcycle::Config do
 
   it "should save" do
     Gitcycle::Config.test = "test"
-    config_fixture["test"].should == "test"
+    config_fixture[:test].should == "test"
   end
 
   it "should not save config_path" do
-    config_fixture["config_path"].should == nil
+    config_fixture[:config_path].should == nil
   end
 end

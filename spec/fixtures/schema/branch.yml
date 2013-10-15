@@ -1,0 +1,129 @@
+---
+:get:
+  :request:
+    :title: GET request /branch.json
+    :type: object
+    :properties:
+      :name:
+        :type: string
+      :source:
+        :type: string
+  :response:
+    :title: GET response /branch.json
+    :type: object
+    :properties:
+      :issue_url:
+        :type: string
+      :lighthouse_url:
+        :type: string
+      :name:
+        :type: string
+      :source:
+        :type: string
+      :title:
+        :type: string
+      :repo:
+        :type: object
+        :properties:
+          :name:
+            :type: string
+          :owner:
+            :type: object
+            :properties:
+              :login:
+                :type: string
+              :name:
+                :type: string
+          :user:
+            :type: object
+            :properties:
+              :login:
+                :type: string
+              :name:
+                :type: string
+:post:
+  :request:
+    :title: POST request /branch.json
+    :type: object
+    :properties:
+      :lighthouse_url:
+        :type: string
+      :source:
+        :type: string
+  :response:
+    :title: POST response /branch.json
+    :type: object
+    :properties:
+      :issue_url:
+        :type: string
+      :lighthouse_url:
+        :type: string
+      :name:
+        :type: string
+      :source:
+        :type: string
+      :title:
+        :type: string
+      :repo:
+        :type: object
+        :properties:
+          :name:
+            :type: string
+          :owner:
+            :type: object
+            :properties:
+              :login:
+                :type: string
+              :name:
+                :type: string
+          :user:
+            :type: object
+            :properties:
+              :login:
+                :type: string
+              :name:
+                :type: string
+:put:
+  :request:
+    :title: PUT request /branch.json
+    :type: object
+    :properties:
+      :home:
+        :type: string
+      :name:
+        :type: string
+      :source:
+        :type: string
+  :response:
+    :title: PUT response /branch.json
+    :type: object
+    :properties:
+      :issue_url:
+        :type: string
+      :lighthouse_url:
+        :type: string
+      :name:
+        :type: string
+      :source:
+        :type: string
+      :title:
+        :type: string
+      :repo:
+        :type: object
+        :properties:
+          :name:
+            :type: string
+          :owner:
+            :type: object
+            :properties:
+              :login:
+                :type: string
+              :name:
+                :type: string
+          :user:
+            :type: object
+            :properties:
+              :login:
+                :type: string
+              :name:
+                :type: string

@@ -13,7 +13,7 @@ describe Gitcycle do
       it "should save to config", :capture do
         setup.send property, property
         $stdout.string.should include("Configuration saved.")
-        config_fixture[property].should == property
+        config_fixture[property.to_sym].should == property
       end
     end
   end

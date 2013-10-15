@@ -1,4 +1,5 @@
 branch:
+  path: /branch.json
   post:
     request:
       lighthouse_url: https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket

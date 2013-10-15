@@ -11,11 +11,15 @@ describe Gitcycle do
 
     before(:each) do
       gitcycle
+      
       webmock(:branch, :post)
       webmock(:branch, :put)
+      
       stub_const("Gitcycle::Git", GitMock)
+      
       GitMock.load
       Gitcycle::Git.stub(:branches).and_return("source")
+      
       $stdin.stub(:gets).and_return("y")
     end
 
@@ -36,6 +40,8 @@ describe Gitcycle do
         end
 
         it "requests and receives parameters that match the json spec" do
+          validate_schema(:post, :branch)
+          validate_schema(:put,  :branch)
         end
 
         it "displays proper dialog" do
