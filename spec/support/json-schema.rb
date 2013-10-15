@@ -25,6 +25,7 @@ RSpec.configure do
   end
 
   def validate_schema(method, schema_type, webmock_type=schema_type)
+    return  if RUBY_VERSION =~ /^1\.8\./
     [ :request, :response ].each do |direction|
       JSON::Validator.validate(
         schema_fixture(schema_type, method)[direction],
