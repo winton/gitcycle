@@ -3,16 +3,15 @@ require "webmock/rspec"
 RSpec.configure do
 
   def webmock_fixture(type=nil, method=nil)
-    unless @webmock_fixture
-      @webmock_fixture = YAML.load(File.read(webmock_fixture_path))
-      @webmock_fixture = Gitcycle::Util.symbolize_keys(@webmock_fixture)
-    end
+    fixture = YAML.load(File.read(webmock_fixture_path))
+    fixture = Gitcycle::Util.symbolize_keys(fixture)
+
     if type && method
-      @webmock_fixture[type][method]
+      fixture[type][method]
     elsif type
-      @webmock_fixture[type]
+      fixture[type]
     else
-      @webmock_fixture
+      fixture
     end
   end
 
