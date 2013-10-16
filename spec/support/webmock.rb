@@ -19,18 +19,20 @@ RSpec.configure do
     "#{$root}/spec/fixtures/webmocks.yml"
   end
 
-  def webmock(type, method)
+  def webmock(type, method, merge={})
     fixture  = webmock_fixture(type)
-    request  = fixture[method][:request]
-    response = fixture[method][:response].to_json
+    path     = fixture[:path]
+    fixture  = Gitcycle::Util.deep_merge(fixture[method], merge)
+    request  = fixture[:request]
+    response = fixture[:response]
     
     headers  = {
       'Authorization' => "Token token=\"#{Gitcycle::Config.token}\"",
       'Content-Type'  => 'application/x-www-form-urlencoded'
     }
 
-    stub_request(method, "#{Gitcycle::Config.url}#{fixture[:path]}").
+    stub_request(method, "#{Gitcycle::Config.url}#{path}").
       with(:body => request, :headers => headers).
-      to_return(:status => 200, :body => response, :headers => {})
+      to_return(:status => 200, :body => response.to_json, :headers => {})
   end
 end

@@ -11,11 +11,14 @@ RSpec.configure do |c|
       stream = stream.to_s
       eval "$#{stream} = StringIO.new"
       yield
-      result = eval("$#{stream}").string
     ensure
-      eval("$#{stream} = #{stream.upcase}")
+      eval "$#{stream} = #{stream.upcase}"
     end
+  end
 
-    result
+  def expect_output(*strings)
+    strings.each do |string|
+      expect($stdout.string).to include(string)
+    end
   end
 end

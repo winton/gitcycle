@@ -7,7 +7,7 @@ class Gitcycle < Thor
     params = generate_params(url_or_title)
     branch = Api.branch(:create, params)
 
-    change_target(branch, params)
+    change_target(branch)
     checkout_branch(branch)
     update_branch(branch)
   end
@@ -15,7 +15,7 @@ class Gitcycle < Thor
   no_commands do
 
     def change_name(name)
-      unless yes?("Would you like to name your branch '#{name}'?")
+      unless yes?("Would you like to name your branch \"#{name}\"?")
         name = q("\nWhat would you like to name your branch?")
         name = name.gsub(/[\s\W]/, '-')
       end
@@ -23,14 +23,14 @@ class Gitcycle < Thor
       name
     end
 
-    def change_target(branch, params)
+    def change_target(branch)
       question = <<-STR
-        Your work will eventually merge into "#{branch['source']}".
+        Your work will eventually merge into "#{branch[:source]}".
         Is this correct?
       STR
 
       unless yes?(question)
-        params[:source] = q("What branch would you like to eventually merge into?")
+        branch[:source] = q("What branch would you like to eventually merge into?")
       end
     end
 
