@@ -16,9 +16,6 @@ describe Gitcycle do
     before(:each) do
       gitcycle
       
-      webmock(:branch, :post)
-      webmock(:branch, :put)
-      
       stub_const("Gitcycle::Git", GitMock)
       
       GitMock.load
@@ -26,6 +23,16 @@ describe Gitcycle do
     end
 
     context "with a lighthouse ticket" do
+
+      before :each do
+        @merge = {
+          :request  => { :lighthouse_url => lighthouse_url },
+          :response => { :lighthouse_url => lighthouse_url }
+        }
+        webmock(:branch, :post, @merge)
+        webmock(:branch, :put)
+      end
+
       context "when the user accepts the default branch" do
 
         before :each do
@@ -136,6 +143,22 @@ describe Gitcycle do
     end
 
     context "with a title" do
+
+      before :each do
+        $stdin.stub(:gets).and_return("y")
+        
+        @merge = {
+          :request  => { :title => 'new title' },
+          :response => { :title => 'new title' }
+        }
+        
+        webmock(:branch, :post, @merge)
+        webmock(:branch, :put)
+      end
+
+      it "runs without assertions", :capture do
+        gitcycle.branch("new title")
+      end
     end
 
     context "with a github issue" do
