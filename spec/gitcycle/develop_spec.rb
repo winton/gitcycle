@@ -159,6 +159,11 @@ describe Gitcycle do
       it "runs without assertions", :capture do
         gitcycle.branch("new title")
       end
+
+      it "requests and receives parameters that match the json spec" do
+        validate_schema(:post, :branch, @merge)
+        validate_schema(:put,  :branch)
+      end
     end
 
     context "with a github issue" do
