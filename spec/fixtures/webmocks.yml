@@ -2,17 +2,17 @@ branch:
   path: /branch.json
   post:
     request:
-      source:         source
+      source:     source
     response: &branch_post_response
-      name:           branch_name
-      issue_url:      issue_url
-      name:           name
-      source:         source
-      title:          title
-      repo:           
-        name:         repo:name
+      name:       branch_name
+      github_url: github_url
+      name:       name
+      source:     source
+      title:      title
+      repo:       
+        name:     repo:name
         owner:
-          login:      repo:owner:login
+          login:  repo:owner:login
   put:
     request:
       name:   name

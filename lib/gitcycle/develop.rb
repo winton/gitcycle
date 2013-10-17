@@ -69,7 +69,7 @@ class Gitcycle < Thor
       if url.include?('lighthouseapp.com/')
         { :lighthouse_url => url }
       elsif url.include?('github.com/')
-        { :issue_url => url }
+        { :github_url => url }
       else
         puts "Gitcycle only supports Lighthouse or Github Issue URLs.".space.red
         exit ERROR[:unrecognized_url]

@@ -160,13 +160,71 @@ describe Gitcycle do
         gitcycle.branch("new title")
       end
 
+      it "calls Git with proper parameters", :capture do
+        Gitcycle::Git.should_receive(:branches).
+          with(:current => true)
+        
+        Gitcycle::Git.should_receive(:checkout_remote_branch).
+          with("repo:owner:login", "repo:name", "source", :branch => "name")
+        
+        gitcycle.branch("new title")
+      end
+
       it "requests and receives parameters that match the json spec" do
         validate_schema(:post, :branch, @merge)
         validate_schema(:put,  :branch)
       end
+
+      it "displays proper dialog", :capture do
+        gitcycle.branch("new title")
+        expect_output(
+          "Your work will eventually merge into \"source\"",
+          "Would you like to name your branch \"name\""
+        )
+      end
     end
 
     context "with a github issue" do
+      let(:github_url) { 'https://github.com/login/repo/pull/0000' }
+
+      before :each do
+        $stdin.stub(:gets).and_return("y")
+        
+        @merge = {
+          :request  => { :github_url => github_url },
+          :response => { :github_url => github_url }
+        }
+        
+        webmock(:branch, :post, @merge)
+        webmock(:branch, :put)
+      end
+
+      it "runs without assertions", :capture do
+        gitcycle.branch(github_url)
+      end
+
+      it "calls Git with proper parameters", :capture do
+        Gitcycle::Git.should_receive(:branches).
+          with(:current => true)
+        
+        Gitcycle::Git.should_receive(:checkout_remote_branch).
+          with("repo:owner:login", "repo:name", "source", :branch => "name")
+        
+        gitcycle.branch(github_url)
+      end
+
+      it "requests and receives parameters that match the json spec" do
+        validate_schema(:post, :branch, @merge)
+        validate_schema(:put,  :branch)
+      end
+
+      it "displays proper dialog", :capture do
+        gitcycle.branch(github_url)
+        expect_output(
+          "Your work will eventually merge into \"source\"",
+          "Would you like to name your branch \"name\""
+        )
+      end
     end
 
     context "when offline" do

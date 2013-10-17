@@ -14,7 +14,7 @@
     :type: object
     :additionalProperties: false
     :properties:
-      :issue_url:
+      :github_url:
         :type: string
       :lighthouse_url:
         :type: string
@@ -52,6 +52,8 @@
     :type: object
     :additionalProperties: false
     :properties:
+      :github_url:
+        :type: string
       :lighthouse_url:
         :type: string
       :source:
@@ -63,7 +65,7 @@
     :type: object
     :additionalProperties: false
     :properties:
-      :issue_url:
+      :github_url:
         :type: string
       :lighthouse_url:
         :type: string
@@ -112,7 +114,7 @@
     :type: object
     :additionalProperties: false
     :properties:
-      :issue_url:
+      :github_url:
         :type: string
       :lighthouse_url:
         :type: string

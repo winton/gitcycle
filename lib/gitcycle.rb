@@ -70,7 +70,7 @@ class Gitcycle < Thor
         )
       end
 
-      if branch && (force || !branch['issue_url'])
+      if branch && (force || !branch['github_url'])
         puts "Creating GitHub pull request.\n".green
         branch = get('branch',
           'branch[create_pull_request]' => true,
