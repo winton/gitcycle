@@ -13,6 +13,10 @@ describe Gitcycle do
       "https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket"
     end
 
+    let(:webmock_default_merge) do
+      { :request => { :home => "git_login" } }
+    end
+
     before(:each) do
       gitcycle
       
@@ -24,13 +28,16 @@ describe Gitcycle do
 
     context "with a lighthouse ticket" do
 
-      before :each do
-        @merge = {
+      let(:webmock_lighthouse_merge) do
+        {
           :request  => { :lighthouse_url => lighthouse_url },
           :response => { :lighthouse_url => lighthouse_url }
         }
-        webmock(:branch, :post, @merge)
-        webmock(:branch, :put)
+      end
+
+      before :each do
+        webmock(:branch, :post, webmock_lighthouse_merge)
+        webmock(:branch, :put,  webmock_default_merge)
       end
 
       context "when the user accepts the default branch" do
@@ -54,8 +61,8 @@ describe Gitcycle do
         end
 
         it "requests and receives parameters that match the json spec" do
-          validate_schema(:post, :branch)
-          validate_schema(:put,  :branch)
+          validate_schema(:branch, :post, webmock_lighthouse_merge)
+          validate_schema(:branch, :put,  webmock_default_merge)
         end
 
         it "displays proper dialog", :capture do
@@ -87,11 +94,6 @@ describe Gitcycle do
           gitcycle.branch(lighthouse_url)
         end
 
-        it "requests and receives parameters that match the json spec" do
-          validate_schema(:post, :branch)
-          validate_schema(:put,  :branch)
-        end
-
         it "displays proper dialog", :capture do
           gitcycle.branch(lighthouse_url)
           expect_output(
@@ -104,12 +106,16 @@ describe Gitcycle do
 
       context "when the user changes the target branch" do
 
-        before :each do
-          $stdin.stub(:gets).and_return("n", "new-source", "y")
-          webmock(:branch, :put,
+        let(:webmock_source_merge) do
+          Gitcycle::Util.deep_merge(webmock_default_merge,
             :request  => { :source => 'new-source' },
             :response => { :source => 'new-source' }
           )
+        end
+
+        before :each do
+          $stdin.stub(:gets).and_return("n", "new-source", "y")
+          webmock(:branch, :put, webmock_source_merge)
         end
 
         it "runs without assertions", :capture do
@@ -127,8 +133,7 @@ describe Gitcycle do
         end
 
         it "requests and receives parameters that match the json spec" do
-          validate_schema(:post, :branch)
-          validate_schema(:put,  :branch)
+          validate_schema(:branch, :put, webmock_source_merge)
         end
 
         it "displays proper dialog", :capture do
@@ -144,16 +149,18 @@ describe Gitcycle do
 
     context "with a title" do
 
-      before :each do
-        $stdin.stub(:gets).and_return("y")
-        
-        @merge = {
+      let(:webmock_title_merge) do
+        {
           :request  => { :title => 'new title' },
           :response => { :title => 'new title' }
         }
+      end
+
+      before :each do
+        $stdin.stub(:gets).and_return("y")
         
-        webmock(:branch, :post, @merge)
-        webmock(:branch, :put)
+        webmock(:branch, :post, webmock_title_merge)
+        webmock(:branch, :put,  webmock_default_merge)
       end
 
       it "runs without assertions", :capture do
@@ -171,8 +178,8 @@ describe Gitcycle do
       end
 
       it "requests and receives parameters that match the json spec" do
-        validate_schema(:post, :branch, @merge)
-        validate_schema(:put,  :branch)
+        validate_schema(:branch, :post, webmock_title_merge)
+        validate_schema(:branch, :put,  webmock_default_merge)
       end
 
       it "displays proper dialog", :capture do
@@ -187,16 +194,18 @@ describe Gitcycle do
     context "with a github issue" do
       let(:github_url) { 'https://github.com/login/repo/pull/0000' }
 
-      before :each do
-        $stdin.stub(:gets).and_return("y")
-        
-        @merge = {
+      let(:webmock_github_merge) do
+        {
           :request  => { :github_url => github_url },
           :response => { :github_url => github_url }
         }
+      end
+
+      before :each do
+        $stdin.stub(:gets).and_return("y")
         
-        webmock(:branch, :post, @merge)
-        webmock(:branch, :put)
+        webmock(:branch, :post, webmock_github_merge)
+        webmock(:branch, :put,  webmock_default_merge)
       end
 
       it "runs without assertions", :capture do
@@ -214,8 +223,8 @@ describe Gitcycle do
       end
 
       it "requests and receives parameters that match the json spec" do
-        validate_schema(:post, :branch, @merge)
-        validate_schema(:put,  :branch)
+        validate_schema(:branch, :post, webmock_github_merge)
+        validate_schema(:branch, :put,  webmock_default_merge)
       end
 
       it "displays proper dialog", :capture do

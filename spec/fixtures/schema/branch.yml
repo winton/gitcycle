@@ -7,8 +7,10 @@
     :properties:
       :name:
         :type: string
+        :optional: true
       :source:
         :type: string
+        :optional: true
   :response:
     :title: GET response /branch.json
     :type: object
@@ -16,8 +18,10 @@
     :properties:
       :github_url:
         :type: string
+        :optional: true
       :lighthouse_url:
         :type: string
+        :optional: true
       :name:
         :type: string
       :source:
@@ -54,12 +58,15 @@
     :properties:
       :github_url:
         :type: string
+        :optional: true
       :lighthouse_url:
         :type: string
+        :optional: true
       :source:
         :type: string
       :title:
         :type: string
+        :optional: true
   :response:
     :title: POST response /branch.json
     :type: object
@@ -67,8 +74,10 @@
     :properties:
       :github_url:
         :type: string
+        :optional: true
       :lighthouse_url:
         :type: string
+        :optional: true
       :name:
         :type: string
       :source:
@@ -116,8 +125,10 @@
     :properties:
       :github_url:
         :type: string
+        :optional: true
       :lighthouse_url:
         :type: string
+        :optional: true
       :name:
         :type: string
       :source:

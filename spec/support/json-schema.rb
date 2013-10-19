@@ -2,8 +2,8 @@ require "json-schema"
 
 RSpec.configure do
 
-  def schema_fixture(type=nil, method=nil)
-    fixture = File.read(schema_fixture_path(type))
+  def schema_fixture(resource=nil, method=nil)
+    fixture = File.read(schema_fixture_path(resource))
     fixture = YAML.load(fixture)
     fixture = Gitcycle::Util.symbolize_keys(fixture)
     
@@ -14,19 +14,15 @@ RSpec.configure do
     end
   end
 
-  def schema_fixture_path(type)
-    "#{$root}/spec/fixtures/schema/#{type}.yml"
+  def schema_fixture_path(resource)
+    "#{$root}/spec/fixtures/schema/#{resource}.yml"
   end
 
-  def validate_schema(method, schema_type, webmock_type=schema_type, merge={})
+  def validate_schema(resource, method, merge={})
     return  if RUBY_VERSION =~ /^1\.8\./
 
-    if webmock_type.is_a?(Hash)
-      merge, webmock_type = webmock_type, schema_type
-    end
-
-    schema  = schema_fixture(schema_type,   method)
-    webmock = webmock_fixture(webmock_type, method)
+    schema  = schema_fixture(resource, method)
+    webmock = schema_to_webmock(schema)
     webmock = Gitcycle::Util.deep_merge(webmock, merge)
 
     [ :request, :response ].each do |direction|
