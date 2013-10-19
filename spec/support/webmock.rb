@@ -6,25 +6,30 @@ RSpec.configure do
     return schema  unless schema.is_a?(Hash)
     
     schema.inject({}) do |memo, (key, value)|
-      if !value.is_a?(Hash) || value[:optional]
-        # do nothing
-      elsif value[:type] == 'string'
-        pre = prefix.join(':')
-        pre = "#{pre}:"  unless pre.empty? 
-        pre = pre.gsub(/^[^:]*:*/, '')
-        memo[key] = pre + key.to_s
-      elsif value[:type] == 'number'
-        memo[key] = Math.floor(Math.random()*1000000)
-      elsif value[:type] == 'object'
-        pre = prefix.dup
-        pre << key
-        memo[key] = schema_to_webmock(value[:properties], pre)
-      else
-        memo[key] = schema_to_webmock(value)
-      end
-
+      memo[key] = webmock_value(key, value, prefix.dup)
+      memo.delete(key)  unless memo[key]
       memo
     end
+  end
+
+  def webmock_value(key, value, prefix)
+    if !value.is_a?(Hash) || value[:optional]
+      nil
+    elsif value[:type] == 'string'
+      webmock_value_prefix(prefix) + key.to_s
+    elsif value[:type] == 'number'
+      Math.floor(Math.random()*1000000)
+    elsif value[:type] == 'object'
+      schema_to_webmock(value[:properties], prefix << key)
+    else
+      schema_to_webmock(value)
+    end
+  end
+
+  def webmock_value_prefix(prefix)
+    pre = prefix.join(':')
+    pre = "#{pre}:"  unless pre.empty? 
+    pre.gsub(/^[^:]*:*/, '')
   end
 
   def webmock(resource, method, merge={})
