@@ -12,6 +12,10 @@ RSpec.configure do
     end
   end
 
+  def webmock_fixture(resource)
+    schema_to_webmock(schema_fixture(resource))
+  end
+
   def webmock_value(key, value, prefix)
     if !value.is_a?(Hash) || value[:optional]
       nil
@@ -27,13 +31,13 @@ RSpec.configure do
   end
 
   def webmock_value_prefix(prefix)
-    pre = prefix.join(':')
-    pre = "#{pre}:"  unless pre.empty? 
-    pre.gsub(/^[^:]*:*/, '')
+    prefix = prefix.join(':')
+    prefix = "#{prefix}:"  unless prefix.empty? 
+    prefix.gsub(/^[^:]*:*/, '')
   end
 
   def webmock(resource, method, merge={})
-    fixture  = schema_to_webmock(schema_fixture(resource))
+    fixture  = webmock_fixture(resource)
     fixture  = Gitcycle::Util.deep_merge(fixture[method], merge)
     request  = fixture[:request]
     response = fixture[:response]

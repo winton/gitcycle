@@ -7,11 +7,7 @@ RSpec.configure do
     fixture = YAML.load(fixture)
     fixture = Gitcycle::Util.symbolize_keys(fixture)
     
-    if method
-      fixture[method]
-    else
-      fixture
-    end
+    method ? fixture[method] : fixture
   end
 
   def schema_fixture_path(resource)
@@ -21,8 +17,8 @@ RSpec.configure do
   def validate_schema(resource, method, merge={})
     return  if RUBY_VERSION =~ /^1\.8\./
 
-    schema  = schema_fixture(resource, method)
-    webmock = schema_to_webmock(schema)
+    webmock = webmock_fixture(resource)[method]
+    schema  = schema_fixture(resource)[method]
     webmock = Gitcycle::Util.deep_merge(webmock, merge)
 
     [ :request, :response ].each do |direction|
