@@ -9,10 +9,6 @@ describe Gitcycle do
       Gitcycle.new
     end
 
-    let(:lighthouse_url) do
-      "https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket"
-    end
-
     let(:webmock_put) do
       { :request => { :home => "git_login" } }
     end
@@ -26,7 +22,19 @@ describe Gitcycle do
       Gitcycle::Git.stub(:branches).and_return("source")
     end
 
+    def expect_git(source="source", branch="name")
+      Gitcycle::Git.should_receive(:branches).
+        with(:current => true)
+      
+      Gitcycle::Git.should_receive(:checkout_remote_branch).
+        with("repo:owner:login", "repo:name", source, :branch => branch)
+    end
+
     context "with a lighthouse ticket" do
+
+      let(:lighthouse_url) do
+        "https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket"
+      end
 
       let(:webmock_post) do
         {
@@ -51,12 +59,7 @@ describe Gitcycle do
         end
 
         it "calls Git with proper parameters", :capture do
-          Gitcycle::Git.should_receive(:branches).
-            with(:current => true)
-          
-          Gitcycle::Git.should_receive(:checkout_remote_branch).
-            with("repo:owner:login", "repo:name", "source", :branch => "name")
-          
+          expect_git
           gitcycle.branch(lighthouse_url)
         end
 
@@ -85,12 +88,7 @@ describe Gitcycle do
         end
 
         it "calls Git with proper parameters", :capture do
-          Gitcycle::Git.should_receive(:branches).
-            with(:current => true)
-          
-          Gitcycle::Git.should_receive(:checkout_remote_branch).
-            with("repo:owner:login", "repo:name", "source", :branch => "new-name")
-          
+          expect_git "source", "new-name"
           gitcycle.branch(lighthouse_url)
         end
 
@@ -123,12 +121,7 @@ describe Gitcycle do
         end
 
         it "calls Git with proper parameters", :capture do
-          Gitcycle::Git.should_receive(:branches).
-            with(:current => true)
-          
-          Gitcycle::Git.should_receive(:checkout_remote_branch).
-            with("repo:owner:login", "repo:name", "new-source", :branch => "name")
-          
+          expect_git "new-source"
           gitcycle.branch(lighthouse_url)
         end
 
@@ -168,12 +161,7 @@ describe Gitcycle do
       end
 
       it "calls Git with proper parameters", :capture do
-        Gitcycle::Git.should_receive(:branches).
-          with(:current => true)
-        
-        Gitcycle::Git.should_receive(:checkout_remote_branch).
-          with("repo:owner:login", "repo:name", "source", :branch => "name")
-        
+        expect_git
         gitcycle.branch("new title")
       end
 
@@ -213,12 +201,7 @@ describe Gitcycle do
       end
 
       it "calls Git with proper parameters", :capture do
-        Gitcycle::Git.should_receive(:branches).
-          with(:current => true)
-        
-        Gitcycle::Git.should_receive(:checkout_remote_branch).
-          with("repo:owner:login", "repo:name", "source", :branch => "name")
-        
+        expect_git
         gitcycle.branch(github_url)
       end
 
