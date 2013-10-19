@@ -19,6 +19,7 @@ RSpec.configure do
 
     webmock = webmock_fixture(resource)[method]
     schema  = schema_fixture(resource)[method]
+    
     webmock = Gitcycle::Util.deep_merge(webmock, merge)
 
     [ :request, :response ].each do |direction|

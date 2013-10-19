@@ -167,7 +167,6 @@ describe Gitcycle do
 
       it "requests and receives parameters that match the json spec" do
         validate_schema(:branch, :post, webmock_post)
-        validate_schema(:branch, :put,  webmock_put)
       end
 
       it "displays proper dialog", :capture do
@@ -207,7 +206,6 @@ describe Gitcycle do
 
       it "requests and receives parameters that match the json spec" do
         validate_schema(:branch, :post, webmock_post)
-        validate_schema(:branch, :put,  webmock_put)
       end
 
       it "displays proper dialog", :capture do

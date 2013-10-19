@@ -15,6 +15,7 @@ RSpec.configure do
   def webmock_fixture(resource)
     $webmock_fixture           ||= {}
     $webmock_fixture[resource] ||= schema_to_webmock(schema_fixture(resource))
+
     Gitcycle::Util.deep_dup($webmock_fixture[resource])
   end
 
@@ -24,7 +25,7 @@ RSpec.configure do
     elsif value[:type] == 'string'
       webmock_value_prefix(prefix) + key.to_s
     elsif value[:type] == 'number'
-      Math.floor(Math.random()*1000000)
+      Math.floor(Math.random() * 1000000)
     elsif value[:type] == 'object'
       schema_to_webmock(value[:properties], prefix << key)
     else
