@@ -107,7 +107,7 @@ describe Gitcycle do
       context "when the user changes the target branch" do
 
         let(:webmock_put_with_source) do
-          Gitcycle::Util.deep(webmock_put,
+          Gitcycle::Util.deep_merge(webmock_put,
             :request  => { :source => 'new-source' },
             :response => { :source => 'new-source' }
           )
