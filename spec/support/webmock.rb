@@ -13,7 +13,9 @@ RSpec.configure do
   end
 
   def webmock_fixture(resource)
-    schema_to_webmock(schema_fixture(resource))
+    $webmock_fixture           ||= {}
+    $webmock_fixture[resource] ||= schema_to_webmock(schema_fixture(resource))
+    Gitcycle::Util.deep_dup($webmock_fixture[resource])
   end
 
   def webmock_value(key, value, prefix)

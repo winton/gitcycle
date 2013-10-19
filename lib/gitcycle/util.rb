@@ -2,6 +2,15 @@ class Gitcycle < Thor
   class Util
     class <<self
 
+      def deep_dup(hash)
+        duplicate = hash.dup
+        duplicate.each_pair do |k,v|
+          tv = duplicate[k]
+          duplicate[k] = tv.is_a?(Hash) && v.is_a?(Hash) ? deep_dup(tv) : v
+        end
+        duplicate
+      end
+
       def deep_merge(hash, other_hash)
         other_hash.each_pair do |k,v|
           tv = hash[k]
