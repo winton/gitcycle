@@ -1,0 +1,160 @@
+---
+branch.json:
+  get:
+    request:
+      title: GET branch.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          optional: true
+        source:
+          type: string
+          optional: true
+    response:
+      title: GET branch.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        name:
+          type: string
+        source:
+          type: string
+        title:
+          type: string
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            owner:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string
+  post:
+    request:
+      title: POST branch.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        source:
+          type: string
+        title:
+          type: string
+          optional: true
+    response:
+      title: POST branch.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        name:
+          type: string
+        source:
+          type: string
+        title:
+          type: string
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            owner:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string
+  put:
+    request:
+      title: PUT branch.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        home:
+          type: string
+        name:
+          type: string
+        source:
+          type: string
+    response:
+      title: PUT branch.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        name:
+          type: string
+        source:
+          type: string
+        title:
+          type: string
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            owner:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string

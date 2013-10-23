@@ -63,11 +63,6 @@ describe Gitcycle do
           gitcycle.branch(lighthouse_url)
         end
 
-        it "requests and receives parameters that match the json spec" do
-          validate_schema(:branch, :post, webmock_post)
-          validate_schema(:branch, :put,  webmock_put)
-        end
-
         it "displays proper dialog", :capture do
           gitcycle.branch(lighthouse_url)
           expect_output(
@@ -125,10 +120,6 @@ describe Gitcycle do
           gitcycle.branch(lighthouse_url)
         end
 
-        it "requests and receives parameters that match the json spec" do
-          validate_schema(:branch, :put, webmock_put_with_source)
-        end
-
         it "displays proper dialog", :capture do
           gitcycle.branch(lighthouse_url)
           expect_output(
@@ -163,10 +154,6 @@ describe Gitcycle do
       it "calls Git with proper parameters", :capture do
         expect_git
         gitcycle.branch("new title")
-      end
-
-      it "requests and receives parameters that match the json spec" do
-        validate_schema(:branch, :post, webmock_post)
       end
 
       it "displays proper dialog", :capture do
@@ -204,10 +191,6 @@ describe Gitcycle do
         gitcycle.branch(github_url)
       end
 
-      it "requests and receives parameters that match the json spec" do
-        validate_schema(:branch, :post, webmock_post)
-      end
-
       it "displays proper dialog", :capture do
         gitcycle.branch(github_url)
         expect_output(
@@ -218,6 +201,7 @@ describe Gitcycle do
     end
 
     context "when offline" do
+      # TODO: develop offline mode
     end
   end
 end
