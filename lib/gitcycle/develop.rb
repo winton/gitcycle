@@ -46,7 +46,10 @@ class Gitcycle < Thor
 
     def generate_params(url_or_title)
       url, title = parse_url_or_title(url_or_title)
-      params     = { :source => Git.branches(:current => true) }
+      params     = {
+        :source => Git.branches(:current => true),
+        :repo   => Config.git_repo
+      }
 
       if url
         params.merge!(ticket_provider_params(url))

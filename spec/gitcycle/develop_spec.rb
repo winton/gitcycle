@@ -10,7 +10,7 @@ describe Gitcycle do
     end
 
     let(:webmock_put) do
-      { :request => { :home => "git_login" } }
+      { :request => { :home => "login" } }
     end
 
     before(:each) do
@@ -39,7 +39,10 @@ describe Gitcycle do
       let(:webmock_post) do
         {
           :request  => { :lighthouse_url => lighthouse_url },
-          :response => { :lighthouse_url => lighthouse_url }
+          :response => {
+            :github_url     => nil,
+            :lighthouse_url => lighthouse_url
+          }
         }
       end
 

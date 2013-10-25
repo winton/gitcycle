@@ -63,6 +63,8 @@ branch.json:
         lighthouse_url:
           type: string
           optional: true
+        repo:
+          type: string
         source:
           type: string
         title:
