@@ -10,7 +10,15 @@ describe Gitcycle do
     end
 
     let(:webmock_put) do
-      { :request => { :home => "login" } }
+      { :request => { :home => "git_login" } }
+    end
+
+    let(:webmock_post) do
+      {
+        :request => {
+          :repo  => { :name => "git_repo", :user => "git_login" }
+        }
+      }
     end
 
     before(:each) do
@@ -36,18 +44,18 @@ describe Gitcycle do
         "https://test.lighthouseapp.com/projects/0000/tickets/0000-ticket"
       end
 
-      let(:webmock_post) do
-        {
+      let(:webmock_post_with_lighthouse_url) do
+        Gitcycle::Util.deep_merge(webmock_post,
           :request  => { :lighthouse_url => lighthouse_url },
           :response => {
             :github_url     => nil,
             :lighthouse_url => lighthouse_url
           }
-        }
+        )
       end
 
       before :each do
-        webmock(:branch, :post, webmock_post)
+        webmock(:branch, :post, webmock_post_with_lighthouse_url)
         webmock(:branch, :put,  webmock_put)
       end
 
@@ -136,17 +144,17 @@ describe Gitcycle do
 
     context "with a title" do
 
-      let(:webmock_post) do
-        {
+      let(:webmock_post_with_title) do
+        Gitcycle::Util.deep_merge(webmock_post,
           :request  => { :title => 'new title' },
           :response => { :title => 'new title' }
-        }
+        )
       end
 
       before :each do
         $stdin.stub(:gets).and_return("y")
         
-        webmock(:branch, :post, webmock_post)
+        webmock(:branch, :post, webmock_post_with_title)
         webmock(:branch, :put,  webmock_put)
       end
 
@@ -171,17 +179,17 @@ describe Gitcycle do
     context "with a github issue" do
       let(:github_url) { 'https://github.com/login/repo/pull/0000' }
 
-      let(:webmock_post) do
-        {
+      let(:webmock_post_with_github_url) do
+        Gitcycle::Util.deep_merge(webmock_post,
           :request  => { :github_url => github_url },
           :response => { :github_url => github_url }
-        }
+        )
       end
 
       before :each do
         $stdin.stub(:gets).and_return("y")
         
-        webmock(:branch, :post, webmock_post)
+        webmock(:branch, :post, webmock_post_with_github_url)
         webmock(:branch, :put,  webmock_put)
       end
 

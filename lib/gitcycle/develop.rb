@@ -48,7 +48,10 @@ class Gitcycle < Thor
       url, title = parse_url_or_title(url_or_title)
       params     = {
         :source => Git.branches(:current => true),
-        :repo   => Config.git_repo
+        :repo   => {
+          :name => Config.git_repo,
+          :user => Config.git_login
+        }
       }
 
       if url

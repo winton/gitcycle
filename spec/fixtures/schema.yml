@@ -63,13 +63,19 @@ branch.json:
         lighthouse_url:
           type: string
           optional: true
-        repo:
-          type: string
         source:
           type: string
         title:
           type: string
           optional: true
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            user:
+              type: string
     response:
       title: POST branch.json (response)
       type: object

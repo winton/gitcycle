@@ -2,9 +2,9 @@ class GitMock
   class <<self
 
     def load
-      Gitcycle::Config.git_url   = "url"
-      Gitcycle::Config.git_repo  = "repo"
-      Gitcycle::Config.git_login = "login"
+      Gitcycle::Config.git_url   = "git_url"
+      Gitcycle::Config.git_repo  = "git_repo"
+      Gitcycle::Config.git_login = "git_login"
     end
 
     def method_missing(method, *args, &block)
