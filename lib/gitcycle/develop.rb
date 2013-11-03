@@ -39,8 +39,6 @@ class Gitcycle < Thor
       repo  = branch[:repo][:name]
       name  = change_name(branch[:name])
 
-      branch[:home] ||= Config.git_login
-
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
     end
 
@@ -84,7 +82,6 @@ class Gitcycle < Thor
 
     def update_branch(branch)
       Api.branch(:update,
-        :home   => branch[:home],
         :name   => branch[:name],
         :source => branch[:source]
       )

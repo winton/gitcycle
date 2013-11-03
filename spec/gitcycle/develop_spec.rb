@@ -10,7 +10,7 @@ describe Gitcycle do
     end
 
     let(:webmock_put) do
-      { :request => { :home => "git_login" } }
+      {}
     end
 
     let(:webmock_post) do

@@ -75,7 +75,11 @@ branch.json:
             name:
               type: string
             user:
-              type: string
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
     response:
       title: POST branch.json (response)
       type: object
@@ -121,8 +125,6 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        home:
-          type: string
         name:
           type: string
         source:
