@@ -48,7 +48,7 @@ class Gitcycle < Thor
         :source => Git.branches(:current => true),
         :repo   => {
           :name => Config.git_repo,
-          :user => Config.git_login
+          :user => { :login => Config.git_login }
         }
       }
 
