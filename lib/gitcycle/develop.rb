@@ -1,7 +1,7 @@
 class Gitcycle < Thor
 
   desc "develop URL|TITLE", "Create or switch to a feature branch"
-  def branch(url_or_title)
+  def develop(url_or_title)
     require_git and require_config
     
     params = generate_params(url_or_title)

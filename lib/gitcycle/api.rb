@@ -16,6 +16,10 @@ class Gitcycle < Thor
         parse http.get("/branch/new.json").body
       end
 
+      def setup_lighthouse(token)
+        http.post("/setup/lighthouse.json", :token => token)
+      end
+
       def user
         parse http.get("/user.json").body
       end

@@ -69,16 +69,16 @@ describe Gitcycle do
         end
 
         it "runs without assertions", :capture do
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
         end
 
         it "calls Git with proper parameters", :capture do
           expect_git
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
         end
 
         it "displays proper dialog", :capture do
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
           expect_output(
             "Your work will eventually merge into \"source\"",
             "Would you like to name your branch \"name\""
@@ -93,16 +93,16 @@ describe Gitcycle do
         end
 
         it "runs without assertions", :capture do
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
         end
 
         it "calls Git with proper parameters", :capture do
           expect_git "source", "new-name"
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
         end
 
         it "displays proper dialog", :capture do
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
           expect_output(
             "Your work will eventually merge into \"source\"",
             "Would you like to name your branch \"name\"",
@@ -126,16 +126,16 @@ describe Gitcycle do
         end
 
         it "runs without assertions", :capture do
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
         end
 
         it "calls Git with proper parameters", :capture do
           expect_git "new-source"
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
         end
 
         it "displays proper dialog", :capture do
-          gitcycle.branch(lighthouse_url)
+          gitcycle.develop(lighthouse_url)
           expect_output(
             "Your work will eventually merge into \"source\"",
             "What branch would you like to eventually merge into?",
@@ -162,16 +162,16 @@ describe Gitcycle do
       end
 
       it "runs without assertions", :capture do
-        gitcycle.branch("new title")
+        gitcycle.develop("new title")
       end
 
       it "calls Git with proper parameters", :capture do
         expect_git
-        gitcycle.branch("new title")
+        gitcycle.develop("new title")
       end
 
       it "displays proper dialog", :capture do
-        gitcycle.branch("new title")
+        gitcycle.develop("new title")
         expect_output(
           "Your work will eventually merge into \"source\"",
           "Would you like to name your branch \"name\""
@@ -197,16 +197,16 @@ describe Gitcycle do
       end
 
       it "runs without assertions", :capture do
-        gitcycle.branch(github_url)
+        gitcycle.develop(github_url)
       end
 
       it "calls Git with proper parameters", :capture do
         expect_git
-        gitcycle.branch(github_url)
+        gitcycle.develop(github_url)
       end
 
       it "displays proper dialog", :capture do
-        gitcycle.branch(github_url)
+        gitcycle.develop(github_url)
         expect_output(
           "Your work will eventually merge into \"source\"",
           "Would you like to name your branch \"name\""
