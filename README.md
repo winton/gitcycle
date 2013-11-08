@@ -159,27 +159,8 @@ Checkout a branch from a ticket #:
 
 	gitc checkout user/branch
 
-Todo
-----
+Testing Manually
+----------------
 
-Nice to haves:
-* gitc branch [lh]
-* gitc branch [gitissue]
-* gitc ready # switch me back to rc or master
-* gitc ready - issue already closed, will open a new issue
+	CONFIG=../gitcycle.yml bin/git-cycle develop "this is a test"
 
-* Conflict recording not working
-* gitc qa pass [issue] should use a qa_rc_tongueroo_temp branch so it doesnt blow away the changes in the qa_rc_tongueroo branch
-	* not working : https://gist.github.com/819c99281f5d6492de47
-* gitc qa pass (all), doesnt update lighthouse to state pending-approval 
-* Collaborator mode = work on same ticket, gitc ready readys ticket no matter who is working on it, if more than one ticket then we should have a feature branch that people are basing tickets off of
-* Hook to run after gitc qa pass, so I can write a script for amit that will auto merge master into rc
-* Issues aren't assigned to people
-* On pass or fail, send email to Github email
-* Note you can use gitc with a string (and get this working)
-* gitc qa pass, should not set ticket to pending-approval if its already resolved
-* Everything before colon in ticket name, make shorter somehow
-$ gitc st - shortcut
-* gitc clean # to clean up old branches
-* fail should change to inactive
-* gitc pull: shouldnt matter who does it, it should update the latest br/rc, not working https://gist.github.com/22b1e248e8dba7a32288

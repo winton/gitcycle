@@ -35,7 +35,7 @@ class Gitcycle < Thor
     end
 
     def checkout_branch(branch)
-      owner = branch[:repo][:owner][:login]
+      owner = branch[:repo][:owner][:login] rescue 'origin'
       repo  = branch[:repo][:name]
       name  = change_name(branch[:name])
 

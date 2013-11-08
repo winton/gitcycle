@@ -168,3 +168,16 @@ branch.json:
                   type: string
                 name:
                   type: string
+setup/lighthouse.json:
+  get:
+    request:
+      title: POST setup/lighthouse.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+    response:
+      title: POST setup/lighthouse.json (response)
+      type: 'null'
+      additionalProperties: false

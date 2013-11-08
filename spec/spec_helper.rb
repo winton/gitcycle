@@ -1,9 +1,6 @@
-unless ENV['CI']
-  begin
-    require 'simplecov'
-    SimpleCov.start
-  rescue Exception => e
-  end
+unless ENV['CI'] || RUBY_VERSION =~ /^1\.8\./
+  require 'simplecov'
+  SimpleCov.start
 end
 
 ENV['ENV'] = "test"
