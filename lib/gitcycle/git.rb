@@ -2,14 +2,10 @@ class Gitcycle < Thor
   class Git
     class <<self
 
-      def add_remote_and_fetch(remote, repo)
-        unless Config.remotes.include?(remote)
-          Config.remotes.push(remote)
-          
-          unless Git.remotes(:match => remote)
-            puts "Adding remote repo '#{remote}/#{repo}'.\n".green.space
-            remote_add(remote, repo)
-          end
+      def add_remote_and_fetch(remote, repo, options={})
+        unless Git.remotes(:match => remote)
+          puts "Adding remote repo '#{remote}/#{repo}'.\n".green.space
+          remote_add(remote, repo)
         end
 
         unless Config.fetches.include?(remote)
@@ -22,7 +18,7 @@ class Gitcycle < Thor
 
       def branch(remote, branch_name=nil, options=nil)
         remote, branch_name, options = params(remote, branch_name, options)
-        run("git branch #{remote} #{branch_name}#{git_options}")
+        run("git branch #{remote} #{branch_name}#{options}")
       end
 
       def branches(options={})
@@ -38,9 +34,9 @@ class Gitcycle < Thor
         end
       end
 
-      def checkout(remote, branch_name=nil)
-        remote, branch_name = params(remote, branch_name)
-        run("git checkout #{remote}/#{branch_name} -q")
+      def checkout(remote, branch_name=nil, options=nil)
+        remote, branch_name, options = params(remote, branch_name, options)
+        run("git checkout #{remote}/#{branch_name} -q#{options}")
       end
 
       def checkout_or_track(remote, branch_name=nil)
@@ -146,9 +142,9 @@ class Gitcycle < Thor
       end
 
       def remotes(options={})
-        b = run("git remote")
+        b = run("git remote -v")
         if options[:match]
-          b.match(/^(#{options[:match]})$/)[1] rescue nil
+          b =~ /^#{Regexp.quote(options[:match])}\s/
         else
           b
         end
@@ -163,10 +159,10 @@ class Gitcycle < Thor
       end
 
       def params(remote, branch_name=nil, options=nil)
-        remote, branch_name = "origin", remote  unless branch_name
-
         options   = branch_name  unless options
         options ||= {}
+
+        remote, branch_name = "origin", remote  unless branch_name
 
         git_options = options.inject("") do |memo, (key, value)|
           memo += " -b #{value}"  if key == :branch && value
