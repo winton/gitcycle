@@ -181,3 +181,63 @@ setup/lighthouse.json:
       title: POST setup/lighthouse.json (response)
       type: 'null'
       additionalProperties: false
+pull_request.json:
+  post:
+    request:
+      title: POST pull_request.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        branch:
+          type: string
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+    response:
+      title: POST pull_request.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        name:
+          type: string
+        source:
+          type: string
+        title:
+          type: string
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            owner:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+                name:
+                  type: string

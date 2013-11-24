@@ -24,10 +24,10 @@ require "gitcycle/assist"
 require "gitcycle/config"
 require "gitcycle/commit"
 require "gitcycle/develop"
-require "gitcycle/discuss"
 require "gitcycle/git"
 require "gitcycle/incident"
 require "gitcycle/open"
+require "gitcycle/pr"
 require "gitcycle/pull"
 require "gitcycle/qa"
 require "gitcycle/ready"
@@ -60,27 +60,6 @@ class Gitcycle < Thor
   end
 
   no_commands do
-
-    def create_pull_request(branch=nil, force=false)
-      unless branch
-        puts "\nRetrieving branch information from gitcycle.\n".green  
-        branch = get('branch',
-          'branch[name]' => branches(:current => true),
-          'create' => 0
-        )
-      end
-
-      if branch && (force || !branch['github_url'])
-        puts "Creating GitHub pull request.\n".green
-        branch = get('branch',
-          'branch[create_pull_request]' => true,
-          'branch[name]' => branch['name'],
-          'create' => 0
-        )
-      end
-
-      branch
-    end
     
     def q(question, extra='')
       puts "#{question.yellow}#{extra}"

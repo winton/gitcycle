@@ -9,19 +9,23 @@ class Gitcycle < Thor
 
       def branch(method, params=nil)
         method, params = method_parameters(method, params)
-        parse http.send(method, "/branch.json", params).body
+        parse http.send(method, "/branch.json", params)
       end
 
       def branch_schema
-        parse http.get("/branch/new.json").body
+        parse http.get("/branch/new.json")
+      end
+
+      def pull_request(params)
+        parse http.post("/pull_request.json", params)
       end
 
       def setup_lighthouse(token)
-        http.post("/setup/lighthouse.json", :token => token)
+        parse http.post("/setup/lighthouse.json", :token => token)
       end
 
       def user
-        parse http.get("/user.json").body
+        parse http.get("/user.json")
       end
 
       private
@@ -50,10 +54,14 @@ class Gitcycle < Thor
         [ method, params ]
       end
 
-      def parse(body)
-        hash = JSON.parse(body)
-        hash = Util.symbolize_keys(hash)
-        parse_timestamps(hash)
+      def parse(response)
+        if response.body.strip.empty?
+          false
+        else
+          hash = JSON.parse(response.body)
+          hash = Util.symbolize_keys(hash)
+          parse_timestamps(hash)
+        end
       end
 
       def parse_timestamps(hash)

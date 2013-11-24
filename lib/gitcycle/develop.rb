@@ -4,7 +4,7 @@ class Gitcycle < Thor
   def develop(url_or_title)
     require_git and require_config
     
-    params = generate_params(url_or_title)
+    params = branch_create_params(url_or_title)
     branch = Api.branch(:create, params)
 
     change_target(branch)
@@ -42,7 +42,7 @@ class Gitcycle < Thor
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
     end
 
-    def generate_params(url_or_title)
+    def branch_create_params(url_or_title)
       url, title = parse_url_or_title(url_or_title)
       params     = {
         :source => Git.branches(:current => true),
