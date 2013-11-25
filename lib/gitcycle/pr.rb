@@ -20,5 +20,7 @@ class Gitcycle < Thor
     else
       puts "You must push code before opening a pull request.".space.red
     end
+
+    branch
   end
 end

@@ -4,14 +4,19 @@ RSpec.configure do
 
   def webmock(resource, method, merge={})
     request, response = json_schema_params(resource, method, merge)
+
+    if method == :get
+      query, body = request, nil
+    else
+      query, body = nil, request
+    end
     
     headers  = {
-      'Authorization' => "Token token=\"#{Gitcycle::Config.token}\"",
-      'Content-Type'  => 'application/x-www-form-urlencoded'
+      'Authorization' => "Token token=\"#{Gitcycle::Config.token}\""
     }
 
     stub_request(method, "#{Gitcycle::Config.url}/#{resource}.json").
-      with(:body => request, :headers => headers).
+      with(:body => body, :headers => headers, :query => query).
       to_return(:status => 200, :body => response.to_json, :headers => {})
   end
 end

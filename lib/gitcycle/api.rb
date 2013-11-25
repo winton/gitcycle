@@ -48,7 +48,7 @@ class Gitcycle < Thor
         end
 
         if params.nil?
-          method, params = :get, params
+          method, params = :get, method
         end
 
         [ method, params ]

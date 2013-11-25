@@ -33,6 +33,7 @@ require "gitcycle/qa"
 require "gitcycle/ready"
 require "gitcycle/review"
 require "gitcycle/setup"
+require "gitcycle/sync"
 require "gitcycle/util"
 
 class Gitcycle < Thor

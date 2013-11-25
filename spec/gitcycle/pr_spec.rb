@@ -27,7 +27,6 @@ describe Gitcycle do
       
       GitMock.load
       Gitcycle::Git.stub(:branches).and_return("branch")
-      Gitcycle::Git.should_receive(:branches).with(:current => true)
     end
 
     context "without github_url in the response" do
@@ -41,6 +40,11 @@ describe Gitcycle do
         expect_output(
           "You must push code before opening a pull request."
         )
+      end
+
+      it "calls Git with proper parameters", :capture do
+        Gitcycle::Git.should_receive(:branches).with(:current => true)
+        gitcycle.pr
       end
     end
 
@@ -62,6 +66,11 @@ describe Gitcycle do
       it "displays proper dialog", :capture do
         gitcycle.pr
         expect_output("Opening issue: #{github_url}")
+      end
+
+      it "calls Git with proper parameters", :capture do
+        Gitcycle::Git.should_receive(:branches).with(:current => true)
+        gitcycle.pr
       end
     end
   end
