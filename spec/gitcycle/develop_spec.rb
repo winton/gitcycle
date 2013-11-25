@@ -51,7 +51,6 @@ describe Gitcycle do
         Gitcycle::Util.deep_merge(webmock_post,
           :request  => { :lighthouse_url => lighthouse_url },
           :response => {
-            :github_url     => nil,
             :lighthouse_url => lighthouse_url
           }
         )
