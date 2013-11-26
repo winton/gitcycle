@@ -20,25 +20,18 @@ describe Gitcycle do
       
       GitMock.load
       Gitcycle::Git.stub(:branches).and_return("branch")
+
+      webmock(:branch, :get, webmock_get)
     end
 
-    context "with" do
-
-      before :each do
-        webmock(:branch, :get, webmock_get)
-      end
-
-      # it "displays proper dialog", :capture do
-      #   gitcycle.sync
-      #   expect_output(
-      #     ""
-      #   )
-      # end
-
-      it "calls Git with proper parameters", :capture do
-        Gitcycle::Git.should_receive(:branches).with(:current => true)
-        gitcycle.sync
-      end
+    it "calls Git with proper parameters", :capture do
+      Gitcycle::Git.should_receive(:branches).with(:current => true)
+      Gitcycle::Git.should_receive(:pull).with("origin", "name")
+      Gitcycle::Git.should_receive(:merge_remote_branch).with(
+        "repo:owner:login", "repo:owner:name", "name"
+      )
+      Gitcycle::Git.should_receive(:push).with("origin", "name")
+      gitcycle.sync
     end
   end
 end
