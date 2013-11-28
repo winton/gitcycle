@@ -3,164 +3,168 @@ Gitcycle
 
 Development cycle automation.
 
-About
------
+Problems Solved
+---------------
 
-Gitcycle is a `git` wrapper that makes working on a team easy.
+Are you wasting time on questions about forks, pull requests, merging, tracking, pulling, pushing, and remotes?
 
-It assumes you are using pull requests along side [GitHub Issues](https://github.com/features/projects/issues).
+Do you want to automate issue state changes when features move from development -> review -> QA?
 
-It connects to email, Lighthouse, and Campfire if you want it to.
+Gitcycle is a `git` wrapper that makes all of these things simple and uniform across all environments.
 
-Get Started
+The Process
 -----------
 
-Visit [gitcycle.com](http://gitcycle.com) to set up your repository.
+* Create feature branch from issue
+* Ready feature branch for code review
+* If code review passes, move feature to QA
+* If QA passes, merge into target branch
 
-gitc
-----
+Currently gitcycle can only create feature branches from Github issues or [Lighthouse](http://lighthouseapp.com) tickets (more providers coming soon).
 
-The `gitc` command does everything `git` does, but with some extra features.
+Install Gem
+-----------
 
-Try using `gitc` for everything. It should just work.
+	gem install gitcycle
 
-Branch From Ticket
+Start Server
+------------
+
+You need to have a [gitcycle_api](https://github.com/winton/gitcycle_api2) web server running.
+
+Please visit the project page for installation instructions.
+
+If you question the idea of needing a server, please read [Why a server?](https://github.com/winton/gitcycle/wiki/Why-a-server%3F).
+
+Setup Client
+------------
+
+Visit your running [gitcycle_api](https://github.com/winton/gitcycle_api2) web server via browser.
+
+Login and follow the instructions on the setup tab.
+
+Create Git Aliases
 ------------------
 
-First, checkout the branch that you will eventually merge your code into:
+Run gitcycle commands like so:
 
-	gitc checkout [BRANCH]
+	git cycle [COMMAND]
 
-Type `gitc branch` + your ticket URL to create a new branch:
+Since gitcycle does not have command names that conflict with standard `git` commands, you can alias them like so:
 
-	gitc branch https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+	git cycle alias
 
-Pull
-----
+Now you can run `git [COMMAND]` for all gitcycle commands.
 
-Use `gitc pull` without parameters. It knows what you're trying to do.
+The rest of the README assumes you have aliased your gitcycle commands.
 
-	gitc pull
+Track a Branch
+--------------
 
-If you're working on a ticket branch, it will automatically pull the latest code from upstream.
+Gitcycle provides a shortcut for easily checking out branches.
+
+The shortcut is smart enough to pick the right branch to checkout, whether it be from your repo or upstream.
+
+So typically it "just works" to checkout any branch like this:
+
+	git track [BRANCH]
+
+Create a Feature Branch
+-----------------------
+
+First, `track` the branch that you want your feature branch to eventually merge into (for example, a release candidate branch):
+
+	git track rc
+
+Now let's create a feature branch from a...
+
+### Github Issue
+
+	git feature https://github.com/user/repo/issues/0000
+
+### Lighthouse Ticket
+
+	git feature https://xxx.lighthouseapp.com/projects/0000/tickets/0000-my-ticket
+
+### Title
+
+You can create an issue and feature branch at once!
+
+	git feature "This is my issue title"
+
+Sync Branch
+-----------
+
+Push and pull changes to and from your repo and the upstream repo with a single command:
+
+	git sync
+
+You should rarely need to use `git pull` or `git push` (but you still can if you want to :).
 
 Commit
 ------
 
-Commit all changes and open commit message in EDITOR:
+Commit like always via `git commit`. Gitcycle populates your commit message with issue information.
 
-	gitc commit
+Create Pull Request
+-------------------
 
-Ticket number and name are prefilled if present.
+After syncing some commits, create a pull request to discuss your code:
 
-Push
-----
+	git pr
 
-Use `gitc push` without parameters. It knows what you're trying to do.
-
-	gitc push
-
-Discuss
--------
-
-After pushing some commits, put the code up for discussion:
-
-	gitc discuss
-
-Ready
------
+Ready for Code Review
+---------------------
 
 When the branch is ready for code review:
 
-	gitc ready
-
-This will label the pull request as "Pending Review".
-
-Open
-----
-
-If you want to view the pull request without updating the ticket:
-
-	gitc open
+	git ready
 
 Code Review
 -----------
 
-Periodically check for "Pending Review" issues on GitHub.
-
 ### Pass
 
-	gitc review pass [GITHUB ISSUE #] [...]
+	git review pass [GITHUB ISSUE #] [...]
 
-Label the issue "Pending QA".
+Now this feature is ready for QA.
 
 ### Fail
 
-	gitc review fail [GITHUB ISSUE #] [...]
+	git review fail [GITHUB ISSUE #] [...]
 
-Label the issue "Fail".
+Once the problem is resolved, the committer should run `git ready` on the feature branch again.
 
 Quality Assurance
 -----------------
 
-Periodically check for "Pending QA" issues on Github.
-
 ### Create QA Branch
 
-	gitc qa [GITHUB ISSUE #] [...]
+	git qa [GITHUB ISSUE #] [...]
 
-Now you have a QA branch containing all commits from the specified Github issue numbers.
+This generates a QA branch containing all commits from the specified Github issue numbers.
 
 ### Fail
 
-	gitc qa fail [GITHUB ISSUE #]
-
-Label the issue with "Fail" and regenerate the QA branch without the failing issue.
+	git qa fail [GITHUB ISSUE #]
 
 ### Pass
 
-	gitc qa pass
+	git qa pass
 
-Label all issues "Pass" and the merge the QA branch into target branch.
+This merges the QA branch into the target branch.
 
 ### Immediate Pass
 
-	gitc checkout [TARGET BRANCH]
-	gitc qa pass [GITHUB ISSUE #] [...]
+	git qa pass [GITHUB ISSUE #] [...]
 
-Immediately merge issue into the target branch.
+This immediately merges issues into the target branch without generating a QA branch first.
 
-### Status
+More Magic!
+-----------
 
-See who is QA'ing what:
+A lot more happens when you run the commands above, such as issue labeling and state changing.
 
-	gitc qa
+Gitcycle also has some more add-ons not described here. To see them:
 
-Checkout
---------
-
-Check out an upstream or local branch:
-
-	gitc checkout [BRANCH]
-
-### From Ticket
-
-Checkout a branch from a ticket URL:
-
-	gitc checkout [TICKET URL]
-
-### From Ticket Number
-
-Checkout a branch from a ticket #:
-
-	gitc checkout [TICKET NUMBER]
-
-### From User's Fork
-
-	gitc checkout user/branch
-
-Testing Manually
-----------------
-
-	CONFIG=../gitcycle.yml bin/git-cycle develop "this is a test"
-
+	git cycle -h
