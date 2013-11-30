@@ -14,7 +14,15 @@ class Gitcycle < Thor
       if branch[:repo][:owner]
         Git.merge_remote_branch(
           branch[:repo][:owner][:login],
-          branch[:repo][:owner][:name],
+          branch[:repo][:name],
+          branch[:name]
+        )
+      end
+
+      unless branch[:repo][:owner].to_h[:login] == branch[:repo][:user][:login]
+        Git.merge_remote_branch(
+          branch[:repo][:user][:login],
+          branch[:repo][:name],
           branch[:name]
         )
       end

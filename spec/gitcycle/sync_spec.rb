@@ -28,7 +28,10 @@ describe Gitcycle do
       Gitcycle::Git.should_receive(:branches).with(:current => true)
       Gitcycle::Git.should_receive(:pull).with("origin", "name")
       Gitcycle::Git.should_receive(:merge_remote_branch).with(
-        "repo:owner:login", "repo:owner:name", "name"
+        "repo:owner:login", "repo:name", "name"
+      )
+      Gitcycle::Git.should_receive(:merge_remote_branch).with(
+        "repo:user:login", "repo:name", "name"
       )
       Gitcycle::Git.should_receive(:push).with("origin", "name")
       gitcycle.sync
