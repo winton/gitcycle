@@ -241,3 +241,41 @@ pull_request.json:
                   type: string
                 name:
                   type: string
+repo.json:
+  post:
+    request:
+      title: POST repo.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        user:
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+    response:
+      title: POST repo.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        owner:
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+            name:
+              type: string
+        user:
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+            name:
+              type: string
