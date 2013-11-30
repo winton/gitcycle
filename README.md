@@ -1,7 +1,7 @@
 Gitcycle
 ========
 
-Development cycle automation.
+Simplifies and standardizes your development process.
 
 Why?
 ----
@@ -10,7 +10,7 @@ Are you wasting time on questions about forks, pull requests, merging, tracking,
 
 Do you want to automate issue state changes when features move from development -> review -> QA?
 
-Gitcycle is a `git` wrapper that makes all of these things simple and uniform across all environments.
+Gitcycle is a `git` wrapper that makes all of these things easy and uniform across all environments.
 
 The Process
 -----------
