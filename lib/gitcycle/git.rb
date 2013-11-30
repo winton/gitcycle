@@ -2,18 +2,14 @@ class Gitcycle < Thor
   class Git
     class <<self
 
-      def add_remote_and_fetch(remote, repo, options={})
+      def add_remote_and_fetch(remote, repo, branch, options={})
         unless Git.remotes(:match => remote)
           puts "Adding remote repo '#{remote}/#{repo}'.\n".green.space
           remote_add(remote, repo)
         end
 
-        unless Config.fetches.include?(remote)
-          Config.fetches.push(remote)
-
-          puts "Fetching remote '#{remote}'.".space.green
-          fetch(remote, :catch => options[:catch])
-        end
+        puts "Fetching '#{remote}/#{branch}'.".space.green
+        fetch(remote, branch, :catch => options[:catch])
       end
 
       def branch(remote, branch_name=nil, options=nil)
@@ -44,14 +40,14 @@ class Gitcycle < Thor
 
         if branches(:match => branch_name)
           puts "Checking out branch '#{branch_name}'.\n".green
-          Git.checkout(branch_name)
+          checkout(branch_name)
         else
           puts "Tracking branch '#{remote}/#{branch_name}'.\n".green
-          Git.fetch(remote)
-          Git.checkout(remote, branch_name)
+          fetch(remote, branch_name)
+          checkout(remote, branch_name)
         end
 
-        Git.pull(remote, branch_name)
+        pull(remote, branch_name)
       end
 
       def checkout_remote_branch(remote, repo, branch_name, options={})
@@ -74,8 +70,8 @@ class Gitcycle < Thor
         puts "Checking out remote branch '#{target}' from '#{remote}/#{repo}/#{branch_name}'.".green.space
         checkout(remote, branch_name, :branch => target)
 
-        puts "Fetching remote 'origin'.".green.space
-        fetch
+        puts "Fetching remote 'origin/#{target}'.".green.space
+        fetch("origin", target)
 
         if branches(:remote => true, :match => "origin/#{target}")
           puts "Pulling 'origin/#{target}'.".green.space
@@ -99,8 +95,8 @@ class Gitcycle < Thor
         end
       end
 
-      def fetch(user="origin", options={})
-        run("git fetch #{user} -q", :catch => options[:catch])
+      def fetch(user, branch, options={})
+        run("git fetch #{user} #{branch}:refs/remotes/#{user}/#{branch} -q", :catch => options[:catch])
       end
 
       def load
