@@ -16,8 +16,8 @@ class Gitcycle < Thor
       login, Config.git_repo, branch, :catch => false
     )
 
-    if Git.errored?(output)
-      login = repo[:user][:login]
+    if Git.errored?(output) && repo[:owner]
+      login = repo[:owner][:login]
       Git.add_remote_and_fetch(login, Config.git_repo, branch)
     end
 

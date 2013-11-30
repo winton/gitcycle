@@ -27,22 +27,48 @@ describe Gitcycle do
       webmock(:repo, :post, webmock_post)
     end
 
-    it "calls Git with proper parameters", :capture do
-      Gitcycle::Git.should_receive(:branches).ordered.
-        with(:current => true).
-        and_return("branch")
-      
-      Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
-        with("user:login", "git_repo", "branch", :catch => false).
-        and_return("output")
-      
-      Gitcycle::Git.should_receive(:errored?).ordered.
-        with("output")
-      
-      Gitcycle::Git.should_receive(:branch).ordered.
-        with("user:login", "user:login/branch")
+    context "when branch exists on fork" do
+      it "calls Git with proper parameters", :capture do
+        Gitcycle::Git.should_receive(:branches).ordered.
+          with(:current => true).
+          and_return("branch")
+        
+        Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
+          with("user:login", "git_repo", "branch", :catch => false).
+          and_return("output")
+        
+        Gitcycle::Git.should_receive(:errored?).ordered.
+          with("output")
+        
+        Gitcycle::Git.should_receive(:branch).ordered.
+          with("user:login", "user:login/branch")
 
-      gitcycle.track
+        gitcycle.track
+      end
+    end
+
+    context "when branch does not exist on fork" do
+      it "calls Git with proper parameters", :capture do
+        Gitcycle::Git.should_receive(:branches).ordered.
+          with(:current => true).
+          and_return("branch")
+        
+        Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
+          with("user:login", "git_repo", "branch", :catch => false).
+          and_return("output")
+        
+        Gitcycle::Git.should_receive(:errored?).ordered.
+          with("output").
+          and_return(true)
+
+        Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
+          with("owner:login", "git_repo", "branch")
+        
+        Gitcycle::Git.should_receive(:branch).ordered.
+          with("owner:login", "owner:login/branch")
+
+        gitcycle.track
+      end
     end
   end
 end
