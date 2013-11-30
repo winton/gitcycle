@@ -28,7 +28,8 @@ describe Gitcycle do
     end
 
     context "when branch exists on fork" do
-      it "calls Git with proper parameters", :capture do
+      
+      before :each do
         Gitcycle::Git.should_receive(:branches).ordered.
           with(:current => true).
           and_return("branch")
@@ -42,13 +43,23 @@ describe Gitcycle do
         
         Gitcycle::Git.should_receive(:branch).ordered.
           with("user:login", "user:login/branch")
+      end
 
+      it "calls Git with proper parameters", :capture do
         gitcycle.track
+      end
+
+      it "displays proper dialog", :capture do
+        gitcycle.track
+        expect_output(
+          "Creating branch 'branch' from 'user:login/branch'."
+        )
       end
     end
 
     context "when branch does not exist on fork" do
-      it "calls Git with proper parameters", :capture do
+
+      before :each do
         Gitcycle::Git.should_receive(:branches).ordered.
           with(:current => true).
           and_return("branch")
@@ -66,8 +77,17 @@ describe Gitcycle do
         
         Gitcycle::Git.should_receive(:branch).ordered.
           with("owner:login", "owner:login/branch")
+      end
 
+      it "calls Git with proper parameters", :capture do
         gitcycle.track
+      end
+
+      it "displays proper dialog", :capture do
+        gitcycle.track
+        expect_output(
+          "Creating branch 'branch' from 'owner:login/branch'."
+        )
       end
     end
   end
