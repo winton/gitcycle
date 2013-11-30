@@ -10,16 +10,17 @@ class Gitcycle < Thor
       puts "Branch not found.".space.red
     else
       Git.pull "origin", branch[:name]
+      owner_login = branch[:repo][:owner][:login] rescue nil
 
-      if branch[:repo][:owner]
+      if owner_login
         Git.merge_remote_branch(
-          branch[:repo][:owner][:login],
+          owner_login,
           branch[:repo][:name],
           branch[:name]
         )
       end
 
-      unless branch[:repo][:owner].to_h[:login] == branch[:repo][:user][:login]
+      unless owner_login == branch[:repo][:user][:login]
         Git.merge_remote_branch(
           branch[:repo][:user][:login],
           branch[:repo][:name],
