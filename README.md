@@ -3,8 +3,8 @@ Gitcycle
 
 Development cycle automation.
 
-Problems Solved
----------------
+Why?
+----
 
 Are you wasting time on questions about forks, pull requests, merging, tracking, pulling, pushing, and remotes?
 
@@ -76,7 +76,7 @@ First, `track` the branch that you want your feature branch to eventually merge 
 
 	git track rc
 
-Now let's create a feature branch from a...
+Now let's create a feature branch from one of the following options:
 
 ### Github Issue
 
