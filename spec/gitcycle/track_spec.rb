@@ -11,9 +11,9 @@ describe Gitcycle do
 
     let(:webmock_post) do
       {
-        request: {
-          name: "git_repo",
-          user: { login: "git_login" }
+        :request => {
+          :name => "git_repo",
+          :user => { :login => "git_login" }
         }
       }
     end
