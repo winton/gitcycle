@@ -12,6 +12,7 @@ describe Gitcycle do
     let(:webmock_post) do
       {
         :request  => {
+          :ready  => "false",
           :repo   => {
             :name => "git_repo",
             :user => { :login => "git_login" }

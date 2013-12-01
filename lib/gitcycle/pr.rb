@@ -1,11 +1,12 @@
 class Gitcycle < Thor
 
   desc "pr", "Create a pull request from current feature branch"
-  def pr
+  def pr(ready=false)
     require_git and require_config
 
     branch = Api.pull_request(
       :branch => Git.branches(:current => true),
+      :ready  => ready,
       :repo   => {
         :name => Config.git_repo,
         :user => { :login => Config.git_login }

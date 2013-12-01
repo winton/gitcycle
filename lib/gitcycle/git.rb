@@ -82,6 +82,10 @@ class Gitcycle < Thor
         push(target)
       end
 
+      def commit(msg)
+        run("git commit -m #{msg.dump.gsub('`', "'")}")
+      end
+
       def config_path(path)
         config = "#{path}/.git/config"
 
@@ -121,6 +125,11 @@ class Gitcycle < Thor
           puts "\nMerging remote branch '#{branch_name}' from '#{remote}/#{repo}'.".green.space
           merge(remote, branch_name)
         end
+      end
+
+      def merge_squash(remote, branch_name=nil)
+        remote, branch_name = params(remote, branch_name)
+        run("git merge --squash #{remote}/#{branch_name}")
       end
 
       def pull(remote, branch_name=nil)

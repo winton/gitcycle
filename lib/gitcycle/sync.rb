@@ -30,5 +30,7 @@ class Gitcycle < Thor
 
       Git.push "origin", branch[:name]
     end
+
+    branch
   end
 end
