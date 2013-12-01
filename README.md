@@ -65,9 +65,13 @@ Gitcycle provides a shortcut for easily checking out branches.
 
 The shortcut is smart enough to pick the right branch to checkout, whether it be from your repo or upstream.
 
-So typically it "just works" to checkout any branch like this:
+It "just works" to checkout a branch from your fork or upstream repo like this:
 
 	git track [BRANCH]
+
+To collaborate with another user:
+	
+	git track [REMOTE]/[BRANCH]
 
 Create a Feature Branch
 -----------------------
