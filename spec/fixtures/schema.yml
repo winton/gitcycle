@@ -200,7 +200,10 @@ pull_request.json:
         branch:
           type: string
         ready:
-          type: boolean
+          type: string
+          enum:
+          - 'true'
+          - 'false'
         repo:
           type: object
           additionalProperties: false
