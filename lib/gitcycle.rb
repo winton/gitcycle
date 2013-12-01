@@ -18,6 +18,7 @@ require "gitcycle/subcommand"
 require "gitcycle/subcommands/review"
 require "gitcycle/subcommands/setup"
 
+require "gitcycle/alias"
 require "gitcycle/api"
 require "gitcycle/config"
 require "gitcycle/develop"
@@ -33,6 +34,10 @@ require "gitcycle/track"
 require "gitcycle/util"
 
 class Gitcycle < Thor
+
+  COMMANDS = %w(
+    feature incident pr qa ready review setup sync track
+  )
 
   ERROR = {
     :unrecognized_url      => 1,
