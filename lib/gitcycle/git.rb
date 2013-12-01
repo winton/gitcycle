@@ -111,13 +111,13 @@ class Gitcycle < Thor
 
       def merge(remote, branch_name=nil)
         remote, branch_name = params(remote, branch_name)
-        run("git merge #{remote}/#{branch_name}")
+        run("git rebase #{remote}/#{branch_name}")
       end
 
       def merge_remote_branch(remote, repo, branch_name)
         add_remote_and_fetch(remote, repo)
 
-        if branches(:remote => true, :match => "#{remote}/#{branch_name}")
+        if branches(:match => "#{remote}/#{branch_name}", :remote => true)
           puts "\nMerging remote branch '#{branch_name}' from '#{remote}/#{repo}'.".green.space
           merge(remote, branch_name)
         end
