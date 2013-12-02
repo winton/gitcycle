@@ -31,14 +31,18 @@ describe Gitcycle do
       
       GitMock.load
       Gitcycle::Git.stub(:branches).and_return("source")
+
+      gitcycle.stub(:sync)
     end
 
-    def expect_git(source="source", branch="name")
-      Gitcycle::Git.should_receive(:branches).
+    def common_expectations(source="source", branch="name")
+      Gitcycle::Git.should_receive(:branches).ordered.
         with(:current => true)
       
-      Gitcycle::Git.should_receive(:checkout_remote_branch).
+      Gitcycle::Git.should_receive(:checkout_remote_branch).ordered.
         with("repo:owner:login", "repo:name", source, :branch => branch)
+
+      gitcycle.should_receive(:sync).ordered
     end
 
     context "with a lighthouse ticket" do
@@ -72,7 +76,7 @@ describe Gitcycle do
         end
 
         it "calls Git with proper parameters", :capture do
-          expect_git
+          common_expectations
           gitcycle.feature(lighthouse_url)
         end
 
@@ -96,7 +100,7 @@ describe Gitcycle do
         end
 
         it "calls Git with proper parameters", :capture do
-          expect_git "source", "new-name"
+          common_expectations "source", "new-name"
           gitcycle.feature(lighthouse_url)
         end
 
@@ -129,7 +133,7 @@ describe Gitcycle do
         end
 
         it "calls Git with proper parameters", :capture do
-          expect_git "new-source"
+          common_expectations "new-source"
           gitcycle.feature(lighthouse_url)
         end
 
@@ -165,7 +169,7 @@ describe Gitcycle do
       end
 
       it "calls Git with proper parameters", :capture do
-        expect_git
+        common_expectations
         gitcycle.feature("new title")
       end
 
@@ -200,7 +204,7 @@ describe Gitcycle do
       end
 
       it "calls Git with proper parameters", :capture do
-        expect_git
+        common_expectations
         gitcycle.feature(github_url)
       end
 

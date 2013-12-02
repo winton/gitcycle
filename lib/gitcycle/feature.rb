@@ -9,6 +9,7 @@ class Gitcycle < Thor
 
     change_target(branch)
     checkout_branch(branch)
+    sync
     update_branch(branch)
   end
 

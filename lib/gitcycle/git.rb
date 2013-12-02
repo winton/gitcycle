@@ -69,17 +69,6 @@ class Gitcycle < Thor
         
         puts "Checking out remote branch '#{target}' from '#{remote}/#{repo}/#{branch_name}'.".green.space
         checkout(remote, branch_name, :branch => target)
-
-        puts "Fetching remote 'origin/#{target}'.".green.space
-        fetch("origin", target)
-
-        if branches(:remote => true, :match => "origin/#{target}")
-          puts "Pulling 'origin/#{target}'.".green.space
-          pull(target)
-        end
-
-        puts "Pushing 'origin/#{target}'.".green.space
-        push(target)
       end
 
       def commit(msg)
