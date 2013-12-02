@@ -3,198 +3,84 @@ class Gitcycle < Thor
   desc "qa GITHUBISSUE#...", "Create a single qa branch from multiple feature branches"
   def qa(*issues)
     require_git && require_config
+    
+    qa_branch = Git.branches(:current => true)
 
-    if issues.empty?
-      puts "\n"
-      get('qa_branch').each do |branches|
-        puts "qa_#{branches['source']}_#{branches['user']}".green
-        branches['branches'].each do |branch|
-          puts "  #{"issue ##{branch['issue']}".yellow}\t#{branch['user']}/#{branch['branch']}"
-        end
-        puts "\n"
-      end
-    elsif issues.first == 'fail' || issues.first == 'pass'
-      branch    = branches(:current => true)
-      pass_fail = issues.first
-      label     = pass_fail.capitalize
-      issues    = issues[1..-1]
+    if issues.first == 'pass' && issues.length > 1
+      qa_direct_pass(qa_branch, issues)
 
-      if pass_fail == 'pass' && !issues.empty?
-        puts "\nWARNING: #{
-          issues.length == 1 ? "This issue" : "These issues"
-        } will merge straight into '#{branch}' without testing.\n".red
-        
-        if yes?("Continue?")
-          qa_branch = create_qa_branch(
-            :instructions => false,
-            :issues       => issues,
-            :source       => branch
-          )
-          `git checkout qa_#{qa_branch['source']}_#{qa_branch['user']} -q`
-          Config.fetches = []
-          qa('pass')
-        else
-          exit ERROR[:told_not_to_merge]
-        end
-      elsif branch =~ /^qa_/
-        puts "\nRetrieving branch information from gitcycle.\n".green
-        qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
+    elsif issues.first == 'pass'
+      qa_pass(qa_branch)
+    
+    elsif issues.first == 'fail'
+      qa_fail(qa_branch, issues)
 
-        if pass_fail == 'pass'
-          Git.checkout_or_track(qa_branch['source'])
-        end
-
-        if issues.empty? 
-          branches = qa_branch['branches']
-        else
-          branches = qa_branch['branches'].select do |b|
-            issues.include?(b['issue'])
-          end
-        end
-
-        if pass_fail == 'pass' && issues.empty?
-          owner, repo = qa_branch['repo'].split(':')
-          Git.merge_remote_branch(
-            owner,
-            repo,
-            "qa_#{qa_branch['source']}_#{qa_branch['user']}"
-          )
-
-          branch = branches(:current => true)
-          puts "Pushing branch '#{branch}'.\n".green
-          Git.push(branch)
-        end
-
-        unless issues.empty?
-          branches.each do |branch|
-            puts "\nLabeling issue #{branch['issue']} as '#{label}'.\n".green
-            get('label',
-              'qa_branch[source]' => qa_branch['source'],
-              'issue' => branch['issue'],
-              'labels' => [ label ]
-            )
-          end
-        end
-
-        if issues.empty?
-          puts "\nLabeling all issues as '#{label}'.\n".green
-          get('label',
-            'qa_branch[source]' => qa_branch['source'],
-            'labels' => [ label ]
-          )
-        end
-      else
-        puts "\nYou are not in a QA branch.\n".red
-      end
-    elsif issues.first == 'resolved'
-      branch = branches(:current => true)
-
-      if branch =~ /^qa_/
-        puts "\nRetrieving branch information from gitcycle.\n".green
-        qa_branch = get('qa_branch', :source => branch.gsub(/^qa_/, ''))
-        
-        branches = qa_branch['branches']
-        conflict = branches.detect { |branch| branch['conflict'] }
-
-        if qa_branch && conflict
-          puts "Committing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-          run("git add . && git add . -u && git commit -a -F .git/MERGE_MSG")
-
-          puts "Pushing merge resolution of #{conflict['branch']} (issue ##{conflict['issue']}).\n".green
-          run("git push origin qa_#{qa_branch['source']}_#{qa_branch['user']} -q")
-
-          puts "\nDe-conflicting on gitcycle.\n".green
-          get('qa_branch',
-            'issues' => branches.collect { |branch| branch['issue'] }
-          )
-
-          create_qa_branch(
-            :preserve  => true,
-            :range     => (branches.index(conflict)+1..-1),
-            :qa_branch => qa_branch
-          )
-        else
-          puts "Couldn't find record of a conflicted merge.\n".red
-        end
-      else
-        puts "\nYou aren't on a QA branch.\n".red
-      end
-    else
-      create_qa_branch(:issues => issues)
+    elsif !issues.empty?
+      create_qa_branch(issues)
     end
   end
 
-  private
+  no_commands do
 
-  def create_qa_branch(options)
-    instructions = options[:instructions]
-    issues       = options[:issues]
-    range        = options[:range] || (0..-1)
-    source       = options[:source]
+    def create_qa_branch(issues)
+      branches = Api.issues(:get, :issues => issues)
 
-    if (issues && !issues.empty?) || options[:qa_branch]
-      if options[:qa_branch]
-        qa_branch = options[:qa_branch]
+      Git.checkout("qa-#{issues.sort.join('-')}", :branch => true)
+
+      branches.each do |branch|
+        Git.add_remote_and_fetch(branch[:repo][:user][:login], branch[:repo][:name], "qa-#{branch[:name]}")
+        Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
+      end
+    end
+
+    def parse_issues_from_branch(qa_branch)
+      unless qa_branch =~ /^qa-/
+        puts "You are not in a QA branch.".red.space
+        exit
+      end
+      
+      qa_branch_issues = qa_branch.match(/(-\d+)+/).to_a[1..-1]
+      qa_branch_issues.map { |issue| issue[1..-1] }
+    end
+
+    def qa_direct_pass(branch, issues)
+    end
+
+    def qa_fail(qa_branch, issues)
+      qa_branch_issues = parse_issues_from_branch(qa_branch)
+
+      if issues.length > 1
+        fail_issues = issues[1..-1]
       else
-        unless source
-          source = branches(:current => true)
-          
-          unless yes?("\nDo you want to create a QA branch from '#{source}'?")
-            source = q("What branch would you like to base this QA branch off of?")
-          end
-        end
-        
-        puts "\nRetrieving branch information from gitcycle.\n".green
-        qa_branch = get('qa_branch', 'issues' => issues, 'source' => source)
+        fail_issues = qa_branch_issues
       end
+      
+      Api.issues(:update, :issues => fail_issues, :state => 'qa fail')
 
-      source = qa_branch['source']
-      name = "qa_#{source}_#{qa_branch['user']}"
+      # Delete QA branch
+      Git.branch(qa_branch, :delete => true)
+      Git.push(":#{qa_branch}")
 
-      unless qa_branch['branches'].empty?
-        qa_branch['branches'][range].each do |branch|
-          if source != branch['source']
-            puts "You can only QA issues based on '#{source}'\n".red
-            exit ERROR[:cannot_qa]
-          end
-        end
-
-        unless options[:preserve]
-          if branches(:match => name, :all => true)
-            puts "Deleting old QA branch '#{name}'.\n".green
-            if branches(:match => name)
-              run("git checkout master -q")
-              run("git branch -D #{name}")
-            end
-            run("git push origin :#{name} -q")
-          end
-
-          Git.checkout_remote_branch(Config.git_login, Config.git_repo, source,
-            :branch => name
-          )
-          
-          puts "\n"
-        end
-
-        qa_branch['branches'][range].each do |branch|
-          issue       = branch['issue']
-          owner, repo = branch['repo'].split(':')
-          home        = branch['home']
-
-          output = Git.merge_remote_branch(home, repo, branch['branch'])
-
-          branch = branches(:current => true)
-          puts "Pushing branch '#{branch}'.\n".green
-          Git.push(branch)
-        end
-
-        unless options[:instructions] == false
-          puts "\nType '".yellow + "gitc qa pass".green + "' to approve all issues in this branch.\n".yellow
-          puts "Type '".yellow + "gitc qa fail".red + "' to reject all issues in this branch.\n".yellow
-        end
+      if yes?("Create a new QA branch with remaining issues?")
+        qa(qa_branch_issues - fail_issues)
       end
+    end
 
-      qa_branch
+    def qa_pass(qa_branch)
+      qa_branch_issues = parse_issues_from_branch(qa_branch)
+      
+      branch = Api.issues(:update,
+        :issues => qa_branch_issues,
+        :state  => 'qa pass'
+      )
+
+      # Checkout target branch and merge QA branch
+      Git.checkout(branchp[:repo][:user][:login], branch[:name])
+      Git.merge(qa_branch)
+
+      # Delete QA branch
+      Git.branch(qa_branch, :delete => true)
+      Git.push(":#{qa_branch}")
     end
   end
 end
