@@ -65,7 +65,7 @@ class Gitcycle < Thor
           end
         end
 
-        add_remote_and_fetch(remote, repo)
+        add_remote_and_fetch(remote, repo, target)
         
         puts "Checking out remote branch '#{target}' from '#{remote}/#{repo}/#{branch_name}'.".green.space
         checkout(remote, branch_name, :branch => target)
@@ -108,7 +108,7 @@ class Gitcycle < Thor
       end
 
       def merge_remote_branch(remote, repo, branch_name)
-        add_remote_and_fetch(remote, repo)
+        add_remote_and_fetch(remote, repo, branch_name)
 
         if branches(:match => "#{remote}/#{branch_name}", :remote => true)
           puts "\nMerging remote branch '#{branch_name}' from '#{remote}/#{repo}'.".green.space
