@@ -5,31 +5,19 @@ class Gitcycle < Thor
       desc "pass GITHUBISSUE#...", "Pass one or more github issues"
       def pass(*issues)
         require_git && require_config
-        label_issue 'Pending QA'
+        change_issue_status(issues, 'pending qa')
       end
 
       desc "fail GITHUBISSUE#...", "Fail one or more github issues"
       def fail(*issues)
         require_git && require_config
-        label_issue 'Fail'
+        change_issue_status(issues, 'review fail')
       end
 
       no_commands do
-        def label_issue(label)
-          if issues.empty?
-            puts "\nLabeling issue as '#{label}'.\n".green
-            get('label',
-              'branch[name]' => branches(:current => true),
-              'labels' => [ label ]
-            )
-          else
-            puts "\nLabeling issues as '#{label}'.\n".green
-            get('label',
-              'issues' => issues,
-              'labels' => [ label ],
-              'scope' => 'repo'
-            )
-          end
+        def change_issue_status(issues, state)
+          puts "Changing state of issues to '#{state}'.".green.space
+          Api.issues(:update, :issues => issues, :state => state)
         end
       end
     end
