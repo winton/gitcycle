@@ -2,13 +2,13 @@ class Gitcycle < Thor
   module Subcommands
     class Review < Subcommand
 
-      desc "pass GITHUBISSUE#...", "Pass one or more github issues"
+      desc "pass ISSUE#...", "Pass one or more github issues"
       def pass(*issues)
         require_git && require_config
         change_issue_status(issues, 'pending qa')
       end
 
-      desc "fail GITHUBISSUE#...", "Fail one or more github issues"
+      desc "fail ISSUE#...", "Fail one or more github issues"
       def fail(*issues)
         require_git && require_config
         change_issue_status(issues, 'review fail')

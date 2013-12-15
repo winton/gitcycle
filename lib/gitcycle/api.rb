@@ -16,6 +16,13 @@ class Gitcycle < Thor
         parse http.get("/branch/new.json")
       end
 
+      def issues(method, params=nil)
+        method, params  = method_parameters(method, params)
+        params[:issues] = params[:issues].join(",")
+        
+        parse http.send(method, "/issues.json", params)
+      end
+
       def pull_request(params)
         parse http.post("/pull_request.json", params)
       end
@@ -46,12 +53,11 @@ class Gitcycle < Thor
       end
 
       def method_parameters(method, params)
-        if method
-          method = :post  if method == :create
-          method = :put   if method == :update
-        end
-
-        if params.nil?
+        if method == :create
+          method = :post
+        elsif method == :update
+          method = :put
+        elsif params.nil? || params.empty?
           method, params = :get, method
         end
 

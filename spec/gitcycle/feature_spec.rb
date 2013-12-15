@@ -1,7 +1,6 @@
 require File.expand_path("../../spec_helper", __FILE__)
 
 describe Gitcycle do
-
   describe "#feature" do
 
     let(:gitcycle) do

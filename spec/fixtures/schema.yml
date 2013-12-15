@@ -177,19 +177,113 @@ branch.json:
                   type: string
                 name:
                   type: string
-setup/lighthouse.json:
+issues.json:
   get:
     request:
-      title: POST setup/lighthouse.json (request)
+      title: GET issues.json (request)
       type: object
       additionalProperties: false
       properties:
-        token:
+        issues:
           type: string
     response:
-      title: POST setup/lighthouse.json (response)
-      type: 'null'
+      title: GET issues.json (response)
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          github_issue_id:
+            type: integer
+            optional: true
+          github_url:
+            type: string
+            optional: true
+          lighthouse_url:
+            type: string
+            optional: true
+          name:
+            type: string
+          source:
+            type: string
+          title:
+            type: string
+          repo:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+              owner:
+                type: object
+                additionalProperties: false
+                properties:
+                  login:
+                    type: string
+                  name:
+                    type: string
+              user:
+                type: object
+                additionalProperties: false
+                properties:
+                  login:
+                    type: string
+                  name:
+                    type: string
+  put:
+    request:
+      title: PUT issues.json (request)
+      type: object
       additionalProperties: false
+      properties:
+        issues:
+          type: string
+        state:
+          type: string
+    response:
+      title: PUT issues.json (response)
+      type: array
+      items:
+        type: object
+        additionalProperties: false
+        properties:
+          github_issue_id:
+            type: integer
+            optional: true
+          github_url:
+            type: string
+            optional: true
+          lighthouse_url:
+            type: string
+            optional: true
+          name:
+            type: string
+          source:
+            type: string
+          title:
+            type: string
+          repo:
+            type: object
+            additionalProperties: false
+            properties:
+              name:
+                type: string
+              owner:
+                type: object
+                additionalProperties: false
+                properties:
+                  login:
+                    type: string
+                  name:
+                    type: string
+              user:
+                type: object
+                additionalProperties: false
+                properties:
+                  login:
+                    type: string
+                  name:
+                    type: string
 pull_request.json:
   post:
     request:
@@ -296,3 +390,16 @@ repo.json:
               type: string
             name:
               type: string
+setup/lighthouse.json:
+  get:
+    request:
+      title: POST setup/lighthouse.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        token:
+          type: string
+    response:
+      title: POST setup/lighthouse.json (response)
+      type: 'null'
+      additionalProperties: false
