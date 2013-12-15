@@ -19,12 +19,20 @@ class Gitcycle < Thor
         hash
       end
       
-      def symbolize_keys(hash)
-        hash.inject({}) do |memo, (key, value)|
-          key       = (key.to_sym rescue key) || key
-          value     = symbolize_keys(value)   if value.is_a?(Hash)
-          memo[key] = value
-          memo
+      def symbolize_keys(value)
+        if value.is_a?(Array)
+          value.collect { |v| symbolize_keys(v) }
+
+        elsif value.is_a?(Hash)
+          value.inject({}) do |memo, (k, v)|
+            k = (k.to_sym rescue k) || k
+            v = symbolize_keys(v)
+            
+            memo[k] = v
+            memo
+          end
+
+        else value
         end
       end
     end

@@ -9,7 +9,10 @@ describe Gitcycle::Subcommands::Qa do
   end
 
   let(:webmock_get) do
-    { :request => { :issues => "123" } }
+    {
+      :request  => { :issues => "123" },
+      :response => []
+    }
   end
 
   before(:each) do
