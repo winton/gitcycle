@@ -30,27 +30,29 @@ describe Gitcycle do
     context "when branch exists on fork" do
       
       before :each do
-        Gitcycle::Git.should_receive(:branches).ordered.
-          with(:current => true).
-          and_return("branch")
-        
         Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
           with("user:login", "git_repo", "branch", :catch => false).
           and_return("output")
         
         Gitcycle::Git.should_receive(:errored?).ordered.
           with("output")
+
+        Gitcycle::Git.should_receive(:errored?).ordered.
+          with("output")
         
         Gitcycle::Git.should_receive(:branch).ordered.
           with("user:login", "user:login/branch")
+
+        Gitcycle::Git.should_receive(:checkout).ordered.
+          with("branch")
       end
 
       it "calls Git with proper parameters", :capture do
-        gitcycle.track
+        gitcycle.track "branch"
       end
 
       it "displays proper dialog", :capture do
-        gitcycle.track
+        gitcycle.track "branch"
         expect_output(
           "Creating branch 'branch' from 'user:login/branch'."
         )
@@ -60,10 +62,6 @@ describe Gitcycle do
     context "when branch does not exist on fork" do
 
       before :each do
-        Gitcycle::Git.should_receive(:branches).ordered.
-          with(:current => true).
-          and_return("branch")
-        
         Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
           with("user:login", "git_repo", "branch", :catch => false).
           and_return("output")
@@ -73,18 +71,26 @@ describe Gitcycle do
           and_return(true)
 
         Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
-          with("owner:login", "git_repo", "branch")
+          with("owner:login", "git_repo", "branch", :catch => false).
+          and_return("output2")
+
+        Gitcycle::Git.should_receive(:errored?).ordered.
+          with("output2").
+          and_return(false)
         
         Gitcycle::Git.should_receive(:branch).ordered.
           with("owner:login", "owner:login/branch")
+
+        Gitcycle::Git.should_receive(:checkout).ordered.
+          with("branch")
       end
 
       it "calls Git with proper parameters", :capture do
-        gitcycle.track
+        gitcycle.track "branch"
       end
 
       it "displays proper dialog", :capture do
-        gitcycle.track
+        gitcycle.track "branch"
         expect_output(
           "Creating branch 'branch' from 'owner:login/branch'."
         )
