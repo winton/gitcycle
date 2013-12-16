@@ -1,3 +1,5 @@
+require "gitcycle/track"
+
 class Gitcycle < Thor
   module Subcommands
     class Qa < Subcommand
@@ -32,6 +34,7 @@ class Gitcycle < Thor
       no_commands do
         
         include Gitcycle::Shared
+        include Gitcycle::Track
 
         def create_qa_branch(issues)
           issues   = parse_issues(issues)
@@ -70,7 +73,19 @@ class Gitcycle < Thor
         def qa_direct_pass(branch, issues)
           issues = parse_issues(issues)
           issues = Api.issues(:issues => issues)
-          puts issues.inspect
+          branch = issues.first
+
+          track(
+            "#{branch[:repo][:user][:login]}/#{branch[:source]}",
+            "--no-checkout"
+          )
+          
+          issues.each do |branch|
+            track(
+              "#{branch[:repo][:user][:login]}/qa-#{branch[:name]}",
+              "--no-checkout"
+            )
+          end
         end
 
         def qa_fail(qa_branch, issues)

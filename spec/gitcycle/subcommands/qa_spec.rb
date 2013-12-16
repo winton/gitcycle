@@ -11,7 +11,7 @@ describe Gitcycle::Subcommands::Qa do
   let(:webmock_get) do
     {
       :request  => { :issues => "123" },
-      :response => []
+      :response => [ { :github_issue_id => 123 } ]
     }
   end
 
@@ -23,16 +23,26 @@ describe Gitcycle::Subcommands::Qa do
     GitMock.load
     Gitcycle::Git.stub(:branches).and_return("source")
 
-    gitcycle.stub(:sync)
+    gitcycle.stub(:track)
   end
 
-  describe "pass ISSUE#«" do
+  describe "pass ISSUE#" do
 
     before :each do
       webmock(:issues, :get, webmock_get)
     end
 
     it "runs without assertions" do
+      gitcycle.pass("123")
+    end
+
+    it "calls methods with correct parameters" do
+      gitcycle.should_receive(:track).ordered.
+        with("repo:user:login/source", "--no-checkout")
+      
+      gitcycle.should_receive(:track).ordered.
+        with("repo:user:login/qa-name", "--no-checkout")
+      
       gitcycle.pass("123")
     end
   end
