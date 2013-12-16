@@ -43,7 +43,7 @@ describe Gitcycle::Subcommands::Qa do
         with("repo:user:login/source")
       
       gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/qa-name", "--no-checkout")
+        with("repo:user:login/qa-name", "--no-checkout", "--recreate")
 
       Gitcycle::Git.should_receive(:merge).ordered.
         with("repo:user:login", "qa-name")

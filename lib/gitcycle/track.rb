@@ -15,6 +15,10 @@ class Gitcycle < Thor
         login = repo[:user][:login]
       end
 
+      if options.include?("--recreate") && Git.branches(:match => branch)
+        Git.branch(branch, :delete => true)
+      end
+
       output = Git.add_remote_and_fetch(
         login, Config.git_repo, branch, :catch => false
       )

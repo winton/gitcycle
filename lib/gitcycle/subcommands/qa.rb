@@ -7,22 +7,13 @@ class Gitcycle < Thor
       desc "branch ISSUE#...", "Create a single qa branch from multiple github issues"
       def branch(*issues)
         require_git && require_config
-      
-        qa_branch = Git.branches(:current => true)
         create_qa_branch(issues)
       end
 
       desc "pass [ISSUE#...]", "Pass one or more github issues"
       def pass(*issues)
         require_git && require_config
-
-        qa_branch = Git.branches(:current => true)
-
-        if issues.length >= 1
-          qa_direct_pass(qa_branch, issues)
-        else
-          qa_pass(qa_branch)
-        end
+        qa_pass(issues)
       end
 
       desc "fail ISSUE#...", "Fail one or more github issues"
@@ -39,11 +30,15 @@ class Gitcycle < Thor
         def create_qa_branch(issues)
           issues   = parse_issues(issues)
           branches = Api.issues(:get, :issues => issues)
+          branch   = branches.first
+          login    = branch[:repo][:user][:login]
 
-          Git.checkout("qa-#{issues.sort.join('-')}", :branch => true)
+          track("#{login}/qa-#{issues.sort.join('-')}", "--recreate")
+          
+          issues.each do |branch|
+            login = branch[:repo][:user][:login]
 
-          branches.each do |branch|
-            Git.add_remote_and_fetch(branch[:repo][:user][:login], branch[:repo][:name], "qa-#{branch[:name]}")
+            track("#{login}/qa-#{branch[:name]}", "--no-checkout", "--recreate")
             Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
           end
         end
@@ -70,7 +65,7 @@ class Gitcycle < Thor
           qa_branch_issues.map { |issue| issue[1..-1] }
         end
 
-        def qa_direct_pass(branch, issues)
+        def qa_pass(issues)
           issues = parse_issues(issues)
           issues = Api.issues(:issues => issues)
           branch = issues.first
@@ -81,8 +76,7 @@ class Gitcycle < Thor
           issues.each do |branch|
             login = branch[:repo][:user][:login]
 
-            track("#{login}/qa-#{branch[:name]}", "--no-checkout")
-
+            track("#{login}/qa-#{branch[:name]}", "--no-checkout", "--recreate")
             Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
           end
 
@@ -110,23 +104,6 @@ class Gitcycle < Thor
           if yes?("Create a new QA branch with remaining issues?")
             qa(qa_branch_issues - fail_issues)
           end
-        end
-
-        def qa_pass(qa_branch)
-          qa_branch_issues = parse_issues_from_branch(qa_branch)
-          
-          branch = Api.issues(:update,
-            :issues => qa_branch_issues,
-            :state  => 'qa pass'
-          )
-
-          # Checkout target branch and merge QA branch
-          Git.checkout(branch[:repo][:user][:login], branch[:name])
-          Git.merge(qa_branch)
-
-          # Delete QA branch
-          Git.branch(qa_branch, :delete => true)
-          Git.push(":#{qa_branch}")
         end
       end
     end
