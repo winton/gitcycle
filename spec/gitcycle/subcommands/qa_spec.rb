@@ -21,11 +21,37 @@ describe Gitcycle::Subcommands::Qa do
     stub_const("Gitcycle::Git", GitMock)
     
     GitMock.load
+
     Gitcycle::Git.stub(:branches).and_return("source")
+    Gitcycle::Git.stub(:merge)
 
     gitcycle.stub(:merge)
     gitcycle.stub(:track)
     gitcycle.stub(:change_issue_status)
+  end
+
+  describe "branch ISSUE#" do
+
+    before :each do
+      webmock(:issues, :get, webmock_get)
+    end
+
+    it "runs without assertions" do
+      gitcycle.branch("123")
+    end
+
+    it "calls methods with correct parameters" do
+      gitcycle.should_receive(:track).ordered.
+        with("repo:user:login/qa-123", "--recreate")
+      
+      gitcycle.should_receive(:track).ordered.
+        with("repo:user:login/qa-name", "--no-checkout", "--recreate")
+
+      Gitcycle::Git.should_receive(:merge).ordered.
+        with("repo:user:login", "qa-name")
+      
+      gitcycle.branch("123")
+    end
   end
 
   describe "pass ISSUE#" do

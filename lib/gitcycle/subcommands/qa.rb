@@ -63,7 +63,7 @@ class Gitcycle < Thor
 
           track("#{login}/qa-#{issues.sort.join('-')}", "--recreate")
           
-          issues.each do |branch|
+          branches.each do |branch|
             login = branch[:repo][:user][:login]
 
             track("#{login}/qa-#{branch[:name]}", "--no-checkout", "--recreate")
