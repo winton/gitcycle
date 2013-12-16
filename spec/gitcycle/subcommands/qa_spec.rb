@@ -23,7 +23,9 @@ describe Gitcycle::Subcommands::Qa do
     GitMock.load
     Gitcycle::Git.stub(:branches).and_return("source")
 
+    gitcycle.stub(:merge)
     gitcycle.stub(:track)
+    gitcycle.stub(:change_issue_status)
   end
 
   describe "pass ISSUE#" do
@@ -38,10 +40,16 @@ describe Gitcycle::Subcommands::Qa do
 
     it "calls methods with correct parameters" do
       gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/source", "--no-checkout")
+        with("repo:user:login/source")
       
       gitcycle.should_receive(:track).ordered.
         with("repo:user:login/qa-name", "--no-checkout")
+
+      Gitcycle::Git.should_receive(:merge).ordered.
+        with("repo:user:login", "qa-name")
+
+      gitcycle.should_receive(:change_issue_status).ordered.
+        with([ 123 ], "pending deploy")
       
       gitcycle.pass("123")
     end

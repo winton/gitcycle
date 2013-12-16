@@ -15,10 +15,7 @@ class Gitcycle < Thor
       end
 
       no_commands do
-        def change_issue_status(issues, state)
-          puts "Changing state of issues to '#{state}'.".green.space
-          Api.issues(:update, :issues => issues, :state => state)
-        end
+        include Gitcycle::Shared
       end
     end
   end

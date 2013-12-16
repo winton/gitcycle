@@ -1,6 +1,11 @@
 class Gitcycle < Thor
   module Shared
 
+    def change_issue_status(issues, state)
+      puts "Changing state of issues to '#{state}'.".green.space
+      Api.issues(:update, :issues => issues, :state => state)
+    end
+
     def q(question, extra='')
       puts "#{question.yellow}#{extra}"
       $input ? $input.shift : $stdin.gets.strip

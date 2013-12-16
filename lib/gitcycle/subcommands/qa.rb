@@ -74,18 +74,22 @@ class Gitcycle < Thor
           issues = parse_issues(issues)
           issues = Api.issues(:issues => issues)
           branch = issues.first
+          login  = branch[:repo][:user][:login]
 
-          track(
-            "#{branch[:repo][:user][:login]}/#{branch[:source]}",
-            "--no-checkout"
-          )
+          track("#{login}/#{branch[:source]}")
           
           issues.each do |branch|
-            track(
-              "#{branch[:repo][:user][:login]}/qa-#{branch[:name]}",
-              "--no-checkout"
-            )
+            login = branch[:repo][:user][:login]
+
+            track("#{login}/qa-#{branch[:name]}", "--no-checkout")
+
+            Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
           end
+
+          change_issue_status(
+            issues.map { |i| i[:github_issue_id] },
+            "pending deploy"
+          )
         end
 
         def qa_fail(qa_branch, issues)
