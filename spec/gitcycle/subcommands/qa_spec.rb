@@ -15,6 +15,13 @@ describe Gitcycle::Subcommands::Qa do
     }
   end
 
+  let(:webmock_put) do
+    {
+      :request  => { :issues => "123", :state => "qa fail" },
+      :response => [ { :github_issue_id => 123 } ]
+    }
+  end
+
   before(:each) do
     gitcycle
     
@@ -22,8 +29,11 @@ describe Gitcycle::Subcommands::Qa do
     
     GitMock.load
 
+    Gitcycle::Git.stub(:branch)
     Gitcycle::Git.stub(:branches).and_return("source")
+    Gitcycle::Git.stub(:checkout)
     Gitcycle::Git.stub(:merge)
+    Gitcycle::Git.stub(:push)
 
     gitcycle.stub(:merge)
     gitcycle.stub(:track)
@@ -42,7 +52,23 @@ describe Gitcycle::Subcommands::Qa do
 
     it "calls methods with correct parameters" do
       gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/qa-123", "--recreate")
+        with("source")
+
+      Gitcycle::Git.should_receive(:branches).ordered.
+        with(:match => "qa-123").
+        and_return(true)
+
+      Gitcycle::Git.should_receive(:branch).ordered.
+        with("qa-123", :delete => true)
+
+      Gitcycle::Git.should_receive(:push).ordered.
+        with(":qa-123")
+
+      Gitcycle::Git.should_receive(:branch).ordered.
+        with("qa-123")
+
+      Gitcycle::Git.should_receive(:checkout).ordered.
+        with("qa-123")
       
       gitcycle.should_receive(:track).ordered.
         with("repo:user:login/qa-name", "--no-checkout", "--recreate")
@@ -51,6 +77,27 @@ describe Gitcycle::Subcommands::Qa do
         with("repo:user:login", "qa-name")
       
       gitcycle.branch("123")
+    end
+  end
+
+  describe "fail ISSUE#" do
+
+    before :each do
+      webmock(:issues, :put, webmock_put)
+    end
+
+    it "runs without assertions" do
+      gitcycle.fail("123")
+    end
+
+    it "calls methods with correct parameters" do
+      Gitcycle::Git.should_receive(:branch).ordered.
+        with("qa-123", :delete => true)
+
+      Gitcycle::Git.should_receive(:push).ordered.
+        with(":qa-123")
+      
+      gitcycle.fail("123")
     end
   end
 

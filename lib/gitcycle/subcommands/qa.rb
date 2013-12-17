@@ -27,14 +27,19 @@ class Gitcycle < Thor
         include Gitcycle::Shared
         include Gitcycle::Track
 
+        def parse_issue_params(issues)
+          issues = issues.collect { |i| i.gsub(/\D/, '').to_i }
+          issues.delete(0)
+          issues
+        end
+
         def parse_issues(issues)
           if issues.length == 0
             issues = parse_issues_from_branch(
               Git.branches(:current => true)
             )
           else
-            issues = issues.collect { |i| i.gsub(/\D/, '').to_i }
-            issues.delete(0)
+            issues = parse_issue_params(issues)
           end
 
           if issues.empty?
@@ -61,7 +66,16 @@ class Gitcycle < Thor
           branch   = branches.first
           login    = branch[:repo][:user][:login]
 
-          track("#{login}/qa-#{issues.sort.join('-')}", "--recreate")
+          track(branch[:source])
+          qa_branch = "qa-#{issues.sort.join('-')}"
+
+          if Git.branches(:match => qa_branch)
+            Git.branch(qa_branch, :delete => true)
+            Git.push(":#{qa_branch}")
+          end
+          
+          Git.branch(qa_branch)
+          Git.checkout(qa_branch)
           
           branches.each do |branch|
             login = branch[:repo][:user][:login]
@@ -93,15 +107,19 @@ class Gitcycle < Thor
         end
 
         def qa_fail(issues)
-          qa_branch_issues = parse_issues(issues)
+          fail_issues = parse_issue_params(issues)
+          issues      = parse_issues(issues)
+          
           Api.issues(:update, :issues => issues, :state => 'qa fail')
 
           # Delete QA branch
-          Git.branch(qa_branch, :delete => true)
-          Git.push(":#{qa_branch}")
+          Git.branch("qa-#{issues.sort.join('-')}", :delete => true)
+          Git.push(":qa-#{issues.sort.join('-')}")
 
-          if yes?("Create a new QA branch with remaining issues?")
-            qa(qa_branch_issues - fail_issues)
+          remaining = issues - fail_issues
+
+          if !remaining.empty? && yes?("Create a new QA branch with remaining issues?")
+            branch(remaining)
           end
         end
       end
