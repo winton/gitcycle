@@ -12,7 +12,7 @@ describe Gitcycle::Git do
     git.load
   end
 
-  describe "#load" do
+  describe ".load" do
 
     context "when using SSL git URL" do
       it "assigns config properties" do
