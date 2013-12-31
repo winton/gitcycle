@@ -100,7 +100,7 @@ class Gitcycle < Thor
 
         if path
           Config.git_url   = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
-          Config.git_repo  = Config.git_url.match(/([^\/]+)\.git/)[1].sub(/.git$/,'')
+          Config.git_repo  = Config.git_url.match(/([^\/]+)\.git/)[1]
           Config.git_login = Config.git_url.match(/([^\/:]+)\/[^\/]+\.git/)[1]
         end
       end
