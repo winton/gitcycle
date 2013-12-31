@@ -2,23 +2,25 @@ class Gitcycle < Thor
   class Git
     class <<self
 
-      def add_remote_and_fetch(remote, repo, branch, options={})
+      def add_remote_and_fetch(remote, repo, branch)
         unless Git.remotes(:match => remote)
           puts "Adding remote repo '#{remote}/#{repo}'.\n".green.space
           remote_add(remote, repo)
         end
 
         puts "Fetching '#{remote}/#{branch}'.".space.green
-        fetch(remote, branch, :catch => options[:catch])
+        fetch(remote, branch)
       end
 
       def branch(remote, branch_name=nil, options=nil)
         remote, branch_name, options = params(remote, branch_name, options)
-        run("git branch #{remote} #{branch_name}#{options}")
+
+        git("branch #{remote} #{branch_name}#{options}")
       end
 
       def branches(options={})
-        b = run("git branch#{" -a" if options[:all]}#{" -r" if options[:remote]}")
+        b = git("branch#{" -a" if options[:all]}#{" -r" if options[:remote]}")
+
         if options[:current]
           b.match(/\*\s+(.+)/)[1]
         elsif options[:match]
@@ -32,7 +34,8 @@ class Gitcycle < Thor
 
       def checkout(remote, branch_name=nil, options=nil)
         remote, branch_name, options = params(remote, branch_name, options)
-        run("git checkout #{remote}/#{branch_name} -q#{options}")
+        
+        git("checkout #{remote}/#{branch_name} -q#{options}")
       end
 
       def checkout_or_track(remote, branch_name=nil)
@@ -72,7 +75,7 @@ class Gitcycle < Thor
       end
 
       def commit(msg)
-        run("git commit -m #{msg.dump.gsub('`', "'")}")
+        git("commit -m #{msg.dump.gsub('`', "'")}")
       end
 
       def config_path(path)
@@ -88,8 +91,8 @@ class Gitcycle < Thor
         end
       end
 
-      def fetch(user, branch, options={})
-        run("git fetch #{user} #{branch}:refs/remotes/#{user}/#{branch} -q", :catch => options[:catch])
+      def fetch(user, branch)
+        git("fetch #{user} #{branch}:refs/remotes/#{user}/#{branch} -q")
       end
 
       def load
@@ -97,14 +100,14 @@ class Gitcycle < Thor
 
         if path
           Config.git_url   = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
-          Config.git_repo  = Config.git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
-          Config.git_login = Config.git_url.match(/:(.+)\//)[1]
+          Config.git_repo  = Config.git_url.match(/([^\/]+)\.git/)[1].sub(/.git$/,'')
+          Config.git_login = Config.git_url.match(/([^\/:]+)\/[^\/]+\.git/)[1]
         end
       end
 
       def merge(remote, branch_name=nil)
         remote, branch_name = params(remote, branch_name)
-        run("git rebase #{remote}/#{branch_name}")
+        git("rebase #{remote}/#{branch_name}")
       end
 
       def merge_remote_branch(remote, repo, branch_name)
@@ -118,25 +121,25 @@ class Gitcycle < Thor
 
       def merge_squash(remote, branch_name=nil)
         remote, branch_name = params(remote, branch_name)
-        run("git merge --squash #{remote}/#{branch_name}")
+        git("merge --squash #{remote}/#{branch_name}")
       end
 
       def pull(remote, branch_name=nil)
         remote, branch_name = params(remote, branch_name)
-        run("git pull #{remote} #{branch_name} -q")
+        git("pull #{remote} #{branch_name} -q")
       end
 
       def push(remote, branch_name=nil)
         remote, branch_name = params(remote, branch_name)
-        run("git push #{remote} #{branch_name} -q")
+        git("push #{remote} #{branch_name} -q")
       end
 
       def remote_add(user, repo)
-        run("git remote add #{user} git@github.com:#{user}/#{repo}.git")
+        git("remote add #{user} git@github.com:#{user}/#{repo}.git")
       end
 
       def remotes(options={})
-        b = run("git remote -v")
+        b = git("remote -v")
         if options[:match]
           b =~ /^#{Regexp.quote(options[:match])}\s/
         else
@@ -146,10 +149,42 @@ class Gitcycle < Thor
 
       private
 
+      def capture(stream)
+        stream = stream.to_s
+        captured_stream = Tempfile.new(stream)
+        stream_io = eval("$#{stream}")
+        origin_stream = stream_io.dup
+        stream_io.reopen(captured_stream)
+
+        yield
+
+        stream_io.rewind
+        return captured_stream.read
+      ensure
+        captured_stream.unlink
+        stream_io.reopen(origin_stream)
+      end
+
       def errored?(output)
         output.include?("fatal: ") ||
         output.include?("ERROR: ") ||
         $?.exitstatus != 0
+      end
+
+      def git(cmd, options={})
+        puts "> ".green + cmd.yellow.space
+
+        err = capture(:stderr) do
+          out = capture(:stdout) do
+            system("git #{cmd}")
+          end
+        end
+
+        if options[:force]
+          [ out, err ]
+        elsif errored?(output)
+          exit ERROR[:last_command_errored]
+        end
       end
 
       def params(remote, branch_name=nil, options=nil)
@@ -165,20 +200,6 @@ class Gitcycle < Thor
         end
 
         [ remote, branch_name, git_options ]
-      end
-
-      def run(cmd, options={})
-        output = `#{cmd} 2>&1`
-
-        if options[:catch] != false && errored?(output)
-          puts "#{output}".space
-          puts "Gitcycle encountered an error when running the last command:".red.space
-          puts "  #{cmd}"
-          puts "Please copy this session's output and send it to gitcycle@bleacherreport.com.\n".yellow.space
-          exit ERROR[:last_command_errored]
-        else
-          output
-        end
       end
     end
   end

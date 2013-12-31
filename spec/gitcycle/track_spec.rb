@@ -31,7 +31,7 @@ describe Gitcycle do
       
       before :each do
         Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
-          with("user:login", "git_repo", "branch", :catch => false).
+          with("user:login", "git_repo", "branch").
           and_return("output")
         
         Gitcycle::Git.should_receive(:errored?).ordered.
@@ -63,7 +63,7 @@ describe Gitcycle do
 
       before :each do
         Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
-          with("user:login", "git_repo", "branch", :catch => false).
+          with("user:login", "git_repo", "branch").
           and_return("output")
         
         Gitcycle::Git.should_receive(:errored?).ordered.
@@ -71,7 +71,7 @@ describe Gitcycle do
           and_return(true)
 
         Gitcycle::Git.should_receive(:add_remote_and_fetch).ordered.
-          with("owner:login", "git_repo", "branch", :catch => false).
+          with("owner:login", "git_repo", "branch").
           and_return("output2")
 
         Gitcycle::Git.should_receive(:errored?).ordered.
