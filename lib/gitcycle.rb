@@ -314,9 +314,9 @@ class Gitcycle
   def load_git
     path = git_config_path(Dir.pwd)
     if path
-      @git_url = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
-      @git_repo = @git_url.match(/\/(.+)/)[1].sub(/.git$/,'')
-      @git_login = @git_url.match(/:(.+)\//)[1]
+      @git_url       = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
+      @git_repo      = @git_url.match(/([^\/]+)\.git/)[1]
+      @git_login     = @git_url.match(/([^\/:]+)\/[^\/]+\.git/)[1]
       @login, @token = @config["#{@git_login}/#{@git_repo}"] rescue [ nil, nil ]
     end
   end
