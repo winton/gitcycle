@@ -12,16 +12,16 @@ Is this your dev cycle?
 * Developers are wasting too much time in ticketing software
 * Too cumbersome to write custom code around process
 
-Maybe gitcycle can help
------------------------
+Gitcycle can help
+-----------------
 
-* Codifies process (pull request -> code review -> qa)
+* Codify process (pull request -> code review -> qa)
 * Non-intrusive `git` wrapper for developers
-* HTTP server for recording events and executing custom code
+* HTTP server for recording events, executing custom code, and displaying custom analytics
 * Pre-baked support for Github and/or Lighthouse
 
-Example session
----------------
+Example dev session
+-------------------
 
 	> git feature "My new feature"
 	Creating feature branch '0000-my-new-feature' from 'master'.
@@ -40,6 +40,11 @@ Example session
 
 	> git qa pass
 	Merging 'qa-1000' into 'master'.
+
+HTTP Server Screenshots
+-----------------------
+
+# TODO
 
 Install Gem
 -----------
