@@ -1,26 +1,24 @@
 Gitcycle
 ========
 
-Simplifies and standardizes your development process.
+Enterprise development cycle platform.
 
-Why?
-----
+Is this your dev cycle?
+-----------------------
 
-Are you wasting time on questions about forks, pull requests, merging, tracking, pulling, pushing, and remotes?
+* Process is not followed the same way every time
+* Process is not enforced strictly, mistakes happen
+* Developers are wasting too much time in Git
+* Developers are wasting too much time in ticketing software
+* Its too cumbersome to write custom code around process
 
-Do you want to automate issue state changes when features move from development -> review -> QA?
+Maybe Gitcycle can help
+-----------------------
 
-Gitcycle is a `git` wrapper that makes all of these things easy and uniform across all environments.
-
-The Process
------------
-
-* Create feature branch from issue
-* Ready feature branch for code review
-* If code review passes, move feature to QA
-* If QA passes, merge into target branch
-
-Currently gitcycle can only create feature branches from Github issues or [Lighthouse](http://lighthouseapp.com) tickets (more providers coming soon).
+* Codifies process (pull request -> code review -> qa)
+* Non-intrusive `git` wrapper for developers
+* HTTP server for recording events and executing custom code
+* Pre-baked support for Github and/or Lighthouse
 
 Install Gem
 -----------
