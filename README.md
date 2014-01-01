@@ -10,15 +10,36 @@ Is this your dev cycle?
 * Process is not enforced strictly, mistakes happen
 * Developers are wasting too much time in Git
 * Developers are wasting too much time in ticketing software
-* Its too cumbersome to write custom code around process
+* Too cumbersome to write custom code around process
 
-Maybe Gitcycle can help
+Maybe gitcycle can help
 -----------------------
 
 * Codifies process (pull request -> code review -> qa)
 * Non-intrusive `git` wrapper for developers
 * HTTP server for recording events and executing custom code
 * Pre-baked support for Github and/or Lighthouse
+
+Example session
+---------------
+
+	> git feature "My new feature"
+	Creating feature branch '0000-my-new-feature' from 'master'.
+
+	> git sync
+	Pulling new changes from 'master'.
+
+	> git ready
+	Creating pull request for '0000-my-issue-feature' to 'master'.
+
+	> git review pass 0000
+	Passing Github issue #0000 to QA.
+
+	> git qa branch 0000
+	Creating QA branch 'qa-1000'.
+
+	> git qa pass
+	Merging 'qa-1000' into 'master'.
 
 Install Gem
 -----------
