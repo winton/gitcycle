@@ -1,4 +1,3 @@
-require "json_schema_spec"
 require "webmock/rspec"
 
 RSpec.configure do

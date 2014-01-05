@@ -176,13 +176,21 @@ class Gitcycle < Thor
           remote      = "origin"
         end
 
-        git_options = options.inject("") do |memo, (key, value)|
-          memo += " -b #{value}"  if key == :branch && value
-          memo += " -D"           if key == :delete && value
-          memo
+        options = options.collect do |(key, value)|
+          next unless value
+          if    key == :branch          then "-b #{value}"
+          elsif key == :delete && value then "-D"
+          end
         end
 
-        [ remote, branch_name, git_options ]
+        if options[0]
+          options.sort!
+          options = " " + options.join(" ")
+        else
+          options = ""
+        end
+
+        [ remote, branch_name, options ]
       end
     end
   end

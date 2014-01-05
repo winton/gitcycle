@@ -348,7 +348,7 @@ describe Gitcycle::Git do
           :delete => true
         }
         git.send(:params, "remote", "branch", options).should eq([
-          "remote", "branch", " -b option_branch -D"
+          "remote", "branch", " -D -b option_branch"
         ])
       end
     end
@@ -360,7 +360,7 @@ describe Gitcycle::Git do
           :delete => true
         }
         git.send(:params, "branch", options).should eq([
-          "origin", "branch", " -b option_branch -D"
+          "origin", "branch", " -D -b option_branch"
         ])
       end
     end
