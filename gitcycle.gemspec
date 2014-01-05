@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "excon"
   spec.add_dependency "faraday"
   spec.add_dependency "launchy"
-  spec.add_dependency "rainbow"
+  spec.add_dependency "rainbow", "=1.99.0"
   spec.add_dependency "thor"
   spec.add_dependency "yajl-ruby"
 end
