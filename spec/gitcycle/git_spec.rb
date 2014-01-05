@@ -290,8 +290,8 @@ describe Gitcycle::Git do
 
     context "when remote branch matches" do
       it "calls correct methods" do
-        git.should_receive(:add_remote_and_fetch)
-          .with("remote", "repo", "branch").ordered
+        git.should_receive(:add_remote_and_fetch).
+          with("remote", "repo", "branch").ordered
         git.should_receive(:branches).
           with(:match => "remote/branch", :remote => true).ordered.
           and_return(true)
@@ -303,8 +303,8 @@ describe Gitcycle::Git do
 
     context "when remote branch does not match" do
       it "calls correct methods" do
-        git.should_receive(:add_remote_and_fetch)
-          .with("remote", "repo", "branch").ordered
+        git.should_receive(:add_remote_and_fetch).
+          with("remote", "repo", "branch").ordered
         git.should_receive(:branches).
           with(:match => "remote/branch", :remote => true).ordered.
           and_return(false)
