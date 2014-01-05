@@ -3,4 +3,5 @@ rvm:
   # - 1.8.7
   - 2.1.0
 before_script:
+  - "gem install bundler"
   - "cp spec/config/gitcycle.example.yml spec/config/gitcycle.yml"
