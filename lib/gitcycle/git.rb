@@ -4,15 +4,13 @@ class Gitcycle < Thor
 
       def add_remote_and_fetch(remote, repo, branch)
         unless Git.remotes(:match => remote)
-          puts "Adding remote repo '#{remote}/#{repo}'.\n".green.space
           remote_add(remote, repo)
         end
 
-        puts "Fetching '#{remote}/#{branch}'.".space.green
         fetch(remote, branch)
       end
 
-      def branch(remote, branch_name=nil, options=nil)
+      def branch(remote, branch_name=nil, options={})
         remote, branch_name, options = params(remote, branch_name, options)
 
         git("branch #{remote} #{branch_name}#{options}")
@@ -32,7 +30,7 @@ class Gitcycle < Thor
         end
       end
 
-      def checkout(remote, branch_name=nil, options=nil)
+      def checkout(remote, branch_name=nil, options={})
         remote, branch_name, options = params(remote, branch_name, options)
         
         git("checkout #{remote}/#{branch_name} -q#{options}")
@@ -42,10 +40,8 @@ class Gitcycle < Thor
         remote, branch_name = params(remote, branch_name)
 
         if branches(:match => branch_name)
-          puts "Checking out branch '#{branch_name}'.\n".green
           checkout(branch_name)
         else
-          puts "Tracking branch '#{remote}/#{branch_name}'.\n".green
           fetch(remote, branch_name)
           checkout(remote, branch_name)
         end
@@ -69,8 +65,6 @@ class Gitcycle < Thor
         end
 
         add_remote_and_fetch(remote, repo, target)
-        
-        puts "Checking out remote branch '#{target}' from '#{remote}/#{repo}/#{branch_name}'.".green.space
         checkout(remote, branch_name, :branch => target)
       end
 
@@ -87,7 +81,7 @@ class Gitcycle < Thor
           return nil
         else
           path = File.expand_path(path + '/..')
-          config_path(path)
+          config_path(path)  if path
         end
       end
 
@@ -114,7 +108,6 @@ class Gitcycle < Thor
         add_remote_and_fetch(remote, repo, branch_name)
 
         if branches(:match => "#{remote}/#{branch_name}", :remote => true)
-          puts "\nMerging remote branch '#{branch_name}' from '#{remote}/#{repo}'.".green.space
           merge(remote, branch_name)
         end
       end
@@ -139,31 +132,15 @@ class Gitcycle < Thor
       end
 
       def remotes(options={})
-        b = git("remote -v")
+        output = git("remote -v")
         if options[:match]
-          b =~ /^#{Regexp.quote(options[:match])}\s/
+          output =~ /^#{Regexp.quote(options[:match])}\s/
         else
-          b
+          output.strip.split(/$/).map { |line| line.strip.split(/\s+/)[0] }
         end
       end
 
       private
-
-      def capture(stream)
-        stream = stream.to_s
-        captured_stream = Tempfile.new(stream)
-        stream_io = eval("$#{stream}")
-        origin_stream = stream_io.dup
-        stream_io.reopen(captured_stream)
-
-        yield
-
-        stream_io.rewind
-        return captured_stream.read
-      ensure
-        captured_stream.unlink
-        stream_io.reopen(origin_stream)
-      end
 
       def errored?(output)
         output.include?("fatal: ") ||
@@ -172,26 +149,32 @@ class Gitcycle < Thor
       end
 
       def git(cmd, options={})
-        puts "> ".green + cmd.yellow.space
+        log("> ".green + cmd)
 
-        err = capture(:stderr) do
-          out = capture(:stdout) do
-            system("git #{cmd}")
-          end
-        end
+        output = `git #{cmd} 2>&1`
 
         if options[:force]
-          [ out, err ]
+          log(output)
         elsif errored?(output)
           exit ERROR[:last_command_errored]
         end
       end
 
-      def params(remote, branch_name=nil, options=nil)
-        options   = branch_name  unless options
-        options ||= {}
+      def log(str=nil)
+        if str
+          @@log ||= []
+          @@log  << str
+          str
+        else @@log
+        end
+      end
 
-        remote, branch_name = "origin", remote  unless branch_name
+      def params(remote, branch_name=nil, options={})
+        if branch_name.nil? || branch_name.is_a?(Hash)
+          options     = branch_name || {}
+          branch_name = remote
+          remote      = "origin"
+        end
 
         git_options = options.inject("") do |memo, (key, value)|
           memo += " -b #{value}"  if key == :branch && value
