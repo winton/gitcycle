@@ -33,12 +33,12 @@ class Gitcycle < Thor
       end
 
       def checkout(remote, branch_name=nil, options={})
-        remote, branch_name, options = params(remote, branch_name, options)
-        
-        if remote == "origin"
-          git("checkout #{branch_name} -q#{options}")
+        remote, branch_name, opts = params(remote, branch_name, options)
+
+        if options[:branch]
+          git("checkout #{remote}/#{branch_name} -q#{opts}")
         else
-          git("checkout #{remote}/#{branch_name} -q#{options}")
+          git("checkout #{branch_name} -q#{opts}")
         end
       end
 
