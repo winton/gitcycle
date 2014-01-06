@@ -4,35 +4,6 @@ class Gitcycle < Thor
     def track(branch, *options)
       require_git and require_config
 
-      branch, login, repo = track_branch_info(branch)
-      track_recreate(branch, options)
-
-      output        = Git.add_remote_and_fetch(login, Config.git_repo, branch)
-      login, output = fetch_from_repo_owner(branch, login, output, repo)
-
-      if Git.errored?(output)
-        puts "Couldn't find '#{login}/#{branch}'.".red.space
-        exit
-      else
-        track_checkout(branch, login, options)
-      end
-    end
-  end
-
-  desc "track (REMOTE/)BRANCH", "Smart branch checkout that \"just works\""
-  include Track
-
-  no_commands do
-
-    def fetch_from_repo_owner(branch, login, output, repo)
-      if repo && repo[:owner] && Git.errored?(output)
-        login  = repo[:owner][:login]
-        output = Git.add_remote_and_fetch(login, Config.git_repo, branch)
-      end
-      [ login, output ]
-    end
-
-    def track_branch_info(branch)
       if branch.include?("/")
         login, branch = branch.split("/")
       else
@@ -44,22 +15,32 @@ class Gitcycle < Thor
         login = repo[:user][:login]
       end
 
-      [ branch, login, repo ]
-    end
-
-    def track_checkout(branch, login, options)
-      puts "Creating branch '#{branch}' from '#{login}/#{branch}'.".green.space
-      Git.branch(login, "#{login}/#{branch}")
-
-      unless options.include?("--no-checkout")
-        Git.checkout(branch)
-      end
-    end
-
-    def track_recreate(branch, options)
       if options.include?("--recreate") && Git.branches(:match => branch)
         Git.branch(branch, :delete => true)
       end
+
+      output = Git.add_remote_and_fetch(login, Config.git_repo, branch)
+
+      if repo && repo[:owner] && Git.errored?(output)
+        login  = repo[:owner][:login]
+        output = Git.add_remote_and_fetch(login, Config.git_repo, branch)
+      end
+
+      if Git.errored?(output)
+        puts "Couldn't find '#{login}/#{branch}'.".red.space
+        exit
+      else
+        puts "Creating branch '#{branch}' from '#{login}/#{branch}'.".green.space
+        Git.branch(login, "#{login}/#{branch}")
+
+        unless options.include?("--no-checkout")
+          Git.checkout(branch)
+        end
+      end
     end
   end
+
+  desc "track (REMOTE/)BRANCH", "Smart branch checkout that \"just works\""
+  option :'no-checkout', :required => false, :type => :boolean
+  include Track
 end
