@@ -5,8 +5,8 @@ class Gitcycle < Thor
   def feature(url_or_title)
     require_git and require_config
     
-    params    = branch_create_params(url_or_title)
-    branch    = Api.branch(:create, params)
+    params = branch_create_params(url_or_title)
+    branch = Api.branch(:create, params)
 
     change_target(branch)
     checkout_branch(branch, options)

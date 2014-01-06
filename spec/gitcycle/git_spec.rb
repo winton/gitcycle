@@ -409,12 +409,4 @@ describe Gitcycle::Git do
       end
     end
   end
-
-  # it "displays proper dialog", :capture do
-  #   git.add_remote_and_fetch("remote", "repo", "branch")
-  #   expect_output(
-  #     "Adding remote repo 'remote/repo'.",
-  #     "Fetching 'remote/branch'."
-  #   )
-  # end
 end
