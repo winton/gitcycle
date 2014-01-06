@@ -100,8 +100,7 @@ describe Gitcycle::Git do
   describe ".checkout" do
 
     it "calls correct methods" do
-      git.should_receive(:git).with("checkout remote/branch -q").ordered
-      
+      git.should_receive(:git).with("checkout branch -q").ordered
       git.checkout("remote", "branch")
     end
   end
