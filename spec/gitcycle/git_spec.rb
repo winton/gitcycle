@@ -58,9 +58,9 @@ describe Gitcycle::Git do
   describe ".branch" do
 
     it "calls correct methods" do
-      git.should_receive(:git).with("branch remote branch").ordered
+      git.should_receive(:git).with("branch branch").ordered
       
-      git.branch("remote", "branch")
+      git.branch("branch")
     end
   end
 
@@ -249,7 +249,10 @@ describe Gitcycle::Git do
   describe ".fetch" do
 
     it "calls correct methods" do
-      git.should_receive(:git).with("fetch user branch:refs/remotes/user/branch -q")
+      git.should_receive(:git).with(
+        "fetch user branch:refs/remotes/user/branch -q",
+        :force => true
+      )
       git.fetch("user", "branch")
     end
   end
@@ -369,7 +372,7 @@ describe Gitcycle::Git do
   describe ".pull" do
 
     it "calls correct methods" do
-      git.should_receive(:git).with("pull remote branch -q")
+      git.should_receive(:git).with("pull remote branch -q", :force => true)
       git.pull("remote", "branch")
     end
   end

@@ -2,6 +2,8 @@ class Gitcycle < Thor
   class Git
     class <<self
 
+      include Shared
+
       def add_remote_and_fetch(remote, repo, branch)
         unless Git.remotes(:match => remote)
           remote_add(remote, repo)
@@ -13,7 +15,7 @@ class Gitcycle < Thor
       def branch(remote, branch_name=nil, options={})
         remote, branch_name, options = params(remote, branch_name, options)
 
-        git("branch #{remote} #{branch_name}#{options}")
+        git("branch #{branch_name}#{options}")
       end
 
       def branches(options={})
@@ -33,7 +35,11 @@ class Gitcycle < Thor
       def checkout(remote, branch_name=nil, options={})
         remote, branch_name, options = params(remote, branch_name, options)
         
-        git("checkout #{remote}/#{branch_name} -q#{options}")
+        if remote == "origin"
+          git("checkout #{branch_name} -q#{options}")
+        else
+          git("checkout #{remote}/#{branch_name} -q#{options}")
+        end
       end
 
       def checkout_or_track(remote, branch_name=nil)
@@ -86,7 +92,7 @@ class Gitcycle < Thor
       end
 
       def fetch(user, branch)
-        git("fetch #{user} #{branch}:refs/remotes/#{user}/#{branch} -q")
+        git("fetch #{user} #{branch}:refs/remotes/#{user}/#{branch} -q", :force => true)
       end
 
       def load
@@ -96,6 +102,15 @@ class Gitcycle < Thor
           Config.git_url   = File.read(path).match(/\[remote "origin"\][^\[]*url = ([^\n]+)/m)[1]
           Config.git_repo  = Config.git_url.match(/([^\/]+)\.git/)[1]
           Config.git_login = Config.git_url.match(/([^\/:]+)\/[^\/]+\.git/)[1]
+        end
+      end
+
+      def log(str=nil)
+        @@log ||= []
+        if str
+          @@log << str
+          str
+        else @@log
         end
       end
 
@@ -119,7 +134,7 @@ class Gitcycle < Thor
 
       def pull(remote, branch_name=nil)
         remote, branch_name = params(remote, branch_name)
-        git("pull #{remote} #{branch_name} -q")
+        git("pull #{remote} #{branch_name} -q", :force => true)
       end
 
       def push(remote, branch_name=nil)
@@ -168,15 +183,6 @@ class Gitcycle < Thor
         end
 
         output
-      end
-
-      def log(str=nil)
-        if str
-          @@log ||= []
-          @@log  << str
-          str
-        else @@log
-        end
       end
 
       def params(remote, branch_name=nil, options={})
