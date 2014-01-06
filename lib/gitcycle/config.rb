@@ -10,7 +10,7 @@ class Gitcycle < Thor
 
       def load
         unless self.config_path
-          self.config_path = ENV['CONFIG'] || "~/.gitcycle.yml"
+          self.config_path = ENV['CONFIG'] || "~/.cycle.yml"
           self.config_path = File.expand_path(config_path)
         end
         read
