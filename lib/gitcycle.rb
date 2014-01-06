@@ -54,8 +54,6 @@ class Gitcycle < Thor
 
   def initialize(args=nil, opts=nil, config=nil)
     Config.load
-    Config.fetches = []
-
     Git.load
 
     unless ENV['ENV'] == 'test'
