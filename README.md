@@ -1,7 +1,9 @@
 Gitcycle
 ========
 
-Enterprise development cycle platform.
+Define, regulate, and automate your development cycle.
+
+[![Build Status](https://secure.travis-ci.org/winton/gitcycle.png)](http://travis-ci.org/winton/gitcycle)
 
 Is this your dev cycle?
 -----------------------
@@ -24,6 +26,8 @@ Example dev session
 -------------------
 
 	> git feature "My new feature"
+	Your work will eventually merge into "master". Is this correct?
+	y
 	Creating feature branch '0000-my-new-feature' from 'master'.
 
 	> git sync

@@ -1,33 +1,24 @@
 class Gitcycle < Thor
 
   desc "feature URL|TITLE", "Create or switch to a feature branch"
+  option :branch, :type => :string, :aliases => [ :b ]
   def feature(url_or_title)
     require_git and require_config
     
-    params = branch_create_params(url_or_title)
-    branch = Api.branch(:create, params)
+    params    = branch_create_params(url_or_title)
+    branch    = Api.branch(:create, params)
 
     change_target(branch)
-    checkout_branch(branch)
+    checkout_branch(branch, options)
     sync
     update_branch(branch)
   end
 
   no_commands do
 
-    def change_name(name)
-      unless yes?("Would you like to name your branch \"#{name}\"?")
-        name = q("\nWhat would you like to name your branch?")
-        name = name.gsub(/[\s\W]/, '-')
-      end
-
-      name
-    end
-
     def change_target(branch)
       question = <<-STR
-        Your work will eventually merge into "#{branch[:source]}".
-        Is this correct?
+        Your work will eventually merge into "#{branch[:source]}". Is this correct?
       STR
 
       unless yes?(question)
@@ -35,11 +26,13 @@ class Gitcycle < Thor
       end
     end
 
-    def checkout_branch(branch)
-      owner = branch[:repo][:owner][:login] rescue 'origin'
-      repo  = branch[:repo][:name]
-      name  = change_name(branch[:name])
+    def checkout_branch(branch, options)
+      name   = options[:branch] || branch[:name]
+      owner  = branch[:repo][:owner][:login] rescue 'origin'
+      repo   = branch[:repo][:name]
+      source = branch[:source]
 
+      puts "Creating feature branch \"#{name}\" from \"#{source}\"."
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
     end
 

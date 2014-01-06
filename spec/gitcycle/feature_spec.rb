@@ -31,6 +31,7 @@ describe Gitcycle do
       GitMock.load
       Gitcycle::Git.stub(:branches).and_return("source")
 
+      gitcycle.stub(:options).and_return({})
       gitcycle.stub(:sync)
     end
 
@@ -82,8 +83,7 @@ describe Gitcycle do
         it "displays proper dialog", :capture do
           gitcycle.feature(lighthouse_url)
           expect_output(
-            "Your work will eventually merge into \"source\"",
-            "Would you like to name your branch \"name\""
+            "Creating feature branch \"name\" from \"source\""
           )
         end
       end
@@ -91,7 +91,8 @@ describe Gitcycle do
       context "when the user changes the name of the branch" do
 
         before :each do
-          $stdin.stub(:gets).and_return("y", "n", "new name")
+          gitcycle.stub(:options).and_return(:branch => "new-name")
+          $stdin.stub(:gets).and_return("y")
         end
 
         it "runs without assertions", :capture do
@@ -106,9 +107,7 @@ describe Gitcycle do
         it "displays proper dialog", :capture do
           gitcycle.feature(lighthouse_url)
           expect_output(
-            "Your work will eventually merge into \"source\"",
-            "Would you like to name your branch \"name\"",
-            "What would you like to name your branch?"
+            "Creating feature branch \"new-name\" from \"source\""
           )
         end
       end
@@ -141,7 +140,7 @@ describe Gitcycle do
           expect_output(
             "Your work will eventually merge into \"source\"",
             "What branch would you like to eventually merge into?",
-            "Would you like to name your branch \"name\""
+            "Creating feature branch \"name\" from \"new-source\""
           )
         end
       end
@@ -175,8 +174,7 @@ describe Gitcycle do
       it "displays proper dialog", :capture do
         gitcycle.feature("new title")
         expect_output(
-          "Your work will eventually merge into \"source\"",
-          "Would you like to name your branch \"name\""
+          "Creating feature branch \"name\" from \"source\""
         )
       end
     end
@@ -211,7 +209,7 @@ describe Gitcycle do
         gitcycle.feature(github_url)
         expect_output(
           "Your work will eventually merge into \"source\"",
-          "Would you like to name your branch \"name\""
+          "Creating feature branch \"name\" from \"source\""
         )
       end
     end

@@ -1,5 +1,9 @@
 class Gitcycle < Thor
   class Git
+
+    class GitExecutionError < StandardError
+    end
+
     class <<self
 
       def add_remote_and_fetch(remote, repo, branch)
@@ -152,11 +156,10 @@ class Gitcycle < Thor
         log("> ".green + cmd)
 
         output = `git #{cmd} 2>&1`
+        log(output)
 
-        if options[:force]
-          log(output)
-        elsif errored?(output)
-          exit ERROR[:last_command_errored]
+        if !options[:force] && errored?(output)
+          raise GitExecutionError
         end
       end
 
