@@ -50,6 +50,13 @@ class Gitcycle < Thor
           issues
         end
 
+        def merge_into_qa_branch(branch)
+          login = branch[:repo][:user][:login]
+
+          track("#{login}/qa-#{branch[:name]}", "--no-checkout", "--recreate")
+          Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
+        end
+
         def parse_issues_from_branch(qa_branch)
           unless qa_branch =~ /^qa-/
             puts "You are not in a QA branch.".red.space
@@ -78,10 +85,7 @@ class Gitcycle < Thor
           Git.checkout(qa_branch)
           
           branches.each do |branch|
-            login = branch[:repo][:user][:login]
-
-            track("#{login}/qa-#{branch[:name]}", "--no-checkout", "--recreate")
-            Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
+            merge_into_qa_branch(branch)
           end
         end
 
@@ -94,10 +98,7 @@ class Gitcycle < Thor
           track("#{login}/#{branch[:source]}")
           
           issues.each do |branch|
-            login = branch[:repo][:user][:login]
-
-            track("#{login}/qa-#{branch[:name]}", "--no-checkout", "--recreate")
-            Git.merge(branch[:repo][:user][:login], "qa-#{branch[:name]}")
+            merge_into_qa_branch(branch)
           end
 
           change_issue_status(
