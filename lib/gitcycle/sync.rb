@@ -10,6 +10,15 @@ class Gitcycle < Thor
       puts "Branch not found.".space.red
     else
       Git.pull "origin", branch[:name]
+      pull_from_owner(branch)
+      Git.push "origin", branch[:name]
+    end
+
+    branch
+  end
+
+  no_commands do
+    def pull_from_owner(branch)
       owner_login = branch[:repo][:owner][:login] rescue nil
 
       if owner_login
@@ -27,10 +36,6 @@ class Gitcycle < Thor
           branch[:name]
         )
       end
-
-      Git.push "origin", branch[:name]
     end
-
-    branch
   end
 end
