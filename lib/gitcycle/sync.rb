@@ -18,24 +18,21 @@ class Gitcycle < Thor
   end
 
   no_commands do
+
+    def merge_remote_branch(remote, branch)
+      Git.merge_remote_branch(
+        remote,
+        branch[:repo][:name],
+        branch[:name]
+      )
+    end
+
     def pull_from_owner(branch)
       owner_login = branch[:repo][:owner][:login] rescue nil
+      user_login  = branch[:repo][:user][:login]  rescue nil
 
-      if owner_login
-        Git.merge_remote_branch(
-          owner_login,
-          branch[:repo][:name],
-          branch[:name]
-        )
-      end
-
-      unless owner_login == branch[:repo][:user][:login]
-        Git.merge_remote_branch(
-          branch[:repo][:user][:login],
-          branch[:repo][:name],
-          branch[:name]
-        )
-      end
+      merge_remote_branch(owner_login, branch)  if owner_login
+      merge_remote_branch(user_login,  branch)  unless owner_login == user_login
     end
   end
 end
