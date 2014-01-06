@@ -189,13 +189,7 @@ class Gitcycle < Thor
         exit 1
       end
 
-      def params(remote, branch_name=nil, options={})
-        if branch_name.nil? || branch_name.is_a?(Hash)
-          options     = branch_name || {}
-          branch_name = remote
-          remote      = "origin"
-        end
-
+      def options_param(options)
         options = options.collect do |(key, value)|
           next unless value
           if    key == :branch          then "-b #{value}"
@@ -209,8 +203,16 @@ class Gitcycle < Thor
         else
           options = ""
         end
+      end
 
-        [ remote, branch_name, options ]
+      def params(remote, branch_name=nil, options={})
+        if branch_name.nil? || branch_name.is_a?(Hash)
+          options     = branch_name || {}
+          branch_name = remote
+          remote      = "origin"
+        end
+
+        [ remote, branch_name, options_param(options) ]
       end
     end
   end
