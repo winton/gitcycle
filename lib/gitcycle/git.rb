@@ -1,9 +1,5 @@
 class Gitcycle < Thor
   class Git
-
-    class GitExecutionError < StandardError
-    end
-
     class <<self
 
       def add_remote_and_fetch(remote, repo, branch)
@@ -159,8 +155,19 @@ class Gitcycle < Thor
         log(output)
 
         if !options[:force] && errored?(output)
-          raise GitExecutionError
+          puts "Failed: git #{cmd}".red.space
+          puts log.last.gsub(/^/, "  ")
+          puts ""
+
+          begin; raise; rescue => e
+            puts e.backtrace.join("\n  ")
+          end
+
+          puts ""
+          exit 1
         end
+
+        output
       end
 
       def log(str=nil)

@@ -4,7 +4,7 @@ class Gitcycle < Thor
   option :branch, :type => :string, :aliases => [ :b ]
   def feature(url_or_title)
     require_git and require_config
-    
+
     params = branch_create_params(url_or_title)
     branch = Api.branch(:create, params)
 
@@ -32,7 +32,7 @@ class Gitcycle < Thor
       repo   = branch[:repo][:name]
       source = branch[:source]
 
-      puts "Creating feature branch \"#{name}\" from \"#{source}\"."
+      puts "Creating feature branch \"#{name}\" from \"#{source}\".".space
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
     end
 

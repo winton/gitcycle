@@ -7,7 +7,7 @@ class Gitcycle < Thor
     end
 
     def q(question, extra='')
-      puts "#{question.yellow}#{extra}"
+      puts "#{question.yellow}#{extra}".space
       $input ? $input.shift : $stdin.gets.strip
     end
 
