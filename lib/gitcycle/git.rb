@@ -2,6 +2,7 @@ class Gitcycle < Thor
   class Git
     class <<self
 
+      include Command
       include Shared
 
       def add_remote_and_fetch(remote, repo, branch)
@@ -156,38 +157,6 @@ class Gitcycle < Thor
       end
 
       private
-
-      def errored?(output)
-        output.include?("fatal: ") ||
-        output.include?("ERROR: ") ||
-        $?.exitstatus != 0
-      end
-
-      def git(cmd, options={})
-        log("> ".green + cmd)
-
-        output = `git #{cmd} 2>&1`
-        log(output)
-
-        if !options[:force] && errored?(output)
-          git_fail(cmd)
-        end
-
-        output
-      end
-
-      def git_fail(cmd)
-        puts "Failed: git #{cmd}".red.space
-        puts log.last.gsub(/^/, "  ")
-        puts ""
-
-        begin; raise; rescue => e
-          puts e.backtrace.join("\n  ")
-        end
-
-        puts ""
-        exit 1
-      end
 
       def options_param(options)
         options = options.collect do |(key, value)|
