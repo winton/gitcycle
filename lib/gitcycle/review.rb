@@ -7,11 +7,11 @@ module Gitcycle
       require_config and require_git
     end
 
-    def pass(issues)
+    def pass(*issues)
       change_issue_status(issues, 'pending qa')
     end
 
-    def fail(issues)
+    def fail(*issues)
       change_issue_status(issues, 'review fail')
     end
   end

@@ -50,12 +50,12 @@ module Gitcycle
 
         desc "pass ISSUE#...", "Pass one or more github issues"
         def pass(*issues)
-          Gitcycle::Review.new.pass(issues)
+          Gitcycle::Review.new.pass(*issues)
         end
 
         desc "fail ISSUE#...", "Fail one or more github issues"
         def fail(*issues)
-          Gitcycle::Review.new.fail(issues)
+          Gitcycle::Review.new.fail(*issues)
         end
       end
     end

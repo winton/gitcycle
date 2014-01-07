@@ -66,6 +66,10 @@ module Gitcycle
       end
     end
 
+    def sync_with_branch(branch)
+      Sync.new.sync_with_branch(branch)
+    end
+
     def ticket_provider_params(url)
       if url.include?('lighthouseapp.com/')
         { :lighthouse_url => url }
