@@ -4,7 +4,7 @@ module Gitcycle
     include Shared
 
     def initialize
-      require_config and require_git
+      Config.load
     end
 
     def lighthouse(token)
