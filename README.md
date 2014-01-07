@@ -1,7 +1,7 @@
 Gitcycle
 ========
 
-Define, regulate, and automate your development cycle.
+Development cycle automation.
 
 [![Build Status](https://secure.travis-ci.org/winton/gitcycle.png)](http://travis-ci.org/winton/gitcycle) [![Code Climate](https://codeclimate.com/repos/52ca7661e30ba035c3003a3f/badges/4fa8189d4f383772dd96/gpa.png)](https://codeclimate.com/repos/52ca7661e30ba035c3003a3f/feed)
 
