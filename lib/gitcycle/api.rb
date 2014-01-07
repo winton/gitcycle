@@ -3,7 +3,7 @@ require "faraday"
 require "yajl/json_gem"
 require "yaml"
 
-class Gitcycle < Thor
+module Gitcycle
   class Api
     class <<self
 

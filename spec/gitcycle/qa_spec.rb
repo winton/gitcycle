@@ -1,11 +1,10 @@
-require File.expand_path("../../../spec_helper", __FILE__)
+require File.expand_path("../../spec_helper", __FILE__)
 
-describe Gitcycle::Subcommands::Qa do
+describe Gitcycle::QA do
 
   let(:gitcycle) do
     Gitcycle::Config.config_path = config_path
-    Gitcycle.new
-    Gitcycle::Subcommands::Qa.new
+    Gitcycle::QA.new
   end
 
   let(:webmock_get) do
@@ -71,7 +70,7 @@ describe Gitcycle::Subcommands::Qa do
         with("qa-123")
       
       gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/qa-name", "--no-checkout", "--recreate")
+        with("repo:user:login/qa-name", :"no-checkout" => true, :recreate => true)
 
       Gitcycle::Git.should_receive(:merge).ordered.
         with("repo:user:login", "qa-name")
@@ -116,7 +115,7 @@ describe Gitcycle::Subcommands::Qa do
         with("repo:user:login/source")
       
       gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/qa-name", "--no-checkout", "--recreate")
+        with("repo:user:login/qa-name", :"no-checkout" => true, :recreate => true)
 
       Gitcycle::Git.should_receive(:merge).ordered.
         with("repo:user:login", "qa-name")

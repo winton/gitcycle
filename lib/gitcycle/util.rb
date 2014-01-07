@@ -1,4 +1,4 @@
-class Gitcycle < Thor
+module Gitcycle
   class Util
     class <<self
 

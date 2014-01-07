@@ -27,13 +27,9 @@ require "gitcycle/git/pull_push"
 require "gitcycle/git/remote"
 require "gitcycle/git"
 
-require "gitcycle/subcommand"
-require "gitcycle/subcommands/qa"
-require "gitcycle/subcommands/review"
-require "gitcycle/subcommands/setup"
-
 require "gitcycle/alias"
 require "gitcycle/api"
+require "gitcycle/cli"
 require "gitcycle/config"
 require "gitcycle/feature"
 require "gitcycle/pr"
@@ -45,7 +41,7 @@ require "gitcycle/sync"
 require "gitcycle/track"
 require "gitcycle/util"
 
-class Gitcycle < Thor
+module Gitcycle
 
   COMMANDS = %w(
     feature incident pr qa ready review setup sync track
@@ -61,15 +57,4 @@ class Gitcycle < Thor
     :git_origin_not_found  => 7,
     :last_command_errored  => 8
   }
-
-  def initialize(args=nil, opts=nil, config=nil)
-    Config.load
-    Git.load
-
-    unless ENV['ENV'] == 'test'
-      super(args, opts, config)
-    end
-  end
-
-  no_commands { include Shared }
 end

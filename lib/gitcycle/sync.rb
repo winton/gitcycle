@@ -1,11 +1,36 @@
-class Gitcycle < Thor
-  module Sync
+module Gitcycle
+  class Sync
+
+    include Shared
   
-    def sync
+    def initialize
       require_git and require_config
+    end
 
+    def sync
       branch = Api.branch(:name => Git.branches(:current => true))
+      sync_with_branch(branch)
+    end
 
+    private
+
+    def merge_remote_branch(remote, branch)
+      Git.merge_remote_branch(
+        remote,
+        branch[:repo][:name],
+        branch[:name]
+      )
+    end
+
+    def pull_from_owner(branch)
+      owner_login = branch[:repo][:owner][:login] rescue nil
+      user_login  = branch[:repo][:user][:login]  rescue nil
+
+      merge_remote_branch(owner_login, branch)  if owner_login
+      merge_remote_branch(user_login,  branch)  unless owner_login == user_login
+    end
+
+    def sync_with_branch(branch)
       if !branch
         puts "Branch not found.".space.red
       else
@@ -16,29 +41,5 @@ class Gitcycle < Thor
 
       branch
     end
-
-    module NoCommands
-
-      def merge_remote_branch(remote, branch)
-        Git.merge_remote_branch(
-          remote,
-          branch[:repo][:name],
-          branch[:name]
-        )
-      end
-
-      def pull_from_owner(branch)
-        owner_login = branch[:repo][:owner][:login] rescue nil
-        user_login  = branch[:repo][:user][:login]  rescue nil
-
-        merge_remote_branch(owner_login, branch)  if owner_login
-        merge_remote_branch(user_login,  branch)  unless owner_login == user_login
-      end
-    end
   end
-
-  desc "sync", "Push and pull changes to and from relevant upstream sources"
-  include Sync
-
-  no_commands { include Sync::NoCommands }
 end

@@ -1,17 +1,18 @@
-class Gitcycle < Thor
+module Gitcycle
   class Git
-    class <<self
+    
+    extend Branch
+    extend Checkout
+    extend Command
+    extend Commit
+    extend Fetch
+    extend Merge
+    extend Params
+    extend PullPush
+    extend Remote
+    extend Shared
 
-      include Branch
-      include Checkout
-      include Command
-      include Commit
-      include Fetch
-      include Merge
-      include Params
-      include PullPush
-      include Remote
-      include Shared
+    class <<self
 
       def config_path(path)
         config = "#{path}/.git/config"

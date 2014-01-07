@@ -1,4 +1,4 @@
-class Gitcycle < Thor
+module Gitcycle
   module Shared
 
     def change_issue_status(issues, state)
@@ -12,6 +12,8 @@ class Gitcycle < Thor
     end
 
     def require_config
+      Config.load
+      
       unless Config.token
         puts "Gitcycle token not found (`git cycle setup token`).".space(true).red
         exit
@@ -26,6 +28,8 @@ class Gitcycle < Thor
     end
 
     def require_git
+      Git.load
+
       unless Config.git_url && Config.git_repo && Config.git_login
         puts "Could not find origin entry within \".git/config\"!".space.red
         puts "Are you sure you are in a git repository?".space.yellow

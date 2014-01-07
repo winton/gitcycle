@@ -1,9 +1,13 @@
-class Gitcycle < Thor
-  module Ready
+module Gitcycle
+  class Ready
+
+    include Shared
+
+    def initialize
+      require_config and require_git
+    end
   
     def ready
-      require_git && require_config
-
       branch = sync
       pr(true)
 
@@ -25,7 +29,4 @@ class Gitcycle < Thor
       Git.checkout(branch[:name])
     end
   end
-
-  desc "ready", "Prepare feature branch for code review"
-  include Ready
 end

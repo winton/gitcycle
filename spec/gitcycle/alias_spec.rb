@@ -6,7 +6,7 @@ describe Gitcycle do
 
     let(:gitcycle) do
       Gitcycle::Config.config_path = config_path
-      Gitcycle.new
+      Gitcycle::Alias.new
     end
 
     it "runs git config commands" do

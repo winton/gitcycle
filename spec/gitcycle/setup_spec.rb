@@ -1,15 +1,15 @@
 require File.expand_path("../../spec_helper", __FILE__)
 
-describe Gitcycle do
+describe Gitcycle::Setup do
   
   let(:setup) do
     Gitcycle::Config.config_path = config_fixture_path
     Gitcycle::Config.read
-    Gitcycle::Subcommands::Setup.new
+    Gitcycle::Setup.new
   end
 
   %w(lighthouse token url).each do |property|
-    describe "setup #{property} #{property.upcase}" do
+    describe "##{property}" do
       
       it "should save to config", :capture do
         if property == 'lighthouse'
