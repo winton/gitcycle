@@ -165,14 +165,12 @@ describe Gitcycle::Git do
             and_return("target")
           git.should_receive(:yes?).ordered.
             and_return(true)
-          git.should_receive(:push).
-            with("target").ordered
           git.should_receive(:checkout).
             with(:master).ordered
           git.should_receive(:branch).
             with("target", :delete => true).ordered
           git.should_receive(:add_remote_and_fetch).
-            with("remote", "repo", "target").ordered
+            with("remote", "repo", "branch").ordered
           git.should_receive(:checkout).
             with("remote", "branch", :branch => "target").ordered
 
@@ -201,7 +199,7 @@ describe Gitcycle::Git do
     context "when matching branch not found" do
       it "calls correct methods" do
         git.should_receive(:add_remote_and_fetch).
-          with("remote", "repo", "target").ordered
+          with("remote", "repo", "branch").ordered
         git.should_receive(:checkout).
           with("remote", "branch", :branch => "target").ordered
 
@@ -262,15 +260,6 @@ describe Gitcycle::Git do
       config.git_url.should   == git_url
       config.git_repo.should  == "git_repo"
       config.git_login.should == "git_login"
-    end
-  end
-
-  describe ".log" do
-
-    it "appends log messages" do
-      git.send(:log, "1")
-      git.send(:log, "2")
-      git.send(:log).should eq([ "1", "2" ])
     end
   end
 

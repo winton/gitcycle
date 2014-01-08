@@ -30,7 +30,6 @@ module Gitcycle
 
         if branches(:match => target)
           if yes?("You already have a branch called '#{target}'. Overwrite?")
-            push(target)
             checkout(:master)
             branch(target, :delete => true)
           else
@@ -40,7 +39,7 @@ module Gitcycle
           end
         end
 
-        add_remote_and_fetch(remote, repo, target)
+        add_remote_and_fetch(remote, repo, branch_name)
         checkout(remote, branch_name, :branch => target)
       end
     end
