@@ -11,19 +11,18 @@ module Gitcycle
       $input ? $input.shift : $stdin.gets.strip
     end
 
-    def require_config
+    def require_config(verbose=true)
       Config.load
       
-      unless Config.token
+      if !Config.token && verbose
         puts "Gitcycle token not found (`git cycle setup token`).".space(true).red
-        exit
       end
 
-      unless Config.url
+      if !Config.url && verbose
         puts "Gitcycle URL not found (`git cycle setup url`).".space(true).red
-        exit
       end
 
+      exit  unless Config.token && Config.url
       true
     end
 

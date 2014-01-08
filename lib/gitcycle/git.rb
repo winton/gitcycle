@@ -36,15 +36,6 @@ module Gitcycle
           Config.git_login = Config.git_url.match(/([^\/:]+)\/[^\/]+\.git/)[1]
         end
       end
-
-      def log(str=nil)
-        @@log ||= []
-        if str
-          @@log << str
-          str
-        else @@log
-        end
-      end
     end
   end
 end

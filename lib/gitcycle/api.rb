@@ -23,6 +23,10 @@ module Gitcycle
         parse http.send(method, "/issues.json", params)
       end
 
+      def logs(params)
+        parse http.post("/logs.json", params)
+      end
+
       def pull_request(params)
         parse http.post("/pull_request.json", params)
       end
@@ -43,12 +47,12 @@ module Gitcycle
 
       def http
         options = { :ssl => { :verify => false } }
-        @http ||= Faraday.new Gitcycle::Config.url, options do |conn|
+        @http ||= Faraday.new Config.url, options do |conn|
           conn.request :url_encoded
           conn.adapter :excon
         end
         
-        @http.headers['Authorization'] = "Token token=\"#{Gitcycle::Config.token}\""
+        @http.headers['Authorization'] = "Token token=\"#{Config.token}\""
         @http
       end
 

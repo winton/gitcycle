@@ -9,26 +9,24 @@ module Gitcycle
       end
 
       def git(cmd, options={})
-        log("> ".green + cmd)
+        Log.log(:git_cmd, cmd)
 
         output = `git #{cmd} 2>&1`
-        log(output)
+
+        Log.log(:git_output, output)
 
         if !options[:force] && errored?(output)
-          git_fail(cmd)
+          git_fail(cmd, output)
         end
 
         output
       end
 
-      def git_fail(cmd)
-        puts "Failed: git #{cmd}".red.space
-        puts log.last.gsub(/^/, "  ")
-        puts ""
+      def git_fail(cmd, output)
+        Log.log(:git_failure)
 
-        begin; raise; rescue => e
-          puts e.backtrace.join("\n  ")
-        end
+        puts "Failed: git #{cmd}".red.space
+        puts output.gsub(/^/, "  ")
 
         puts ""
         exit 1

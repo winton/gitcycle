@@ -3,18 +3,18 @@ module Gitcycle
 
     desc "alias", "Alias git cycle commands to git"
     def alias
-      Alias.new.alias
+      watch { Alias.new.alias }
     end
 
     desc "feature URL|TITLE", "Create or switch to a feature branch"
     option :branch, :type => :string, :aliases => [ :b ]
     def feature(url_or_title)
-      Feature.new.feature(url_or_title, options)
+      watch { Feature.new.feature(url_or_title, options) }
     end
 
     desc "pr", "Create a pull request from current feature branch"
     def pr(ready=false)
-      PR.new.pr(ready)
+      watch { PR.new.pr(ready) }
     end
 
     module Subcommands
@@ -22,17 +22,17 @@ module Gitcycle
 
         desc "branch ISSUE#...", "Create a single QA branch from multiple github issues"
         def branch(*issues)
-          Gitcycle::QA.new.branch(*issues)
+          watch { Gitcycle::QA.new.branch(*issues) }
         end
 
         desc "pass ISSUE#...", "Pass one or more github issues"
         def pass(*issues)
-          Gitcycle::QA.new.pass(*issues)
+          watch { Gitcycle::QA.new.pass(*issues) }
         end
 
         desc "fail ISSUE#...", "Fail one or more github issues"
         def fail(*issues)
-          Gitcycle::QA.new.fail(*issues)
+          watch { Gitcycle::QA.new.fail(*issues) }
         end
       end
     end
@@ -42,7 +42,7 @@ module Gitcycle
 
     desc "ready", "Prepare feature branch for code review"
     def ready
-      Ready.new.ready
+      watch { Ready.new.ready }
     end
 
     module Subcommands
@@ -50,12 +50,12 @@ module Gitcycle
 
         desc "pass ISSUE#...", "Pass one or more github issues"
         def pass(*issues)
-          Gitcycle::Review.new.pass(*issues)
+          watch { Gitcycle::Review.new.pass(*issues) }
         end
 
         desc "fail ISSUE#...", "Fail one or more github issues"
         def fail(*issues)
-          Gitcycle::Review.new.fail(*issues)
+          watch { Gitcycle::Review.new.fail(*issues) }
         end
       end
     end
@@ -68,17 +68,17 @@ module Gitcycle
 
         desc "lighthouse TOKEN", "Set up your Lighthouse TOKEN"
         def lighthouse(token)
-          Gitcycle::Setup.new.lighthouse(token)
+          watch { Gitcycle::Setup.new.lighthouse(token) }
         end
 
         desc "token TOKEN", "Set up your gitcycle TOKEN"
         def token(token)
-          Gitcycle::Setup.new.token(token)
+          watch { Gitcycle::Setup.new.token(token) }
         end
 
         desc "url URL", "Set up your gitcycle URL"
         def url(url)
-          Gitcycle::Setup.new.url(url)
+          watch { Gitcycle::Setup.new.url(url) }
         end
       end
     end
@@ -88,14 +88,27 @@ module Gitcycle
 
     desc "sync", "Push and pull changes to and from relevant upstream sources"
     def sync
-      Sync.new.sync
+      watch { Sync.new.sync }
     end
 
     desc "track (REMOTE/)BRANCH", "Smart branch checkout that \"just works\""
     option :'no-checkout', :type => :boolean
     option :recreate,      :type => :boolean
     def track(branch)
-      Track.new.track(branch, options)
+      watch { Track.new.track(branch, options) }
+    end
+
+    no_commands do
+
+      def watch(&block)
+        begin; yield
+        rescue Exception => e
+          Log.log(:runtime_error, "#{e.to_s}\n#{e.backtrace.join("\n")}")
+        ensure
+          Log.log(:finished)
+          Exit.new
+        end
+      end
     end
   end
 end
