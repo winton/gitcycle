@@ -284,6 +284,31 @@ issues.json:
                     type: string
                   name:
                     type: string
+logs.json:
+  post:
+    request:
+      title: POST logs.json (request)
+      type: object
+      additionalProperties: false
+      properties:
+        events:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              event:
+                type: string
+              body:
+                type: string
+              session_id:
+                type: string
+              ran_at:
+                type: string
+    response:
+      title: POST logs.json (response)
+      type: 'null'
+      additionalProperties: false
 pull_request.json:
   post:
     request:
