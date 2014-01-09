@@ -6,9 +6,16 @@ module Gitcycle
       Api.issues(:update, :issues => issues, :state => state)
     end
 
+    def puts(*args)
+      Log.log(:puts, args.join("\n").gsub(/\[(\d+)m/, ''))
+      $stdout.puts *args
+    end
+
     def q(question, extra='')
       puts "#{question.yellow}#{extra}".space
-      $input ? $input.shift : $stdin.gets.strip
+      input = $stdin.gets.strip
+      Log.log(:gets, input)
+      input
     end
 
     def require_config(verbose=true)

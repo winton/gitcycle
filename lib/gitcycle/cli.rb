@@ -108,13 +108,15 @@ module Gitcycle
       def watch(&block)
         exit_code = nil
 
-        begin; yield
+        begin
+          Log.log(:start)
+          yield
         rescue Exception => e
           Log.log(:runtime_error, "#{e.to_s}\n#{e.backtrace.join("\n")}")
         rescue Exit::Exception => e
           exit_code = e.exit_code
         ensure
-          Log.log(:finished, exit_code || :success)
+          Log.log(:finish, exit_code || :success)
           Exit.new
         end
       end

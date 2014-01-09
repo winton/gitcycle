@@ -6,7 +6,9 @@ module Gitcycle
     def initialize
       require_config(false)
 
-      begin; Api.logs(:events => Log.log)
+      begin
+        id = Api.logs(:events => Log.log)[:id]
+        puts "Session ##{id}\n\n".space
       rescue ::Exception => e
       end
     end
