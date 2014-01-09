@@ -10,7 +10,7 @@ module Gitcycle
             :event     => event,
             :body      => body,
             :backtrace => backtrace,
-            :ran_at    => Time.now.utc.to_s
+            :ran_at    => (Time.now.to_f * 1000.0).to_i
           }
         else
           @@log
