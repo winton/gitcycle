@@ -91,6 +91,11 @@ module Gitcycle
       watch { Sync.new.sync }
     end
 
+    desc "test", "Does nothing"
+    def test
+      watch { nil }
+    end
+
     desc "track (REMOTE/)BRANCH", "Smart branch checkout that \"just works\""
     option :'no-checkout', :type => :boolean
     option :recreate,      :type => :boolean
@@ -101,11 +106,15 @@ module Gitcycle
     no_commands do
 
       def watch(&block)
+        exit_code = nil
+
         begin; yield
         rescue Exception => e
           Log.log(:runtime_error, "#{e.to_s}\n#{e.backtrace.join("\n")}")
+        rescue Exit::Exception => e
+          exit_code = e.exit_code
         ensure
-          Log.log(:finished)
+          Log.log(:finished, exit_code || :success)
           Exit.new
         end
       end

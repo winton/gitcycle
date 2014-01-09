@@ -4,11 +4,10 @@ module Gitcycle
     include Shared
 
     def initialize
-      require_config(true)
+      require_config(false)
 
       begin; Api.logs(:events => Log.log)
-      rescue Exception => e
-        puts e.inspect
+      rescue ::Exception => e
       end
     end
   end
