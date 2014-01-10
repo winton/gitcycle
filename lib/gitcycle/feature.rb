@@ -30,10 +30,11 @@ module Gitcycle
     end
 
     def checkout_branch(branch, options)
-      name   = options[:branch] || branch[:name]
-      owner  = branch[:repo][:owner][:login] rescue 'origin'
-      repo   = branch[:repo][:name]
-      source = branch[:source]
+      name    = options[:branch] || branch[:name]
+      owner   = branch[:repo][:owner][:login] rescue nil
+      onwer ||= branch[:repo][:user][:login]
+      repo    = branch[:repo][:name]
+      source  = branch[:source]
 
       puts "Creating feature branch \"#{name}\" from \"#{source}\".".space
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)

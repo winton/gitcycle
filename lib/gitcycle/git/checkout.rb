@@ -34,7 +34,7 @@ module Gitcycle
             branch(target, :delete => true)
           else
             checkout(target)
-            pull(target)
+            pull(remote, target)
             return
           end
         end
