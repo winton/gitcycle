@@ -23,15 +23,13 @@ describe Gitcycle::Sync do
   end
 
   it "calls Git with proper parameters", :capture do
-    Gitcycle::Git.should_receive(:branches).with(:current => true)
-    Gitcycle::Git.should_receive(:pull).with("origin", "name")
-    Gitcycle::Git.should_receive(:merge_remote_branch).with(
-      "repo:owner:login", "repo:name", "name"
-    )
     Gitcycle::Git.should_receive(:merge_remote_branch).with(
       "repo:user:login", "repo:name", "name"
-    )
-    Gitcycle::Git.should_receive(:push).with("origin", "name")
+    ).ordered
+    Gitcycle::Git.should_receive(:merge_remote_branch).with(
+      "repo:owner:login", "repo:name", "source"
+    ).ordered
+    Gitcycle::Git.should_receive(:push).with("repo:user:login", "name")
     gitcycle.sync
   end
 end

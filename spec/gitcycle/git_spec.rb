@@ -10,6 +10,7 @@ describe Gitcycle::Git do
     git.stub(:git) # don't run real commands, ever
     File.stub(:read).and_return("[remote \"origin\"] url = #{git_url}")
     git.load
+    git.send(:remote_cache, :expire)
   end
 
   describe ".load" do
@@ -275,30 +276,30 @@ describe Gitcycle::Git do
 
     before :each do
       git.stub(:add_remote_and_fetch)
-      git.stub(:branches)
+      git.stub(:errored?)
       git.stub(:merge)
     end
 
     context "when remote branch matches" do
+
       it "calls correct methods" do
         git.should_receive(:add_remote_and_fetch).
-          with("remote", "repo", "branch").ordered
-        git.should_receive(:branches).
-          with(:match => "remote/branch", :remote => true).ordered.
-          and_return(true)
+          with("remote", "repo", "branch").ordered.
+          and_return("")
+        git.should_receive(:errored?).ordered.
+          and_return(false)
         git.should_receive(:merge).with("remote", "branch").ordered
 
         git.merge_remote_branch("remote", "repo", "branch")
       end
     end
 
-    context "when remote branch does not match" do
+    context "when fetch errors" do
       it "calls correct methods" do
         git.should_receive(:add_remote_and_fetch).
           with("remote", "repo", "branch").ordered
-        git.should_receive(:branches).
-          with(:match => "remote/branch", :remote => true).ordered.
-          and_return(false)
+        git.should_receive(:errored?).ordered.
+          and_return(true)
         git.should_not_receive(:merge)
 
         git.merge_remote_branch("remote", "repo", "branch")

@@ -67,7 +67,7 @@ module Gitcycle
     end
 
     def sync_with_branch(branch)
-      Sync.new.sync_with_branch(branch)
+      Sync.new.sync_with_branch(branch, :exclude_owner => true)
     end
 
     def ticket_provider_params(url)

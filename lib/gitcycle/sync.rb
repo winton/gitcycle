@@ -12,13 +12,13 @@ module Gitcycle
       sync_with_branch(branch)
     end
 
-    def sync_with_branch(branch)
+    def sync_with_branch(branch, options={})
       if !branch
         puts "Branch not found.".space.red
       else
-        Git.pull "origin", branch[:name]
-        pull_from_owner(branch)
-        Git.push "origin", branch[:name]
+        pull_from :user,  branch, :name
+        pull_from(:owner, branch, :source)  unless options[:exclude_owner]
+        push_to   :user,  branch
       end
 
       branch
@@ -26,20 +26,22 @@ module Gitcycle
 
     private
 
-    def merge_remote_branch(remote, branch)
+    def merge_remote_branch(remote, branch, source)
       Git.merge_remote_branch(
         remote,
         branch[:repo][:name],
-        branch[:name]
+        branch[source]
       )
     end
 
-    def pull_from_owner(branch)
-      owner_login = branch[:repo][:owner][:login] rescue nil
-      user_login  = branch[:repo][:user][:login]  rescue nil
+    def pull_from(user, branch, source)
+      login = branch[:repo][user][:login]  rescue nil
+      merge_remote_branch(login, branch, source)  if login
+    end
 
-      merge_remote_branch(owner_login, branch)  if owner_login
-      merge_remote_branch(user_login,  branch)  unless owner_login == user_login
+    def push_to(user, branch)
+      login = branch[:repo][user][:login]  rescue nil
+      Git.push(login, branch[:name])  if login
     end
   end
 end
