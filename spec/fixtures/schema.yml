@@ -135,6 +135,18 @@ branch.json:
           type: string
         source:
           type: string
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
     response:
       title: PUT branch.json (response)
       type: object
@@ -301,14 +313,17 @@ logs.json:
                 type: string
               body:
                 type: string
-              session_id:
+              backtrace:
                 type: string
               ran_at:
-                type: string
+                type: integer
     response:
       title: POST logs.json (response)
-      type: 'null'
+      type: object
       additionalProperties: false
+      properties:
+        id:
+          type: string
 pull_request.json:
   post:
     request:

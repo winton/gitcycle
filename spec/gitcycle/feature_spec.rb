@@ -8,7 +8,14 @@ describe Gitcycle::Feature do
   end
 
   let(:webmock_put) do
-    {}
+    {
+      :request => {
+        :repo  => {
+          :name => "git_repo",
+          :user => { :login => "git_login" }
+        }
+      }
+    }
   end
 
   let(:webmock_post) do

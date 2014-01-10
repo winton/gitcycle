@@ -189,7 +189,7 @@ describe Gitcycle::Git do
           git.should_receive(:checkout).
             with("target").ordered
           git.should_receive(:pull).
-            with("target").ordered
+            with("remote", "target").ordered
           git.should_not_receive(:add_remote_and_fetch)
 
           git.checkout_remote_branch("remote", "repo", "branch", :branch => "target")

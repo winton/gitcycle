@@ -44,10 +44,7 @@ module Gitcycle
       url, title = parse_url_or_title(url_or_title)
       params     = {
         :source => Git.branches(:current => true),
-        :repo   => {
-          :name => Config.git_repo,
-          :user => { :login => Config.git_login }
-        }
+        :repo   => repo_params
       }
 
       if url
@@ -65,6 +62,13 @@ module Gitcycle
       else
         [ nil, url_or_title ]
       end
+    end
+
+    def repo_params
+      {
+        :name => Config.git_repo,
+        :user => { :login => Config.git_login }
+      }
     end
 
     def sync_with_branch(branch)
@@ -85,7 +89,8 @@ module Gitcycle
     def update_branch(branch)
       Api.branch(:update,
         :name   => branch[:name],
-        :source => branch[:source]
+        :source => branch[:source],
+        :repo   => repo_params
       )
     end
   end
