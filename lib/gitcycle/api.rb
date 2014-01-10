@@ -9,18 +9,17 @@ module Gitcycle
 
       def branch(method, params=nil)
         method, params = method_parameters(method, params)
-        parse http.send(method, "/branch.json", params)
+        request(method, "/branch.json", params)
       end
 
       def branch_schema
-        parse http.get("/branch/new.json")
+        request(:get, "/branch/new.json")
       end
 
       def issues(method, params=nil)
         method, params  = method_parameters(method, params)
         params[:issues] = params[:issues].join(",")
-        
-        parse http.send(method, "/issues.json", params)
+        request(method, "/issues.json", params)
       end
 
       def logs(params)
@@ -28,19 +27,19 @@ module Gitcycle
       end
 
       def pull_request(params)
-        parse http.post("/pull_request.json", params)
+        request(:post, "/pull_request.json", params)
       end
 
       def repo(params)
-        parse http.post("/repo.json", params)
+        request(:post, "/repo.json", params)
       end
 
       def setup_lighthouse(token)
-        parse http.post("/setup/lighthouse.json", :token => token)
+        request(:post, "/setup/lighthouse.json", :token => token)
       end
 
       def user
-        parse http.get("/user.json")
+        request(:get, "/user.json")
       end
 
       private
@@ -83,6 +82,11 @@ module Gitcycle
           hash[key] = Time.parse(value)  if key.to_s =~ /_at$/
         end
         hash
+      end
+
+      def request(method, path, params)
+        Log.log("http_#{method}", "#{path}\n\n#{params.inspect}")
+        parse http.send(method, path, params)
       end
     end
   end
