@@ -109,7 +109,8 @@ module Gitcycle
         exit_code = nil
 
         begin
-          Log.log(:start)
+          args = ARGV.collect { |a| a =~ /\s/ ? "\"#{a}\"" : a }.join(" ")
+          Log.log(:start, args)
           yield
         rescue Exception => e
           Log.log(:runtime_error, "#{e.to_s}\n#{e.backtrace.join("\n")}")
