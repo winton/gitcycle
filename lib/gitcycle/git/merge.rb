@@ -7,9 +7,9 @@ module Gitcycle
       end
 
       def merge_remote_branch(remote, repo, branch_name)
-        add_remote_and_fetch(remote, repo, branch_name)
+        output = add_remote_and_fetch(remote, repo, branch_name)
 
-        if branches(:match => "#{remote}/#{branch_name}", :remote => true)
+        unless errored?(output)
           merge(remote, branch_name)
         end
       end
