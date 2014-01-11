@@ -21,6 +21,8 @@ RSpec.configure do
   end
 
   def to_params(hash)
+    return if hash.nil?
+    
     params = ''
     stack = []
 
