@@ -16,7 +16,8 @@ module Gitcycle
         checkout_and_sync(branch, options)
         update_branch(branch)  if changed
       else
-        checkout_and_sync(branch, options)
+        Git.checkout(branch[:name])
+        sync_with_branch(branch)
       end
     end
 
@@ -49,7 +50,7 @@ module Gitcycle
       puts "Creating feature branch \"#{name}\" from \"#{source}\".".space
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
 
-      sync_with_branch(branch)
+      sync_with_branch(branch, :exclude_owner => true)
     end
 
     def branch_create_params(url_or_title)
@@ -76,8 +77,8 @@ module Gitcycle
       end
     end
 
-    def sync_with_branch(branch)
-      Sync.new.sync_with_branch(branch, :exclude_owner => true)
+    def sync_with_branch(branch, options={})
+      Sync.new.sync_with_branch(branch, options)
     end
 
     def ticket_provider_params(url)
