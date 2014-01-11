@@ -6,17 +6,40 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
         name:
           type: string
           optional: true
         source:
           type: string
           optional: true
+        title:
+          type: string
+          optional: true
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
     response:
       title: GET branch.json (response)
       type: object
       additionalProperties: false
       properties:
+        exists:
+          type: boolean
         github_issue_id:
           type: integer
           optional: true
@@ -88,6 +111,8 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
+        exists:
+          type: boolean
         github_issue_id:
           type: integer
           optional: true
@@ -152,6 +177,8 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
+        exists:
+          type: boolean
         github_issue_id:
           type: integer
           optional: true
@@ -205,6 +232,8 @@ issues.json:
         type: object
         additionalProperties: false
         properties:
+          exists:
+            type: boolean
           github_issue_id:
             type: integer
             optional: true
@@ -259,6 +288,8 @@ issues.json:
         type: object
         additionalProperties: false
         properties:
+          exists:
+            type: boolean
           github_issue_id:
             type: integer
             optional: true
@@ -355,6 +386,8 @@ pull_request.json:
       type: object
       additionalProperties: false
       properties:
+        exists:
+          type: boolean
         github_issue_id:
           type: integer
           optional: true

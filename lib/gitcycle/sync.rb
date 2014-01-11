@@ -8,7 +8,7 @@ module Gitcycle
     end
 
     def sync
-      branch = Api.branch(:name => Git.branches(:current => true))
+      branch = Api.branch(branch_params)
       sync_with_branch(branch)
     end
 
@@ -25,6 +25,15 @@ module Gitcycle
     end
 
     private
+
+    def branch_params
+      params = {
+        :name => Git.branches(:current => true),
+        :repo => repo_params
+      }
+
+      params
+    end
 
     def merge_remote_branch(remote, branch, source)
       Git.merge_remote_branch(

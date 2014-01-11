@@ -18,6 +18,13 @@ module Gitcycle
       input
     end
 
+    def repo_params
+      {
+        :name => Config.git_repo,
+        :user => { :login => Config.git_login }
+      }
+    end
+
     def require_config(verbose=true)
       Config.load
       

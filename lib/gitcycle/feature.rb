@@ -10,26 +10,36 @@ module Gitcycle
     def feature(url_or_title, options={})
       params = branch_create_params(url_or_title)
       branch = Api.branch(:create, params)
-
-      change_target(branch)
-      checkout_branch(branch, options)
-      sync_with_branch(branch)
-      update_branch(branch)
+      
+      if !branch[:exists] || options[:new]
+        changed = change_target(branch, options)
+        checkout_and_sync(branch, options)
+        update_branch(branch)  if changed
+      else
+        checkout_and_sync(branch, options)
+      end
     end
 
     private
 
-    def change_target(branch)
-      question = <<-STR
-        Your work will eventually merge into "#{branch[:source]}". Is this correct?
-      STR
+    def change_target(branch, options)
+      if options[:source]
+        return branch[:source] = options[:source]
+      else
+        question = <<-STR
+          Your work will eventually merge into "#{branch[:source]}". Correct?
+        STR
 
-      unless yes?(question)
-        branch[:source] = q("What branch would you like to eventually merge into?")
+        unless yes?(question)
+          return branch[:source] =
+            q("What branch would you like to eventually merge into?")
+        end
       end
+
+      false
     end
 
-    def checkout_branch(branch, options)
+    def checkout_and_sync(branch, options)
       name    = options[:branch] || branch[:name]
       owner   = branch[:repo][:owner][:login] rescue nil
       onwer ||= branch[:repo][:user][:login]
@@ -38,6 +48,8 @@ module Gitcycle
 
       puts "Creating feature branch \"#{name}\" from \"#{source}\".".space
       Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
+
+      sync_with_branch(branch)
     end
 
     def branch_create_params(url_or_title)
@@ -62,13 +74,6 @@ module Gitcycle
       else
         [ nil, url_or_title ]
       end
-    end
-
-    def repo_params
-      {
-        :name => Config.git_repo,
-        :user => { :login => Config.git_login }
-      }
     end
 
     def sync_with_branch(branch)
