@@ -11,7 +11,7 @@ module Gitcycle
       params = branch_create_params(url_or_title)
       branch = Api.branch(:create, params)
       
-      if !branch[:exists] || options[:new]
+      if branch[:created] || options[:new]
         changed = change_target(branch, options)
         checkout_and_sync(branch, options)
         update_branch(branch)  if changed

@@ -38,7 +38,7 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        exists:
+        created:
           type: boolean
         github_issue_id:
           type: integer
@@ -111,7 +111,7 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        exists:
+        created:
           type: boolean
         github_issue_id:
           type: integer
@@ -177,7 +177,7 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        exists:
+        created:
           type: boolean
         github_issue_id:
           type: integer
@@ -232,7 +232,7 @@ issues.json:
         type: object
         additionalProperties: false
         properties:
-          exists:
+          created:
             type: boolean
           github_issue_id:
             type: integer
@@ -288,7 +288,7 @@ issues.json:
         type: object
         additionalProperties: false
         properties:
-          exists:
+          created:
             type: boolean
           github_issue_id:
             type: integer
@@ -386,7 +386,7 @@ pull_request.json:
       type: object
       additionalProperties: false
       properties:
-        exists:
+        created:
           type: boolean
         github_issue_id:
           type: integer

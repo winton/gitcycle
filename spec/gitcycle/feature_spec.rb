@@ -25,9 +25,6 @@ describe Gitcycle::Feature do
           :name => "git_repo",
           :user => { :login => "git_login" }
         }
-      },
-      :response => {
-        :exists => false
       }
     }
   end
