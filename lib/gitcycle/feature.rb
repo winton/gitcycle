@@ -16,8 +16,7 @@ module Gitcycle
         checkout_and_sync(branch, options)
         update_branch(branch)  if changed
       else
-        Git.checkout(branch[:name])
-        sync_with_branch(branch)
+        track(branch[:name])
       end
     end
 
@@ -79,6 +78,10 @@ module Gitcycle
 
     def sync_with_branch(branch, options={})
       Sync.new.sync_with_branch(branch, options)
+    end
+
+    def track(branch)
+      Track.new.track(branch)
     end
 
     def ticket_provider_params(url)

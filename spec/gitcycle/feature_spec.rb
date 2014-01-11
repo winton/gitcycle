@@ -39,6 +39,7 @@ describe Gitcycle::Feature do
 
     gitcycle.stub(:options).and_return({})
     gitcycle.stub(:sync_with_branch)
+    gitcycle.stub(:track)
   end
 
   def common_expectations(source="source", branch="name")
@@ -147,6 +148,26 @@ describe Gitcycle::Feature do
           "What branch would you like to eventually merge into?",
           "Creating feature branch \"name\" from \"new-source\""
         )
+      end
+    end
+
+    context "when the branch already exists" do
+
+      let(:webmock_post_with_created_false) do
+        Gitcycle::Util.deep_merge(webmock_post,
+          :response => { :created => false }
+        )
+      end
+
+      before :each do
+        $stdin.stub(:gets).and_return("y")
+        webmock(:branch, :post, webmock_post_with_created_false)
+      end
+
+      it "calls Git with proper parameters" do
+        gitcycle.should_receive(:track).with("name")
+        gitcycle.should_not_receive(:change_target)
+        gitcycle.feature(lighthouse_url)
       end
     end
   end
