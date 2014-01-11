@@ -23,7 +23,7 @@ module Gitcycle
       end
 
       def logs(params)
-        parse http.post("/logs.json", params)
+        request(:post, "/logs.json", params)
       end
 
       def pull_request(params)
@@ -85,7 +85,6 @@ module Gitcycle
       end
 
       def request(method, path, params)
-        Log.log("http_#{method}", "#{path}\n\n#{params.inspect}")
         parse http.send(method, path, params)
       end
     end
