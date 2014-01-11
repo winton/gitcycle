@@ -8,7 +8,15 @@ describe Gitcycle::Sync do
   end
 
   let(:webmock_get) do
-    { :request => { :name => "branch" } }
+    {
+      :request => {
+        :name => "branch",
+        :repo => {
+          :name => "git_repo",
+          :user => { :login => "git_login" }
+        }
+      }
+    }
   end
 
   before(:each) do

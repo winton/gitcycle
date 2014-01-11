@@ -16,7 +16,33 @@ RSpec.configure do
     }
 
     stub_request(method, "#{Gitcycle::Config.url}/#{resource}.json").
-      with(:body => body, :headers => headers, :query => query).
+      with(:body => body, :headers => headers, :query => to_params(query)).
       to_return(:status => 200, :body => response.to_json, :headers => {})
+  end
+
+  def to_params(hash)
+    params = ''
+    stack = []
+
+    hash.each do |k, v|
+      if v.is_a?(Hash)
+        stack << [k,v]
+      else
+        params << "#{k}=#{v}&"
+      end
+    end
+
+    stack.each do |parent, h|
+      h.each do |k, v|
+        if v.is_a?(Hash)
+          stack << ["#{parent}[#{k}]", v]
+        else
+          params << "#{parent}[#{k}]=#{v}&"
+        end
+      end
+    end
+
+    params.chop! # trailing &
+    params
   end
 end
