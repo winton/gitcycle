@@ -165,7 +165,7 @@ describe Gitcycle::Feature do
       end
 
       it "calls Git with proper parameters" do
-        gitcycle.should_receive(:track).with("name")
+        gitcycle.should_receive(:track).with(an_instance_of(Hash))
         gitcycle.should_not_receive(:change_target)
         gitcycle.feature(lighthouse_url)
       end

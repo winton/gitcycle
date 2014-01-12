@@ -18,6 +18,7 @@ describe Gitcycle::Track do
 
   before(:each) do
     gitcycle
+    gitcycle.stub(:sync)
     
     stub_const("Gitcycle::Git", GitMock)
     GitMock.load
@@ -43,6 +44,8 @@ describe Gitcycle::Track do
 
       Gitcycle::Git.should_receive(:checkout).ordered.
         with("branch")
+
+      gitcycle.should_receive(:sync)
     end
 
     it "calls Git with proper parameters", :capture do
@@ -81,6 +84,8 @@ describe Gitcycle::Track do
 
       Gitcycle::Git.should_receive(:checkout).ordered.
         with("branch")
+
+      gitcycle.should_receive(:sync)
     end
 
     it "calls Git with proper parameters", :capture do

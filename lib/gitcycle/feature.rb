@@ -16,7 +16,7 @@ module Gitcycle
         checkout_and_sync(branch, options)
         update_branch(branch)  if changed
       else
-        track(branch[:name])
+        track(branch)
       end
     end
 

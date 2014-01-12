@@ -8,8 +8,8 @@ module Gitcycle
     end
 
     def track(branch, options={})
-      branch, login, repo = track_branch_info(branch)
-      track_recreate(branch, options)
+      branch, login, repo = branch_info(branch)
+      recreate(branch, options)
 
       output        = Git.add_remote_and_fetch(login, Config.git_repo, branch)
       login, output = fetch_from_repo_owner(branch, login, output, repo)
@@ -18,7 +18,8 @@ module Gitcycle
         puts "Couldn't find '#{login}/#{branch}'.".red.space
         exit
       else
-        track_checkout(branch, login, options)
+        checkout(branch, login, options)
+        sync
       end
     end
 
@@ -32,22 +33,20 @@ module Gitcycle
       [ login, output ]
     end
 
-    def track_branch_info(branch)
-      if branch.include?("/")
+    def branch_info(branch)
+      if branch.is_a?(Hash)
+        login, branch = branch[:repo][:user][:login], branch[:name]
+      elsif branch.include?("/")
         login, branch = branch.split("/")
       else
-        repo = Api.repo(
-          :name => Config.git_repo,
-          :user => { :login => Config.git_login }
-        )
-
+        repo = Api.repo(repo_params)
         login = repo[:user][:login]
       end
 
       [ branch, login, repo ]
     end
 
-    def track_checkout(branch, login, options)
+    def checkout(branch, login, options)
       puts "Creating branch '#{branch}' from '#{login}/#{branch}'.".green.space
       Git.branch(login, "#{login}/#{branch}")
 
@@ -56,7 +55,11 @@ module Gitcycle
       end
     end
 
-    def track_recreate(branch, options)
+    def sync
+      Sync.new.sync
+    end
+
+    def recreate(branch, options)
       if options[:recreate] && Git.branches(:match => branch)
         Git.branch(branch, :delete => true)
       end
