@@ -22,10 +22,10 @@ module Gitcycle
           args = ARGV.collect { |a| a =~ /\s/ ? "\"#{a}\"" : a }.join(" ")
           Log.log(:start, args)
           yield
-        rescue Exception => e
-          Log.log(:runtime_error, "#{e.to_s}\n#{e.backtrace.join("\n")}")
         rescue Exit::Exception => e
           exit_code = e.exit_code
+        rescue Exception => e
+          Log.log(:runtime_error, "#{e.to_s}\n#{e.backtrace.join("\n")}")
         ensure
           Log.log(:finish, exit_code || :success)
           Exit.new

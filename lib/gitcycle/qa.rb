@@ -83,7 +83,7 @@ module Gitcycle
 
       if issues.empty?
         puts "Command not recognized.".red.space
-        exit
+        raise Exit::Exception.new(:unknown_command)
       end
       
       issues
@@ -98,7 +98,7 @@ module Gitcycle
     def parse_issues_from_branch(qa_branch)
       unless qa_branch =~ /^qa-/
         puts "You are not in a QA branch.".red.space
-        exit
+        raise Exit::Exception.new(:not_in_qa_branch)
       end
       
       qa_branch_issues = qa_branch.match(/(-\d+)+/).to_a[1..-1]

@@ -49,15 +49,4 @@ module Gitcycle
   COMMANDS = %w(
     feature incident pr qa ready review setup sync track
   )
-
-  ERROR = {
-    :unrecognized_url      => 1,
-    :could_not_find_branch => 2,
-    :told_not_to_merge     => 3,
-    :cannot_qa             => 4,
-    :conflict_when_merging => 5,
-    :something_went_wrong  => 6,
-    :git_origin_not_found  => 7,
-    :last_command_errored  => 8
-  }
 end

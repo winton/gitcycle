@@ -11,7 +11,9 @@ module Gitcycle
       params = branch_create_params(url_or_title)
       branch = Api.branch(:create, params)
       
-      if branch[:created] || options[:new]
+      if !branch[:title]
+        url_not_recognized(branch)
+      elsif branch[:created] || options[:new]
         changed = change_target(branch, options)
         checkout_and_sync(branch, options)
         update_branch(branch)  if changed
@@ -91,7 +93,7 @@ module Gitcycle
         { :github_url => url }
       else
         puts "Gitcycle only supports Lighthouse or Github Issue URLs.".space.red
-        exit ERROR[:unrecognized_url]
+        raise Exit::Exception.new(:unrecognized_url)
       end
     end
 
@@ -101,6 +103,14 @@ module Gitcycle
         :source => branch[:source],
         :repo   => repo_params
       )
+    end
+
+    def url_not_recognized(branch)
+      if branch[:lighthouse_url]
+        puts "Please run `git cycle setup lighthouse TOKEN`.".red.space
+      else
+        puts "URL not recognized.".red.space
+      end
     end
   end
 end

@@ -36,7 +36,10 @@ module Gitcycle
         puts "Gitcycle URL not found (`git cycle setup url`).".space(true).red
       end
 
-      exit  unless Config.token && Config.url
+      unless Config.token && Config.url
+        raise Exit::Exception.new(:config_not_found)
+      end
+
       true
     end
 
@@ -46,7 +49,7 @@ module Gitcycle
       unless Config.git_url && Config.git_repo && Config.git_login
         puts "Could not find origin entry within \".git/config\"!".space.red
         puts "Are you sure you are in a git repository?".space.yellow
-        exit ERROR[:git_origin_not_found]
+        raise Exit::Exception.new(:git_origin_not_found)
       end
 
       true

@@ -29,7 +29,7 @@ module Gitcycle
         puts output.gsub(/^/, "  ")
 
         puts ""
-        exit 1
+        raise Exit::Exception.new(:git_fail)
       end
     end
   end
