@@ -39,8 +39,11 @@ module Gitcycle
           end
         end
 
-        add_remote_and_fetch(remote, repo, branch_name)
-        checkout(remote, branch_name, :branch => target)
+        output = add_remote_and_fetch(remote, repo, branch_name)
+        
+        if errored?(output)
+          checkout(remote, branch_name, :branch => target)
+        end
       end
     end
   end
