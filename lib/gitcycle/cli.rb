@@ -8,8 +8,6 @@ module Gitcycle
 
     desc "feature URL|TITLE", "Create or switch to a feature branch"
     option :branch, :type => :string,  :aliases => [ :b ]
-    option :new,    :type => :boolean, :aliases => [ :n ]
-    option :source, :type => :string,  :aliases => [ :s ]
     def feature(url_or_title)
       Exit.watch { Feature.new.feature(url_or_title, options) }
     end
@@ -100,7 +98,6 @@ module Gitcycle
 
     desc "track (REMOTE/)BRANCH", "Smart branch checkout that \"just works\""
     option :'no-checkout', :type => :boolean
-    option :recreate,      :type => :boolean
     def track(branch)
       Exit.watch { Track.new.track(branch, options) }
     end
