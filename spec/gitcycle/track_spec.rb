@@ -13,14 +13,7 @@ describe Gitcycle::Track do
     gitcycle
     gitcycle.stub(:sync)
 
-    webmock(:branch, :post,
-      :request => {
-        :repo => {
-          :name => "git_repo",
-          :user => { :login => "git_login" }
-        }
-      }
-    )
+    webmock(:branch, :post)
   end
 
   context "when branch exists on fork" do

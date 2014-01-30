@@ -8,15 +8,7 @@ describe Gitcycle::PR do
   end
 
   let(:webmock_post) do
-    {
-      :request  => {
-        :ready  => "false",
-        :repo   => {
-          :name => "git_repo",
-          :user => { :login => "git_login" }
-        }
-      }
-    }
+    { :request  => { :ready  => "false" } }
   end
 
   before(:each) do

@@ -8,15 +8,7 @@ describe Gitcycle::Sync do
   end
 
   let(:webmock_get) do
-    {
-      :request => {
-        :name => "branch",
-        :repo => {
-          :name => "git_repo",
-          :user => { :login => "git_login" }
-        }
-      }
-    }
+    { :request => { :name => "branch" } }
   end
 
   before(:each) do
@@ -33,7 +25,7 @@ describe Gitcycle::Sync do
       with("repo:user:login", "repo:name", "name")
     Gitcycle::Git.should_receive(:push).
       with("repo:user:login", "name")
-    
+
     gitcycle.sync
   end
 end

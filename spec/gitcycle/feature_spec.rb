@@ -9,20 +9,10 @@ describe Gitcycle::Feature do
 
   let :webmock_params do
     {
-      :request => {
-        :id    => :_DEL,
-        :repo  => {
-          :name => "git_repo",
-          :user => { :login => "git_login" }
-        }
-      },
+      :request  => { :id => :_DEL },
       :response => {
-        :id    => :_DEL,
-        :title => "title",
-        :repo  => {
-          :name => "git_repo",
-          :user => { :login => "git_login" }
-        },
+        :id     => :_DEL,
+        :title  => "title",
         :source_branch => { :id => :_DEL }
       },
       :required => [ :source_branch ]
@@ -53,11 +43,11 @@ describe Gitcycle::Feature do
     ).ordered
     
     Gitcycle::Git.should_receive(:merge_remote_branch).with(
-      "git_login", "git_repo", branch
+      "repo:user:login", "repo:name", branch
     ).ordered
     
     Gitcycle::Git.should_receive(:push).with(
-      "git_login", branch
+      "repo:user:login", branch
     ).ordered
   end
 
@@ -272,9 +262,5 @@ describe Gitcycle::Feature do
         'Creating feature branch "name" from "source_branch:name"'
       )
     end
-  end
-
-  context "when offline" do
-    # TODO: develop offline mode
   end
 end
