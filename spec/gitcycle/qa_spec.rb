@@ -22,21 +22,11 @@ describe Gitcycle::QA do
   end
 
   before(:each) do
+    git_mock
     gitcycle
-    
-    stub_const("Gitcycle::Git", GitMock)
-    
-    GitMock.load
 
-    Gitcycle::Git.stub(:branch)
     Gitcycle::Git.stub(:branches).and_return("source")
-    Gitcycle::Git.stub(:checkout)
-    Gitcycle::Git.stub(:merge)
-    Gitcycle::Git.stub(:push)
-
-    gitcycle.stub(:merge)
     gitcycle.stub(:track)
-    gitcycle.stub(:change_issue_status)
   end
 
   describe "branch ISSUE#" do
@@ -45,34 +35,16 @@ describe Gitcycle::QA do
       webmock(:issues, :get, webmock_get)
     end
 
-    it "runs without assertions" do
-      gitcycle.branch("123")
-    end
-
-    it "calls methods with correct parameters" do
-      gitcycle.should_receive(:track).ordered.
-        with("source")
-
-      Gitcycle::Git.should_receive(:branches).ordered.
-        with(:match => "qa-123").
-        and_return(true)
-
-      Gitcycle::Git.should_receive(:branch).ordered.
+    it "calls Git with correct parameters" do
+      Gitcycle::Git.should_receive(:branch).
         with("qa-123", :delete => true)
-
-      Gitcycle::Git.should_receive(:push).ordered.
+      Gitcycle::Git.should_receive(:push).
         with(":qa-123")
-
-      Gitcycle::Git.should_receive(:branch).ordered.
+      Gitcycle::Git.should_receive(:branch).
         with("qa-123")
-
-      Gitcycle::Git.should_receive(:checkout).ordered.
+      Gitcycle::Git.should_receive(:checkout).
         with("qa-123")
-      
-      gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/qa-name", :"no-checkout" => true, :recreate => true)
-
-      Gitcycle::Git.should_receive(:merge).ordered.
+      Gitcycle::Git.should_receive(:merge).
         with("repo:user:login", "qa-name")
       
       gitcycle.branch("123")
@@ -85,15 +57,10 @@ describe Gitcycle::QA do
       webmock(:issues, :put, webmock_put)
     end
 
-    it "runs without assertions" do
-      gitcycle.fail("123")
-    end
-
-    it "calls methods with correct parameters" do
-      Gitcycle::Git.should_receive(:branch).ordered.
+    it "calls Git with correct parameters" do
+      Gitcycle::Git.should_receive(:branch).
         with("qa-123", :delete => true)
-
-      Gitcycle::Git.should_receive(:push).ordered.
+      Gitcycle::Git.should_receive(:push).
         with(":qa-123")
       
       gitcycle.fail("123")
@@ -102,27 +69,21 @@ describe Gitcycle::QA do
 
   describe "pass ISSUE#" do
 
+    let :webmock_put_with_pending_deploy do
+      Gitcycle::Util.deep_merge(webmock_put,
+        :request => { :state => "pending deploy" }
+      )
+    end
+
     before :each do
       webmock(:issues, :get, webmock_get)
+      webmock(:issues, :put, webmock_put_with_pending_deploy)
     end
 
-    it "runs without assertions" do
-      gitcycle.pass("123")
-    end
-
-    it "calls methods with correct parameters" do
-      gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/source")
-      
-      gitcycle.should_receive(:track).ordered.
-        with("repo:user:login/qa-name", :"no-checkout" => true, :recreate => true)
-
-      Gitcycle::Git.should_receive(:merge).ordered.
+    it "calls methods with correct parameters", :capture do
+      Gitcycle::Git.should_receive(:merge).
         with("repo:user:login", "qa-name")
 
-      gitcycle.should_receive(:change_issue_status).ordered.
-        with([ 123 ], "pending deploy")
-      
       gitcycle.pass("123")
     end
   end

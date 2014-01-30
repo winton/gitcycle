@@ -105,7 +105,7 @@ module Gitcycle
       qa_branch_issues.map { |issue| issue[1..-1] }
     end
 
-    def track(branch, options)
+    def track(branch, options={})
       Track.new.track(branch, options)
     end
   end

@@ -6,6 +6,12 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
+        id:
+          type: integer
+          optional: true
+        github_issue_id:
+          type: integer
+          optional: true
         github_url:
           type: string
           optional: true
@@ -13,9 +19,6 @@ branch.json:
           type: string
           optional: true
         name:
-          type: string
-          optional: true
-        source:
           type: string
           optional: true
         title:
@@ -38,8 +41,9 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        created:
-          type: boolean
+        id:
+          type: integer
+          optional: true
         github_issue_id:
           type: integer
           optional: true
@@ -51,31 +55,70 @@ branch.json:
           optional: true
         name:
           type: string
-        source:
-          type: string
+          optional: false
         title:
           type: string
+          optional: true
         repo:
           type: object
           additionalProperties: false
           properties:
             name:
               type: string
-            owner:
-              type: object
-              additionalProperties: false
-              properties:
-                login:
-                  type: string
-                name:
-                  type: string
             user:
               type: object
               additionalProperties: false
               properties:
                 login:
                   type: string
+        user:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+        source_branch:
+          optional: true
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: integer
+              optional: false
+            github_issue_id:
+              type: integer
+              optional: true
+            github_url:
+              type: string
+              optional: true
+            lighthouse_url:
+              type: string
+              optional: true
+            name:
+              type: string
+              optional: false
+            title:
+              type: string
+              optional: true
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
                 name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
+            user:
+              optional: true
+              type: object
+              additionalProperties: false
+              properties:
+                login:
                   type: string
   post:
     request:
@@ -83,36 +126,9 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        github_url:
-          type: string
-          optional: true
-        lighthouse_url:
-          type: string
-          optional: true
-        source:
-          type: string
-        title:
-          type: string
-          optional: true
-        repo:
-          type: object
-          additionalProperties: false
-          properties:
-            name:
-              type: string
-            user:
-              type: object
-              additionalProperties: false
-              properties:
-                login:
-                  type: string
-    response:
-      title: POST branch.json (response)
-      type: object
-      additionalProperties: false
-      properties:
-        created:
-          type: boolean
+        id:
+          type: integer
+          optional: false
         github_issue_id:
           type: integer
           optional: true
@@ -124,31 +140,124 @@ branch.json:
           optional: true
         name:
           type: string
-        source:
-          type: string
+          optional: false
         title:
           type: string
+          optional: true
         repo:
           type: object
           additionalProperties: false
           properties:
             name:
               type: string
-            owner:
-              type: object
-              additionalProperties: false
-              properties:
-                login:
-                  type: string
-                name:
-                  type: string
             user:
               type: object
               additionalProperties: false
               properties:
                 login:
                   type: string
+        source_branch:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
                 name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
+    response:
+      title: POST branch.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          optional: false
+        github_issue_id:
+          type: integer
+          optional: true
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        name:
+          type: string
+          optional: false
+        title:
+          type: string
+          optional: false
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+        user:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+        source_branch:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: integer
+              optional: false
+            github_issue_id:
+              type: integer
+              optional: true
+            github_url:
+              type: string
+              optional: true
+            lighthouse_url:
+              type: string
+              optional: true
+            name:
+              type: string
+              optional: false
+            title:
+              type: string
+              optional: true
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
+            user:
+              optional: true
+              type: object
+              additionalProperties: false
+              properties:
+                login:
                   type: string
   put:
     request:
@@ -156,29 +265,9 @@ branch.json:
       type: object
       additionalProperties: false
       properties:
-        name:
-          type: string
-        source:
-          type: string
-        repo:
-          type: object
-          additionalProperties: false
-          properties:
-            name:
-              type: string
-            user:
-              type: object
-              additionalProperties: false
-              properties:
-                login:
-                  type: string
-    response:
-      title: PUT branch.json (response)
-      type: object
-      additionalProperties: false
-      properties:
-        created:
-          type: boolean
+        id:
+          type: integer
+          optional: false
         github_issue_id:
           type: integer
           optional: true
@@ -190,31 +279,124 @@ branch.json:
           optional: true
         name:
           type: string
-        source:
-          type: string
+          optional: false
         title:
           type: string
+          optional: true
         repo:
           type: object
           additionalProperties: false
           properties:
             name:
               type: string
-            owner:
-              type: object
-              additionalProperties: false
-              properties:
-                login:
-                  type: string
-                name:
-                  type: string
             user:
               type: object
               additionalProperties: false
               properties:
                 login:
                   type: string
+        source_branch:
+          optional: true
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
                 name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
+    response:
+      title: PUT branch.json (response)
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: integer
+          optional: false
+        github_issue_id:
+          type: integer
+          optional: true
+        github_url:
+          type: string
+          optional: true
+        lighthouse_url:
+          type: string
+          optional: true
+        name:
+          type: string
+          optional: false
+        title:
+          type: string
+          optional: false
+        repo:
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            user:
+              type: object
+              additionalProperties: false
+              properties:
+                login:
+                  type: string
+        user:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+        source_branch:
+          optional: true
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: integer
+              optional: false
+            github_issue_id:
+              type: integer
+              optional: true
+            github_url:
+              type: string
+              optional: true
+            lighthouse_url:
+              type: string
+              optional: true
+            name:
+              type: string
+              optional: false
+            title:
+              type: string
+              optional: true
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
+            user:
+              optional: true
+              type: object
+              additionalProperties: false
+              properties:
+                login:
                   type: string
 issues.json:
   get:
@@ -232,8 +414,9 @@ issues.json:
         type: object
         additionalProperties: false
         properties:
-          created:
-            type: boolean
+          id:
+            type: integer
+            optional: false
           github_issue_id:
             type: integer
             optional: true
@@ -245,31 +428,70 @@ issues.json:
             optional: true
           name:
             type: string
-          source:
-            type: string
+            optional: false
           title:
             type: string
+            optional: false
           repo:
             type: object
             additionalProperties: false
             properties:
               name:
                 type: string
-              owner:
-                type: object
-                additionalProperties: false
-                properties:
-                  login:
-                    type: string
-                  name:
-                    type: string
               user:
                 type: object
                 additionalProperties: false
                 properties:
                   login:
                     type: string
+          user:
+            optional: false
+            type: object
+            additionalProperties: false
+            properties:
+              login:
+                type: string
+          source_branch:
+            optional: false
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: integer
+                optional: false
+              github_issue_id:
+                type: integer
+                optional: true
+              github_url:
+                type: string
+                optional: true
+              lighthouse_url:
+                type: string
+                optional: true
+              name:
+                type: string
+                optional: false
+              title:
+                type: string
+                optional: true
+              repo:
+                type: object
+                additionalProperties: false
+                properties:
                   name:
+                    type: string
+                  user:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      login:
+                        type: string
+              user:
+                optional: true
+                type: object
+                additionalProperties: false
+                properties:
+                  login:
                     type: string
   put:
     request:
@@ -288,8 +510,9 @@ issues.json:
         type: object
         additionalProperties: false
         properties:
-          created:
-            type: boolean
+          id:
+            type: integer
+            optional: false
           github_issue_id:
             type: integer
             optional: true
@@ -301,31 +524,70 @@ issues.json:
             optional: true
           name:
             type: string
-          source:
-            type: string
+            optional: false
           title:
             type: string
+            optional: false
           repo:
             type: object
             additionalProperties: false
             properties:
               name:
                 type: string
-              owner:
-                type: object
-                additionalProperties: false
-                properties:
-                  login:
-                    type: string
-                  name:
-                    type: string
               user:
                 type: object
                 additionalProperties: false
                 properties:
                   login:
                     type: string
+          user:
+            optional: false
+            type: object
+            additionalProperties: false
+            properties:
+              login:
+                type: string
+          source_branch:
+            optional: false
+            type: object
+            additionalProperties: false
+            properties:
+              id:
+                type: integer
+                optional: false
+              github_issue_id:
+                type: integer
+                optional: true
+              github_url:
+                type: string
+                optional: true
+              lighthouse_url:
+                type: string
+                optional: true
+              name:
+                type: string
+                optional: false
+              title:
+                type: string
+                optional: true
+              repo:
+                type: object
+                additionalProperties: false
+                properties:
                   name:
+                    type: string
+                  user:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      login:
+                        type: string
+              user:
+                optional: true
+                type: object
+                additionalProperties: false
+                properties:
+                  login:
                     type: string
 logs.json:
   post:
@@ -386,8 +648,9 @@ pull_request.json:
       type: object
       additionalProperties: false
       properties:
-        created:
-          type: boolean
+        id:
+          type: integer
+          optional: false
         github_issue_id:
           type: integer
           optional: true
@@ -399,31 +662,70 @@ pull_request.json:
           optional: true
         name:
           type: string
-        source:
-          type: string
+          optional: false
         title:
           type: string
+          optional: false
         repo:
           type: object
           additionalProperties: false
           properties:
             name:
               type: string
-            owner:
-              type: object
-              additionalProperties: false
-              properties:
-                login:
-                  type: string
-                name:
-                  type: string
             user:
               type: object
               additionalProperties: false
               properties:
                 login:
                   type: string
+        user:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            login:
+              type: string
+        source_branch:
+          optional: false
+          type: object
+          additionalProperties: false
+          properties:
+            id:
+              type: integer
+              optional: false
+            github_issue_id:
+              type: integer
+              optional: true
+            github_url:
+              type: string
+              optional: true
+            lighthouse_url:
+              type: string
+              optional: true
+            name:
+              type: string
+              optional: false
+            title:
+              type: string
+              optional: true
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
                 name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
+            user:
+              optional: true
+              type: object
+              additionalProperties: false
+              properties:
+                login:
                   type: string
 repo.json:
   post:
@@ -447,21 +749,11 @@ repo.json:
       properties:
         name:
           type: string
-        owner:
-          type: object
-          additionalProperties: false
-          properties:
-            login:
-              type: string
-            name:
-              type: string
         user:
           type: object
           additionalProperties: false
           properties:
             login:
-              type: string
-            name:
               type: string
 setup/lighthouse.json:
   get:

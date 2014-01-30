@@ -20,11 +20,8 @@ describe Gitcycle::PR do
   end
 
   before(:each) do
+    git_mock
     gitcycle
-    
-    stub_const("Gitcycle::Git", GitMock)
-    
-    GitMock.load
     Gitcycle::Git.stub(:branches).and_return("branch")
   end
 

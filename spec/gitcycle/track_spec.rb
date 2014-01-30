@@ -17,11 +17,10 @@ describe Gitcycle::Track do
   end
 
   before(:each) do
+    git_mock
+
     gitcycle
     gitcycle.stub(:sync)
-    
-    stub_const("Gitcycle::Git", GitMock)
-    GitMock.load
 
     webmock(:repo, :post, webmock_post)
   end

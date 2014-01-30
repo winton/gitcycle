@@ -156,6 +156,7 @@ describe Gitcycle::Git do
       git.stub(:branch)
       git.stub(:pull)
       git.stub(:add_remote_and_fetch)
+      git.stub(:errored?).and_return(true)
     end
 
     context "when matching branch found" do

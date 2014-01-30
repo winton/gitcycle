@@ -20,24 +20,20 @@ describe Gitcycle::Sync do
   end
 
   before(:each) do
+    git_mock
     gitcycle
-    
-    stub_const("Gitcycle::Git", GitMock)
-    
-    GitMock.load
-    Gitcycle::Git.stub(:branches).and_return("branch")
 
+    Gitcycle::Git.stub(:branches).and_return("branch")
+    
     webmock(:branch, :get, webmock_get)
   end
 
-  it "calls Git with proper parameters", :capture do
-    Gitcycle::Git.should_receive(:merge_remote_branch).with(
-      "repo:user:login", "repo:name", "name"
-    ).ordered
-    Gitcycle::Git.should_receive(:merge_remote_branch).with(
-      "repo:owner:login", "repo:name", "source"
-    ).ordered
-    Gitcycle::Git.should_receive(:push).with("repo:user:login", "name")
+  it "calls Git with proper parameters" do
+    Gitcycle::Git.should_receive(:merge_remote_branch).
+      with("repo:user:login", "repo:name", "name")
+    Gitcycle::Git.should_receive(:push).
+      with("repo:user:login", "name")
+    
     gitcycle.sync
   end
 end

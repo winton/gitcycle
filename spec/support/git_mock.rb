@@ -12,3 +12,10 @@ class GitMock
     end
   end
 end
+
+RSpec.configure do |c|
+  def git_mock
+    stub_const("Gitcycle::Git", GitMock)
+    GitMock.load
+  end
+end

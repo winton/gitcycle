@@ -18,6 +18,8 @@ RSpec.configure do
     stub_request(method, "#{Gitcycle::Config.url}/#{resource}.json").
       with(:body => body, :headers => headers, :query => to_params(query)).
       to_return(:status => 200, :body => response.to_json, :headers => {})
+
+    [ request, response ]
   end
 
   def to_params(hash)

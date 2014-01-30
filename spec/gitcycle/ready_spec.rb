@@ -8,13 +8,11 @@ describe Gitcycle::Ready do
   end
 
   before(:each) do
+    git_mock
     gitcycle
-    
-    stub_const("Gitcycle::Git", GitMock)
-    GitMock.load
 
     request, response = json_schema_params(:branch, :get,
-      :response => { :github_issue_id => 123 }
+      :response => { :github_issue_id => 123, :title => "title" }
     )
     gitcycle.stub(:sync).and_return(response)
     gitcycle.stub(:pr)

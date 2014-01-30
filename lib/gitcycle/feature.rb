@@ -8,15 +8,32 @@ module Gitcycle
     end
 
     def feature(url_or_title, options={})
-      params = branch_create_params(url_or_title)
-      branch = Api.branch(:create, params)
+      params = branch_params(:url_or_title => url_or_title)
+      branch = Api.branch(params)
+
+      create = !branch[:id] || options[:new]
+      update =  branch[:id] && (options[:branch] || options[:update])
+      delete =  options[:delete]
       
       if !branch[:title]
         url_not_recognized(branch)
-      elsif branch[:created] || options[:new]
-        changed = change_target(branch, options)
+      elsif create || update
+        if options[:branch]
+          branch[:name] = options[:branch]
+        else
+          changed = change_target(branch, options)
+        end
+
         checkout_and_sync(branch, options)
-        update_branch(branch)  if changed
+        branch.delete(:user)
+
+        if create
+          Api.branch(:create, branch)
+        elsif update && changed
+          Api.branch(:update, branch)
+        end
+      elsif delete
+        Api.branch(:delete, :id => branch[:id])
       else
         track(branch)
       end
@@ -24,50 +41,65 @@ module Gitcycle
 
     private
 
-    def change_target(branch, options)
-      if options[:source]
-        return branch[:source] = options[:source]
-      else
-        question = <<-STR
-          Your work will eventually merge into "#{branch[:source]}". Correct?
-        STR
+    def branch_params(options)
+      params = { :repo => repo_params }
 
-        unless yes?(question)
-          return branch[:source] =
-            q("What branch would you like to eventually merge into?")
+      if uot = options[:url_or_title]
+        url, title = parse_url_or_title(uot)
+
+        if url
+          params.merge!(ticket_provider_params(url))
+        elsif title
+          params.merge!(:title => title)
         end
       end
 
-      false
+      params
+    end
+
+    def change_target(branch, options)
+      source        = options[:source] || Git.branches(:current => true)
+      source_branch = branch[:source_branch]
+      login         = source_branch[:repo][:user][:login]
+      name          = source_branch[:name]
+
+      question = <<-STR
+        Your work will eventually merge into "#{login}/#{name}". Correct?
+      STR
+
+      if changed = !yes?(question)
+        question = "What branch would you like to eventually merge into?"
+        answer   = q(question).split("/")
+
+        if answer[1]
+          login, name = answer
+        else
+          login, name = login, answer[0]
+        end
+      end
+
+      branch[:source_branch] = {
+        :name => name,
+        :repo => {
+          :name => source_branch[:repo][:name],
+          :user => { :login => login }
+        }
+      }
+
+      changed
     end
 
     def checkout_and_sync(branch, options)
-      name    = options[:branch] || branch[:name]
-      owner   = branch[:repo][:owner][:login] rescue nil
-      onwer ||= branch[:repo][:user][:login]
-      repo    = branch[:repo][:name]
-      source  = branch[:source]
+      name          = options[:branch] || branch[:name]
+      source_branch = branch[:source_branch]
+      owner         = source_branch[:repo][:user][:login]
+      repo          = source_branch[:repo][:name]
+      source        = source_branch[:name]
 
       puts "Creating feature branch \"#{name}\" from \"#{source}\".".space
-      Git.checkout_remote_branch(owner, repo, branch[:source], :branch => name)
+      Git.checkout_remote_branch(owner, repo, source, :branch => name)
 
       sync_with_branch(branch, :exclude_owner => true)
-    end
-
-    def branch_create_params(url_or_title)
-      url, title = parse_url_or_title(url_or_title)
-      params     = {
-        :source => Git.branches(:current => true),
-        :repo   => repo_params
-      }
-
-      if url
-        params.merge!(ticket_provider_params(url))
-      elsif title
-        params.merge!(:title => title)
-      end
-
-      params
     end
     
     def parse_url_or_title(url_or_title)
@@ -95,14 +127,6 @@ module Gitcycle
         puts "Gitcycle only supports Lighthouse or Github Issue URLs.".space.red
         raise Exit::Exception.new(:unrecognized_url)
       end
-    end
-
-    def update_branch(branch)
-      Api.branch(:update,
-        :name   => branch[:name],
-        :source => branch[:source],
-        :repo   => repo_params
-      )
     end
 
     def url_not_recognized(branch)
