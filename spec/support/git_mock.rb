@@ -8,7 +8,7 @@ class GitMock
     end
 
     def method_missing(method, *args, &block)
-      puts "Gitcycle::Git.should_receive(:#{method}).with(#{args.inspect}).and_return(nil)"
+      puts "Gitcycle::Git.should_receive(:#{method}).with(#{args.inspect[1..-2]})"
     end
   end
 end

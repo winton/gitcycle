@@ -11,29 +11,18 @@ module Gitcycle
       params = branch_params(:url_or_title => url_or_title)
       branch = Api.branch(params)
 
-      create = !branch[:id] || options[:new]
-      update =  branch[:id] && (options[:branch] || options[:update])
-      delete =  options[:delete]
-      
-      if !branch[:title]
+      create  = !branch[:id]
+      unknown = !branch[:name]
+
+      branch.delete(:user)
+      branch[:name] = options[:branch]  if options[:branch]
+
+      if unknown
         url_not_recognized(branch)
-      elsif create || update
-        if options[:branch]
-          branch[:name] = options[:branch]
-        else
-          changed = change_target(branch, options)
-        end
-
+      elsif create
+        change_target(branch, options)
         checkout_and_sync(branch, options)
-        branch.delete(:user)
-
-        if create
-          Api.branch(:create, branch)
-        elsif update && changed
-          Api.branch(:update, branch)
-        end
-      elsif delete
-        Api.branch(:delete, :name => branch[:name])
+        Api.branch(:create, branch)
       else
         track(branch)
       end
@@ -90,7 +79,7 @@ module Gitcycle
     end
 
     def checkout_and_sync(branch, options)
-      name          = options[:branch] || branch[:name]
+      name          = branch[:name]
       source_branch = branch[:source_branch]
       owner         = source_branch[:repo][:user][:login]
       repo          = source_branch[:repo][:name]

@@ -104,12 +104,6 @@ describe Gitcycle::Feature do
 
     context "when the user changes the name of the branch" do
 
-      let(:webmock_get_with_id) do
-        Gitcycle::Util.deep_merge(webmock_params_with_lighthouse_url,
-          :response => { :id => 1 }
-        )
-      end
-
       let(:webmock_post_with_name) do
         Gitcycle::Util.deep_merge(webmock_post_with_lighthouse_url,
           :request  => { :name => 'new-name' },
@@ -118,7 +112,7 @@ describe Gitcycle::Feature do
       end
 
       before :each do
-        webmock(:branch, :get,  webmock_get_with_id)
+        webmock_branch_get
         webmock(:branch, :post, webmock_post_with_name)
 
         $stdin.stub(:gets).and_return("y")
