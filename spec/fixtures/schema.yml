@@ -128,7 +128,7 @@ branch.json:
       properties:
         id:
           type: integer
-          optional: false
+          optional: true
         github_issue_id:
           type: integer
           optional: true
@@ -157,7 +157,7 @@ branch.json:
                 login:
                   type: string
         source_branch:
-          optional: false
+          optional: true
           type: object
           additionalProperties: false
           properties:

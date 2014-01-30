@@ -8,61 +8,57 @@ module Gitcycle
     end
 
     def track(branch, options={})
-      branch, login, repo = branch_info(branch)
-      recreate(branch, options)
+      branch = create_branch(branch)
+      source = branch[:source_branch]
 
-      output        = Git.add_remote_and_fetch(login, Config.git_repo, branch)
-      login, output = fetch_from_repo_owner(branch, login, output, repo)
+      login = source[:repo][:user][:login]
+      repo  = source[:repo][:name]
+      name  = source[:name]
+
+      output = Git.add_remote_and_fetch(login, repo, name)
 
       if Git.errored?(output)
-        puts "Couldn't find '#{login}/#{branch}'.".red.space
+        puts "Couldn't find '#{login}/#{repo}/#{name}'.".red.space
         exit
-      else
-        checkout(branch, login, options)
+      elsif !options[:'no-checkout']
+        checkout(name, login)
         sync
       end
     end
 
     private
 
-    def fetch_from_repo_owner(branch, login, output, repo)
-      if repo && repo[:owner] && Git.errored?(output)
-        login  = repo[:owner][:login]
-        output = Git.add_remote_and_fetch(login, Config.git_repo, branch)
-      end
-      [ login, output ]
-    end
-
-    def branch_info(branch)
-      if branch.is_a?(Hash)
-        login, branch = branch[:repo][:user][:login], branch[:name]
-      elsif branch.include?("/")
-        login, branch = branch.split("/")
-      else
-        repo = Api.repo(repo_params)
-        login = repo[:user][:login]
-      end
-
-      [ branch, login, repo ]
-    end
-
-    def checkout(branch, login, options)
+    def checkout(branch, login)
       puts "Creating branch '#{branch}' from '#{login}/#{branch}'.".green.space
       Git.branch(login, "#{login}/#{branch}")
+      Git.checkout(branch)
+    end
 
-      unless options[:'no-checkout']
-        Git.checkout(branch)
+    def create_branch(branch)
+      return branch  if branch.is_a?(Hash)
+
+      params = {
+        :name => branch,
+        :repo => repo_params
+      }
+
+      if branch.include?("/")
+        login, name = branch.split("/")
+
+        branch[:source_branch] = {
+          :name => name,
+          :repo => {
+            :name => name,
+            :user => { :login => login }
+          }
+        }
       end
+      
+      Api.branch(:create, params)
     end
 
     def sync
       Sync.new.sync
-    end
-
-    def recreate(branch, options)
-      if options[:recreate] && Git.branches(:match => branch)
-        Git.branch(branch, :delete => true)
-      end
     end
   end
 end

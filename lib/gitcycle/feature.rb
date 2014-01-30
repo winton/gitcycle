@@ -33,7 +33,7 @@ module Gitcycle
           Api.branch(:update, branch)
         end
       elsif delete
-        Api.branch(:delete, :id => branch[:id])
+        Api.branch(:delete, :name => branch[:name])
       else
         track(branch)
       end
