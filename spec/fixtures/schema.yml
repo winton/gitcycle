@@ -36,6 +36,25 @@ branch.json:
               properties:
                 login:
                   type: string
+        source_branch:
+          optional: true
+          type: object
+          additionalProperties: false
+          properties:
+            name:
+              type: string
+            repo:
+              type: object
+              additionalProperties: false
+              properties:
+                name:
+                  type: string
+                user:
+                  type: object
+                  additionalProperties: false
+                  properties:
+                    login:
+                      type: string
     response:
       title: GET branch.json (response)
       type: object

@@ -9,6 +9,8 @@ module Gitcycle
 
       def branch(method, params=nil)
         method, params = method_parameters(method, params)
+        params.delete(:user)
+
         request(method, "/branch.json", params)
       end
 
@@ -19,6 +21,7 @@ module Gitcycle
       def issues(method, params=nil)
         method, params  = method_parameters(method, params)
         params[:issues] = params[:issues].join(",")
+        
         request(method, "/issues.json", params)
       end
 

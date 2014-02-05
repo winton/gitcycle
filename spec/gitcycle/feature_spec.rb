@@ -19,6 +19,18 @@ describe Gitcycle::Feature do
     }
   end
 
+  let :webmock_get do
+    Gitcycle::Util.deep_merge(webmock_params,
+      :request => {
+        :source_branch => {
+          :name  => "source",
+          :repo  => :_DEL,
+          :title => :_DEL
+        }
+      }
+    )
+  end
+
   let :webmock_post do
     Gitcycle::Util.deep_merge(webmock_params,
       :request => { :title => "title" }
@@ -64,6 +76,13 @@ describe Gitcycle::Feature do
       )
     end
 
+    let :webmock_get_with_lighthouse_url do
+      Gitcycle::Util.deep_merge(
+        webmock_params_with_lighthouse_url,
+        webmock_get
+      )
+    end
+
     let :webmock_post_with_lighthouse_url do
       Gitcycle::Util.deep_merge(
         webmock_params_with_lighthouse_url,
@@ -72,7 +91,7 @@ describe Gitcycle::Feature do
     end
 
     let :webmock_branch_get do
-      webmock(:branch, :get,  webmock_params_with_lighthouse_url)
+      webmock(:branch, :get,  webmock_get_with_lighthouse_url)
     end
 
     let :webmock_branch_post do
@@ -163,14 +182,14 @@ describe Gitcycle::Feature do
 
     context "when the branch already exists" do
 
-      let(:webmock_params_with_id) do
-        Gitcycle::Util.deep_merge(webmock_params_with_lighthouse_url,
+      let(:webmock_get_with_id) do
+        Gitcycle::Util.deep_merge(webmock_get_with_lighthouse_url,
           :response => { :id => 1 }
         )
       end
 
       before :each do
-        webmock(:branch, :get, webmock_params_with_id)
+        webmock(:branch, :get, webmock_get_with_id)
         webmock_branch_post
 
         $stdin.stub(:gets).and_return("y")
@@ -192,6 +211,10 @@ describe Gitcycle::Feature do
       )
     end
 
+    let(:webmock_get_with_title) do
+      Gitcycle::Util.deep_merge(webmock_get, webmock_params_with_title)
+    end
+
     let(:webmock_post_with_title) do
       Gitcycle::Util.deep_merge(
         Gitcycle::Util.deep_merge(webmock_post, webmock_params_with_title),
@@ -202,7 +225,7 @@ describe Gitcycle::Feature do
     before :each do
       $stdin.stub(:gets).and_return("y")
       
-      webmock(:branch, :get,  webmock_params_with_title)
+      webmock(:branch, :get,  webmock_get_with_title)
       webmock(:branch, :post, webmock_post_with_title)
     end
 
@@ -230,6 +253,13 @@ describe Gitcycle::Feature do
       )
     end
 
+    let(:webmock_get_with_github_url) do
+      Gitcycle::Util.deep_merge(
+        webmock_params_with_github_url,
+        webmock_get
+      )
+    end
+
     let(:webmock_post_with_github_url) do
       Gitcycle::Util.deep_merge(
         webmock_params_with_github_url,
@@ -240,7 +270,7 @@ describe Gitcycle::Feature do
     before :each do
       $stdin.stub(:gets).and_return("y")
       
-      webmock(:branch, :get,  webmock_params_with_github_url)
+      webmock(:branch, :get,  webmock_get_with_github_url)
       webmock(:branch, :post, webmock_post_with_github_url)
     end
 
