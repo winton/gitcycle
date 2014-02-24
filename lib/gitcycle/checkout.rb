@@ -35,6 +35,37 @@ class Gitcycle
           puts results
           puts "\nDid not switch branches. Please check your ticket number.\n".red
         end
+      # Example:
+      # ~/src/breport>> gitc checkout list                                                                                                                                   (git)-[master-14916-security-disable]
+      # 1. master
+      # 2. master-12345-branch
+      # 3. master-67890-branch
+      # Which branch would you like to checkout?
+      # 3
+      # => runs `gitc checkout master-67890-branch`
+      elsif args[0] =~ /^list/
+        branch_list = %x{git branch}.split("\n")
+        branch_count = branch_list.size
+
+        branch_list.each_with_index do |b,i|
+          i += 1
+          b.strip!
+          if b =~ /^\*/
+            b.gsub!('*','')
+            b.strip! 
+          end
+
+          puts "#{i}. #{b}"
+        end
+
+        puts "Which branch would you like to checkout?"
+        input = STDIN.gets.chomp
+        if input =~ /^\d{1,3}/ && (1..branch_count).include?(input.to_i)
+          index = input.to_i - 1
+          run("gitc checkout -q #{branch_list.at(index)}")
+        else
+          puts "You must select a valid branch number."
+        end
       else
         remote, branch = args[0].split('/')
         remote, branch = nil, remote if branch.nil?
