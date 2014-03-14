@@ -6,12 +6,6 @@ module Gitcycle
       Exit.watch { Alias.new.alias }
     end
 
-    desc "feature URL|TITLE", "Create or switch to a feature branch"
-    option :branch, :type => :string,  :aliases => [ :b ]
-    def feature(url_or_title)
-      Exit.watch { Feature.new.feature(url_or_title, options) }
-    end
-
     desc "pr", "Create a pull request from current feature branch"
     def pr(ready=false)
       Exit.watch { PR.new.pr(ready) }
@@ -96,10 +90,18 @@ module Gitcycle
       Exit.watch { nil }
     end
 
-    desc "track (REMOTE/)BRANCH", "Smart branch checkout that \"just works\""
-    option :'no-checkout', :type => :boolean
-    def track(branch)
-      Exit.watch { Track.new.track(branch, options) }
+    desc "track QUERY", "Smart branch checkout that \"just works\""
+    option :'branch',         :type => :string,  :desc => "New branch name"
+    option :'github_url',     :type => :string,  :desc => "Github issue URL"
+    option :'id',             :type => :numeric, :desc => "Gitcycle record id"
+    option :'lighthouse_url', :type => :string,  :desc => "Lighthouse ticket URL"
+    option :'query',          :type => :string,  :desc => "Branch name, title, or URL"
+    option :'repo',           :type => :string,  :desc => "Repository to checkout branch from"
+    option :'reset',          :type => :string,  :desc => "Recreate gitcycle record"
+    option :'source',         :type => :string,  :desc => "Branch to base feature off of"
+    option :'title',          :type => :string,  :desc => "Title (if no ticket or issue exists)"
+    def track(query)
+      Exit.watch { Track.new.track(query, options) }
     end
   end
 end

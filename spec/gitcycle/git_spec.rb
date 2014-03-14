@@ -173,8 +173,6 @@ describe Gitcycle::Git do
             with("target", :delete => true).ordered
           git.should_receive(:add_remote_and_fetch).
             with("remote", "repo", "branch").ordered
-          git.should_receive(:checkout).
-            with("remote", "branch", :branch => "target").ordered
 
           git.checkout_remote_branch("remote", "repo", "branch", :branch => "target")
         end
@@ -202,8 +200,6 @@ describe Gitcycle::Git do
       it "calls correct methods" do
         git.should_receive(:add_remote_and_fetch).
           with("remote", "repo", "branch").ordered
-        git.should_receive(:checkout).
-          with("remote", "branch", :branch => "target").ordered
 
         git.checkout_remote_branch("remote", "repo", "branch", :branch => "target")
       end

@@ -41,6 +41,11 @@ module Gitcycle
         request(:post, "/setup/lighthouse.json", :token => token)
       end
 
+      def track(method, params=nil)
+        method, params = method_parameters(method, params)
+        request(method, "/track.json", params)
+      end
+
       def user
         request(:get, "/user.json")
       end
