@@ -1,8 +1,12 @@
 module Gitcycle
   class Rpc < Struct.new(:response)
 
+    def branch
+      response[:branch]
+    end
+
     def branch_name
-      branch[:branch][:name]
+      branch[:name]
     end
 
     def commands
