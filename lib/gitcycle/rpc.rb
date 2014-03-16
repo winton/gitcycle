@@ -1,6 +1,10 @@
 module Gitcycle
   class Rpc < Struct.new(:response)
 
+    def available_commands
+      self.public_methods(false).map(&:to_s)
+    end
+
     def branch
       response[:branch]
     end
@@ -24,7 +28,7 @@ module Gitcycle
 
     def execute
       commands.each do |method|
-        if self.public_methods(false).include?(method.intern)
+        if available_commands.include?(method)
           self.send(method, response)
         end
       end
