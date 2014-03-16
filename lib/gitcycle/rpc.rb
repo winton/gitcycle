@@ -9,6 +9,15 @@ module Gitcycle
       branch[:name]
     end
 
+    def checkout_from_remote
+      Git.checkout_remote_branch(
+        source_branch_repo_login,
+        source_branch_repo_name,
+        source_branch_name,
+        :branch => branch_name
+      )
+    end
+
     def commands
       response[:commands]
     end
@@ -19,15 +28,6 @@ module Gitcycle
           self.send(method, response)
         end
       end
-    end
-
-    def checkout_from_remote
-      Git.checkout_remote_branch(
-        source_branch_repo_login,
-        source_branch_repo_name,
-        source_branch_name,
-        :branch => branch_name
-      )
     end
 
     def source_branch_name
