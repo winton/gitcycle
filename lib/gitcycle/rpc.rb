@@ -29,7 +29,7 @@ module Gitcycle
     def execute
       commands.each do |method|
         if available_commands.include?(method)
-          self.send(method, response)
+          self.send(method)
         end
       end
     end

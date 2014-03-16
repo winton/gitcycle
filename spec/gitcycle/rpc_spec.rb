@@ -75,7 +75,7 @@ describe Gitcycle::Rpc do
     context "when public method exists" do
 
       let(:commands) { [ "checkout_from_remote" ] }
-      specify { expect(rpc).to have_received(:send).with("checkout_from_remote", response) }
+      specify { expect(rpc).to have_received(:send).with("checkout_from_remote") }
     end
 
     context "when public method does not exist" do
