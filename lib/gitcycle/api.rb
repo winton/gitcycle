@@ -7,24 +7,6 @@ module Gitcycle
   class Api
     class <<self
 
-      def branch(method, params=nil)
-        method, params = method_parameters(method, params)
-        params.delete(:user)
-
-        request(method, "/branch.json", params)
-      end
-
-      def branch_schema
-        request(:get, "/branch/new.json")
-      end
-
-      def issues(method, params=nil)
-        method, params  = method_parameters(method, params)
-        params[:issues] = params[:issues].join(",")
-        
-        request(method, "/issues.json", params)
-      end
-
       def logs(params)
         request(:post, "/logs.json", params)
       end

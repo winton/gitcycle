@@ -6,7 +6,7 @@ module Gitcycle
         remote, branch_name, opts = params(remote, branch_name, options)
 
         if options[:branch]
-          git("checkout remotes/#{remote}/#{branch_name} -q#{opts}")
+          git("checkout remotes/#{remote}/#{branch_name} -q#{opts} --track")
         else
           git("checkout #{branch_name} -q#{opts}")
         end

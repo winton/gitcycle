@@ -1,11 +1,6 @@
 module Gitcycle
   module Shared
 
-    def change_issue_status(issues, state)
-      puts "Changing state of issues to '#{state}'.".green.space
-      Api.issues(:update, :issues => issues, :state => state)
-    end
-
     def puts(*args)
       Log.log(:puts, args.join("\n").gsub(/\[(\d+)m/, ''))
       $stdout.puts *args

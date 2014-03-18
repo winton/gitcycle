@@ -18,16 +18,6 @@ module Gitcycle
         def branch(*issues)
           Exit.watch { Gitcycle::QA.new.branch(*issues) }
         end
-
-        desc "pass ISSUE#...", "Pass one or more github issues"
-        def pass(*issues)
-          Exit.watch { Gitcycle::QA.new.pass(*issues) }
-        end
-
-        desc "fail ISSUE#...", "Fail one or more github issues"
-        def fail(*issues)
-          Exit.watch { Gitcycle::QA.new.fail(*issues) }
-        end
       end
     end
 
@@ -38,24 +28,6 @@ module Gitcycle
     def ready
       Exit.watch { Ready.new.ready }
     end
-
-    module Subcommands
-      class Review < Thor
-
-        desc "pass ISSUE#...", "Pass one or more github issues"
-        def pass(*issues)
-          Exit.watch { Gitcycle::Review.new.pass(*issues) }
-        end
-
-        desc "fail ISSUE#...", "Fail one or more github issues"
-        def fail(*issues)
-          Exit.watch { Gitcycle::Review.new.fail(*issues) }
-        end
-      end
-    end
-
-    desc "review SUBCOMMAND", "Type `git cycle review` to see subcommands"
-    subcommand "review", Subcommands::Review
 
     module Subcommands
       class Setup < Thor
