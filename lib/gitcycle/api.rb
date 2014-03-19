@@ -15,10 +15,6 @@ module Gitcycle
         request(:post, "/pull_request.json", params)
       end
 
-      def repo(params)
-        request(:post, "/repo.json", params)
-      end
-
       def setup_lighthouse(token)
         request(:post, "/setup/lighthouse.json", :token => token)
       end

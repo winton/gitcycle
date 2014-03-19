@@ -12,37 +12,21 @@ module Gitcycle
         end
       end
 
-      def checkout_or_track(remote, branch_name=nil)
-        remote, branch_name = params(remote, branch_name)
-
-        if branches(:match => branch_name)
-          checkout(branch_name)
-        else
-          fetch(remote, branch_name)
-          checkout(remote, branch_name)
-        end
-
-        pull(remote, branch_name)
-      end
-
-      def checkout_remote_branch(remote, repo, branch_name, options={})
-        target = options[:branch]
-
-        if branches(:match => target)
-          if yes?("You already have a branch called \"#{target}\". Overwrite?")
+      def checkout_remote(remote, repo, source_branch, branch)
+        if branches(:match => branch)
+          if yes?("You already have a branch called \"#{branch}\". Overwrite?")
             checkout(:master)
-            branch(target, :delete => true)
+            branch(branch, :delete => true)
           else
-            checkout(target)
-            pull(remote, target)
+            checkout(branch)
             return
           end
         end
 
-        output = add_remote_and_fetch(remote, repo, branch_name)
+        output = add_remote_and_fetch(remote, repo, source_branch)
         
         unless errored?(output)
-          checkout(remote, branch_name, :branch => target)
+          checkout(remote, source_branch, :branch => branch)
         end
       end
     end

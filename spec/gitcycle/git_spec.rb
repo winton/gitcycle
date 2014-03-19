@@ -106,47 +106,7 @@ describe Gitcycle::Git do
     end
   end
 
-  describe ".checkout_or_track" do
-
-    before :each do
-      git.stub(:branches)
-      git.stub(:checkout)
-      git.stub(:fetch)
-      git.stub(:pull)
-    end
-
-    context "when matching branch found" do
-      it "calls correct methods" do
-        git.should_receive(:branches).
-          with(:match => "branch").ordered.
-          and_return("branch")
-        git.should_receive(:checkout).
-          with("branch").ordered
-        git.should_receive(:pull).
-          with("remote", "branch").ordered
-
-        git.checkout_or_track("remote", "branch")
-      end
-    end
-
-    context "when matching branch not found" do
-      it "calls correct methods" do
-        git.should_receive(:branches).
-          with(:match => "branch").ordered.
-          and_return(nil)
-        git.should_receive(:fetch).
-          with("remote", "branch").ordered
-        git.should_receive(:checkout).
-          with("remote", "branch").ordered
-        git.should_receive(:pull).
-          with("remote", "branch").ordered
-
-        git.checkout_or_track("remote", "branch")
-      end
-    end
-  end
-
-  describe ".checkout_remote_branch" do
+  describe ".checkout_remote" do
 
     before :each do
       git.stub(:branches)
@@ -174,7 +134,7 @@ describe Gitcycle::Git do
           git.should_receive(:add_remote_and_fetch).
             with("remote", "repo", "branch").ordered
 
-          git.checkout_remote_branch("remote", "repo", "branch", :branch => "target")
+          git.checkout_remote("remote", "repo", "branch", "target")
         end
       end
 
@@ -187,11 +147,9 @@ describe Gitcycle::Git do
             and_return(false)
           git.should_receive(:checkout).
             with("target").ordered
-          git.should_receive(:pull).
-            with("remote", "target").ordered
           git.should_not_receive(:add_remote_and_fetch)
 
-          git.checkout_remote_branch("remote", "repo", "branch", :branch => "target")
+          git.checkout_remote("remote", "repo", "branch", "target")
         end
       end
     end
@@ -201,7 +159,7 @@ describe Gitcycle::Git do
         git.should_receive(:add_remote_and_fetch).
           with("remote", "repo", "branch").ordered
 
-        git.checkout_remote_branch("remote", "repo", "branch", :branch => "target")
+        git.checkout_remote("remote", "repo", "branch", "target")
       end
     end
   end
