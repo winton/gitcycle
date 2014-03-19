@@ -46,6 +46,6 @@ require "gitcycle/util"
 module Gitcycle
 
   COMMANDS = %w(
-    feature incident pr qa ready review setup sync track
+    pr qa ready setup sync track
   )
 end
