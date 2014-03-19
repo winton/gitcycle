@@ -16,7 +16,14 @@ module Gitcycle
 
     def parse_command(array)
       const, method, *params = array
-      const = Object.const_get("Gitcycle::#{const}", false)
+      const = "Gitcycle::#{const}"
+
+      if RUBY_VERSION[0..2] == "1.8"
+        const = Object.const_get(const)
+      else
+        const = Object.const_get(const, false)
+      end
+      
       [ const, method, params ]
     end
 
