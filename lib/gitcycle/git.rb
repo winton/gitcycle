@@ -38,7 +38,10 @@ module Gitcycle
       def git(params)
         must_run = params.pop if !!params.last == params.last
         
-        params.collect! { |p| "'#{Shellwords.shellescape(p)}'" }
+        params.collect! do |p|
+          p = Shellwords.shellescape(p)
+          p[0..0] == "-" ? p : "'#{p}'"
+        end
 
         cmd    = "git #{params.join ' '}"
         output = `#{cmd}`

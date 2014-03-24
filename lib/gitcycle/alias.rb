@@ -9,7 +9,7 @@ module Gitcycle
 
     def alias
       COMMANDS.each do |cmd|
-        run("git config --global alias.#{cmd} 'cycle #{cmd}'")
+        Git.git(:config, "--global", "alias.#{cmd}", "cycle #{cmd}")
       end
     end
   end
