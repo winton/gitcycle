@@ -35,7 +35,7 @@ module Gitcycle
         raise Exit::Exception.new(:git_fail)
       end
 
-      def git(params)
+      def git(*params)
         must_run = params.pop if !!params.last == params.last
         
         params.collect! do |p|

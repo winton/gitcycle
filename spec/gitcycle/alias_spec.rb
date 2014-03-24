@@ -5,14 +5,15 @@ describe Gitcycle do
   describe "#alias" do
 
     let(:gitcycle) do
+      Gitcycle::Git.stub(:git)
       Gitcycle::Config.config_path = config_path
       Gitcycle::Alias.new
     end
 
     it "runs git config commands" do
       Gitcycle::COMMANDS.each do |cmd|
-        gitcycle.should_receive(:run).ordered.
-          with("git config --global alias.#{cmd} 'cycle #{cmd}'")
+        Gitcycle::Git.should_receive(:git).ordered.
+          with(:config, "--global", "alias.#{cmd}", "cycle #{cmd}")
       end
       gitcycle.alias
     end
