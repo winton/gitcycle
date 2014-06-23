@@ -29,7 +29,7 @@ class Gitcycle
         exec_git(:branch, args)
       end
 
-      unless yes?("\nYour work will eventually merge into '#{params['branch[source]']}'. Is this correct?")
+      unless yes?("\nYour work will eventually merge into '#{params['branch[source]'].red}'. Is this correct?")
         params['branch[source]'] = q("What branch would you like to eventually merge into?")
       end
 
